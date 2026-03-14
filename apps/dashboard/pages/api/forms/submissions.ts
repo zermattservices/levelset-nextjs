@@ -1,45 +1,19 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { calculateEvaluationScore } from '@/lib/forms/scoring';
 import { resolveConnectedQuestions } from '@/lib/forms/connectors-resolver';
 import { checkPermission } from '@/lib/permissions/service';
 import { P } from '@/lib/permissions/constants';
 import { validateLocationAccess } from '@/lib/native-auth';
+import { withPermissionAndContext, type AuthenticatedRequest } from '@/lib/permissions/middleware';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
+async function handler(
+  req: AuthenticatedRequest,
+  res: NextApiResponse,
+  context: { userId: string; orgId: string }
 ) {
   const supabase = createServerSupabaseClient();
-
-  // Get authenticated user and their org_id
-  const {
-    data: { user },
-  } = await supabase.auth.getUser(
-    req.headers.authorization?.replace('Bearer ', '') || ''
-  );
-
-  if (!user) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const { data: appUsers } = await supabase
-    .from('app_users')
-    .select('id, org_id, role, full_name')
-    .eq('auth_user_id', user.id)
-    .order('created_at');
-
-  if (!appUsers || appUsers.length === 0) {
-    return res.status(403).json({ error: 'No user profile found' });
-  }
-
-  const appUser = appUsers.find(u => u.role === 'Levelset Admin') || appUsers[0];
-
-  if (!appUser?.org_id) {
-    return res.status(403).json({ error: 'No organization found' });
-  }
-
-  const orgId = appUser.org_id;
+  const { orgId, userId } = context;
 
   if (req.method === 'GET') {
     // List submissions with filters
@@ -131,6 +105,14 @@ export default async function handler(
       return res.status(400).json({ error: 'template_id and response_data are required' });
     }
 
+    // Look up the app_user for submitted_by and role check
+    const { data: appUser } = await supabase
+      .from('app_users')
+      .select('id, role')
+      .eq('auth_user_id', userId)
+      .eq('org_id', orgId)
+      .maybeSingle();
+
     // Fetch the template for schema snapshot and form_type
     const { data: template, error: templateError } = await supabase
       .from('form_templates')
@@ -150,20 +132,20 @@ export default async function handler(
         return res.status(400).json({ error: 'location_id is required for system form submissions' });
       }
 
-      // Validate location access (user.id here is auth_user_id from getUser())
-      const location = await validateLocationAccess(user.id, orgId, locationId);
+      // Validate location access
+      const location = await validateLocationAccess(userId, orgId, locationId);
       if (!location) {
         return res.status(403).json({ error: 'No access to this location' });
       }
 
       // Levelset Admin bypasses permission checks
-      const isAdmin = appUser.role === 'Levelset Admin';
+      const isAdmin = appUser?.role === 'Levelset Admin';
       if (!isAdmin) {
         const permissionKey = template.form_type === 'rating'
           ? P.PE_SUBMIT_RATINGS
           : P.DISC_SUBMIT_INFRACTIONS;
 
-        const hasPermission = await checkPermission(supabase, user.id, orgId, permissionKey);
+        const hasPermission = await checkPermission(supabase, userId, orgId, permissionKey);
         if (!hasPermission) {
           return res.status(403).json({ error: 'Permission denied' });
         }
@@ -227,7 +209,7 @@ export default async function handler(
         location_id: location_id || null,
         template_id,
         form_type: template.form_type,
-        submitted_by: appUser.id,
+        submitted_by: appUser?.id || null,
         employee_id: employee_id || null,
         response_data,
         schema_snapshot: template.schema,
@@ -267,7 +249,7 @@ export default async function handler(
                   .from('ratings')
                   .insert({
                     employee_id: response_data[mappings.employee_id] || employee_id,
-                    rater_user_id: response_data[mappings.leader_id] || appUser.id,
+                    rater_user_id: response_data[mappings.leader_id] || appUser?.id,
                     position: response_data[mappings.position],
                     rating_1: ratings[0],
                     rating_2: ratings[1],
@@ -333,7 +315,7 @@ export default async function handler(
                   .from('infractions')
                   .insert({
                     employee_id: response_data[mappings.employee_id] || employee_id,
-                    leader_id: response_data[mappings.leader_id] || appUser.id,
+                    leader_id: response_data[mappings.leader_id] || appUser?.id,
                     infraction: rubric.action,
                     points: rubric.points ?? 0,
                     acknowledgement: acknowledged ? 'Notified' : 'Not notified',
@@ -378,8 +360,8 @@ export default async function handler(
                     : new Date().toISOString().split('T')[0];
 
                   const actingLeaderId = mappings.acting_leader
-                    ? (response_data[mappings.acting_leader] || appUser.id)
-                    : appUser.id;
+                    ? (response_data[mappings.acting_leader] || appUser?.id)
+                    : appUser?.id;
 
                   const { data: actionRow } = await supabase
                     .from('disc_actions')
@@ -418,3 +400,5 @@ export default async function handler(
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
+export default withPermissionAndContext(P.FM_VIEW_SUBMISSIONS, handler);

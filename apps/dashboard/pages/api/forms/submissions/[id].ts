@@ -1,45 +1,21 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { withPermissionAndContext, type AuthenticatedRequest } from '@/lib/permissions/middleware';
+import { P } from '@/lib/permissions/constants';
+import { checkPermission } from '@/lib/permissions/service';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
+async function handler(
+  req: AuthenticatedRequest,
+  res: NextApiResponse,
+  context: { userId: string; orgId: string }
 ) {
   const supabase = createServerSupabaseClient();
+  const { orgId, userId } = context;
   const { id } = req.query;
 
   if (!id || typeof id !== 'string') {
     return res.status(400).json({ error: 'Submission ID is required' });
   }
-
-  // Get authenticated user and their org_id
-  const {
-    data: { user },
-  } = await supabase.auth.getUser(
-    req.headers.authorization?.replace('Bearer ', '') || ''
-  );
-
-  if (!user) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const { data: appUsers } = await supabase
-    .from('app_users')
-    .select('id, org_id, role')
-    .eq('auth_user_id', user.id)
-    .order('created_at');
-
-  if (!appUsers || appUsers.length === 0) {
-    return res.status(403).json({ error: 'No user profile found' });
-  }
-
-  const appUser = appUsers.find(u => u.role === 'Levelset Admin') || appUsers[0];
-
-  if (!appUser?.org_id) {
-    return res.status(403).json({ error: 'No organization found' });
-  }
-
-  const orgId = appUser.org_id;
 
   if (req.method === 'GET') {
     const { data: submission, error } = await supabase
@@ -53,7 +29,6 @@ export default async function handler(
       return res.status(404).json({ error: 'Submission not found' });
     }
 
-    // Enrich with names
     let submittedByName = null;
     let employeeName = null;
 
@@ -95,20 +70,18 @@ export default async function handler(
   }
 
   if (req.method === 'PATCH') {
-    // Only Levelset Admin can update submission status
-    if (appUser.role !== 'Levelset Admin') {
-      return res.status(403).json({ error: 'Insufficient permissions' });
+    const hasManage = await checkPermission(supabase, userId, orgId, P.FM_MANAGE_SUBMISSIONS);
+    if (!hasManage) {
+      return res.status(403).json({ error: 'Permission denied' });
     }
 
     const { status } = req.body;
 
-    // Only allow valid status values
     const validStatuses = ['submitted', 'deleted'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ error: 'Invalid status. Must be "submitted" or "deleted"' });
     }
 
-    // Verify submission exists
     const { data: existing } = await supabase
       .from('form_submissions')
       .select('status')
@@ -140,3 +113,5 @@ export default async function handler(
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
+export default withPermissionAndContext(P.FM_VIEW_SUBMISSIONS, handler);

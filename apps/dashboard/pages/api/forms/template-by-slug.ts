@@ -39,18 +39,22 @@ export default async function handler(
     return res.status(401).json({ error: 'Token expired' });
   }
 
-  // Look up user's org
-  const { data: appUsers } = await supabase
-    .from('app_users')
-    .select('id, org_id')
-    .eq('auth_user_id', payload.sub)
-    .order('created_at');
+  let orgId = req.query.org_id as string | undefined;
 
-  if (!appUsers || appUsers.length === 0 || !appUsers[0].org_id) {
-    return res.status(403).json({ error: 'No organization found' });
+  if (!orgId) {
+    // Fallback for mobile app: resolve from user's app_user record
+    const { data: appUsers } = await supabase
+      .from('app_users')
+      .select('id, org_id')
+      .eq('auth_user_id', payload.sub)
+      .order('created_at');
+
+    if (!appUsers || appUsers.length === 0 || !appUsers[0].org_id) {
+      return res.status(403).json({ error: 'No organization found' });
+    }
+
+    orgId = appUsers[0].org_id;
   }
-
-  const orgId = appUsers[0].org_id;
 
   // Fetch template by slug + org
   const { data: template, error } = await supabase

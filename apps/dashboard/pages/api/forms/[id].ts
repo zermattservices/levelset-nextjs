@@ -1,48 +1,23 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { generateUniqueSlug } from '@/lib/forms/slugify';
+import { withPermissionAndContext, type AuthenticatedRequest } from '@/lib/permissions/middleware';
+import { P } from '@/lib/permissions/constants';
+import { checkPermission } from '@/lib/permissions/service';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
+async function handler(
+  req: AuthenticatedRequest,
+  res: NextApiResponse,
+  context: { userId: string; orgId: string }
 ) {
   const supabase = createServerSupabaseClient();
+  const { orgId, userId } = context;
   const { id } = req.query;
 
   if (!id || typeof id !== 'string') {
     return res.status(400).json({ error: 'Template ID is required' });
   }
 
-  // Get authenticated user and their org_id
-  const {
-    data: { user },
-  } = await supabase.auth.getUser(
-    req.headers.authorization?.replace('Bearer ', '') || ''
-  );
-
-  if (!user) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const { data: appUsers } = await supabase
-    .from('app_users')
-    .select('id, org_id, role')
-    .eq('auth_user_id', user.id)
-    .order('created_at');
-
-  if (!appUsers || appUsers.length === 0) {
-    return res.status(403).json({ error: 'No user profile found' });
-  }
-
-  const appUser = appUsers.find(u => u.role === 'Levelset Admin') || appUsers[0];
-
-  if (!appUser?.org_id) {
-    return res.status(403).json({ error: 'No organization found' });
-  }
-
-  const orgId = appUser.org_id;
-
-  // Determine if the id is a UUID or a slug
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
   const lookupField = isUuid ? 'id' : 'slug';
 
@@ -68,9 +43,9 @@ export default async function handler(
   }
 
   if (req.method === 'PATCH') {
-    // Only Levelset Admin can edit templates for now
-    if (appUser.role !== 'Levelset Admin') {
-      return res.status(403).json({ error: 'Insufficient permissions' });
+    const hasEdit = await checkPermission(supabase, userId, orgId, P.FM_EDIT_FORMS);
+    if (!hasEdit) {
+      return res.status(403).json({ error: 'Permission denied' });
     }
 
     const {
@@ -109,7 +84,6 @@ export default async function handler(
       }
     }
 
-    // Build update object with only provided fields
     const updates: Record<string, any> = { updated_at: new Date().toISOString() };
 
     if (name !== undefined) updates.name = name;
@@ -122,9 +96,7 @@ export default async function handler(
     if (ui_schema !== undefined) updates.ui_schema = ui_schema;
     if (settings !== undefined) updates.settings = settings;
 
-    // Regenerate slug when name changes
     if (name !== undefined) {
-      // First resolve the template UUID if we looked up by slug
       let templateId = id;
       if (!isUuid) {
         const { data: found } = await supabase
@@ -154,12 +126,11 @@ export default async function handler(
   }
 
   if (req.method === 'DELETE') {
-    // Only Levelset Admin can delete templates for now
-    if (appUser.role !== 'Levelset Admin') {
-      return res.status(403).json({ error: 'Insufficient permissions' });
+    const hasDelete = await checkPermission(supabase, userId, orgId, P.FM_DELETE_FORMS);
+    if (!hasDelete) {
+      return res.status(403).json({ error: 'Permission denied' });
     }
 
-    // Check if system template
     const { data: existing } = await supabase
       .from('form_templates')
       .select('is_system')
@@ -175,7 +146,6 @@ export default async function handler(
       return res.status(403).json({ error: 'System templates cannot be deleted' });
     }
 
-    // Soft-delete: set is_active to false
     const { error } = await supabase
       .from('form_templates')
       .update({ is_active: false, updated_at: new Date().toISOString() })
@@ -191,3 +161,5 @@ export default async function handler(
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
+export default withPermissionAndContext(P.FM_VIEW_FORMS, handler);

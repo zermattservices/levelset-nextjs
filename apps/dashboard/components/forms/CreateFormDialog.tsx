@@ -34,6 +34,7 @@ interface CreateFormDialogProps {
   onCreated: () => void;
   groups: FormGroup[];
   getAccessToken: () => Promise<string | null>;
+  orgId?: string | null;
 }
 
 /** Maps system group slugs to their fixed form types */
@@ -50,6 +51,7 @@ export function CreateFormDialog({
   onCreated,
   groups,
   getAccessToken,
+  orgId,
 }: CreateFormDialogProps) {
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
@@ -99,6 +101,7 @@ export function CreateFormDialog({
           description: description.trim() || null,
           group_id: groupId,
           form_type: formType,
+          org_id: orgId,
         }),
       });
 

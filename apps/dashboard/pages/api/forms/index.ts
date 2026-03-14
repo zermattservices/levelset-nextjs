@@ -1,44 +1,19 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { generateUniqueSlug } from '@/lib/forms/slugify';
+import { withPermissionAndContext, type AuthenticatedRequest } from '@/lib/permissions/middleware';
+import { P } from '@/lib/permissions/constants';
+import { checkPermission } from '@/lib/permissions/service';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
+async function handler(
+  req: AuthenticatedRequest,
+  res: NextApiResponse,
+  context: { userId: string; orgId: string }
 ) {
   const supabase = createServerSupabaseClient();
-
-  // Get authenticated user and their org_id
-  const {
-    data: { user },
-  } = await supabase.auth.getUser(
-    req.headers.authorization?.replace('Bearer ', '') || ''
-  );
-
-  if (!user) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const { data: appUsers } = await supabase
-    .from('app_users')
-    .select('id, org_id, role')
-    .eq('auth_user_id', user.id)
-    .order('created_at');
-
-  if (!appUsers || appUsers.length === 0) {
-    return res.status(403).json({ error: 'No user profile found' });
-  }
-
-  const appUser = appUsers.find(u => u.role === 'Levelset Admin') || appUsers[0];
-
-  if (!appUser?.org_id) {
-    return res.status(403).json({ error: 'No organization found' });
-  }
-
-  const orgId = appUser.org_id;
+  const { orgId, userId } = context;
 
   if (req.method === 'GET') {
-    // List all form templates for the org
     const { group_id, form_type, is_active } = req.query;
 
     let query = supabase
@@ -63,7 +38,6 @@ export default async function handler(
       return res.status(500).json({ error: error.message });
     }
 
-    // Transform joined data
     const transformed = (templates || []).map((t: any) => ({
       ...t,
       group: t.form_groups,
@@ -74,9 +48,10 @@ export default async function handler(
   }
 
   if (req.method === 'POST') {
-    // Only Levelset Admin can create templates for now
-    if (appUser.role !== 'Levelset Admin') {
-      return res.status(403).json({ error: 'Insufficient permissions' });
+    // POST requires create permission (middleware only checked view)
+    const hasCreate = await checkPermission(supabase, userId, orgId, P.FM_CREATE_FORMS);
+    if (!hasCreate) {
+      return res.status(403).json({ error: 'Permission denied' });
     }
 
     const { intent } = req.body;
@@ -88,7 +63,6 @@ export default async function handler(
         return res.status(400).json({ error: 'Name, group_id, and form_type are required' });
       }
 
-      // Validate form_type
       const validTypes = ['rating', 'discipline', 'evaluation', 'custom'];
       if (!validTypes.includes(form_type)) {
         return res.status(400).json({ error: 'Invalid form_type' });
@@ -119,10 +93,16 @@ export default async function handler(
         });
       }
 
-      // Generate a unique slug from the form name
       const slug = await generateUniqueSlug(supabase, orgId, name);
 
-      // Create template with default empty schema
+      // Look up the app_user id for created_by
+      const { data: appUser } = await supabase
+        .from('app_users')
+        .select('id')
+        .eq('auth_user_id', userId)
+        .eq('org_id', orgId)
+        .maybeSingle();
+
       const { data: template, error } = await supabase
         .from('form_templates')
         .insert({
@@ -139,7 +119,7 @@ export default async function handler(
           settings: {},
           is_active: true,
           is_system: false,
-          created_by: appUser.id,
+          created_by: appUser?.id || null,
         })
         .select()
         .single();
@@ -156,3 +136,5 @@ export default async function handler(
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
+export default withPermissionAndContext(P.FM_VIEW_FORMS, handler);

@@ -45,6 +45,7 @@ interface ImportFormDialogProps {
   onImported: (slug: string) => void;
   groups: FormGroup[];
   getAccessToken: () => Promise<string | null>;
+  orgId?: string | null;
 }
 
 const FORM_TYPE_OPTIONS: { value: FormType; label: string }[] = [
@@ -66,6 +67,7 @@ export function ImportFormDialog({
   onImported,
   groups,
   getAccessToken,
+  orgId,
 }: ImportFormDialogProps) {
   const [activeTab, setActiveTab] = React.useState(0);
   const [formName, setFormName] = React.useState('');
@@ -186,6 +188,7 @@ export function ImportFormDialog({
           description: description || undefined,
           group_id: groupId,
           form_type: formType,
+          org_id: orgId,
         };
       } else {
         setProcessingMessage('Fetching form page...');
@@ -196,6 +199,7 @@ export function ImportFormDialog({
           description: description || undefined,
           group_id: groupId,
           form_type: formType,
+          org_id: orgId,
         };
       }
 

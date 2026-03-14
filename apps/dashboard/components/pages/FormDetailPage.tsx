@@ -13,6 +13,9 @@ import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useLocationContext } from '@/components/CodeComponents/LocationContext';
+import { usePermissions } from '@/lib/providers/PermissionsProvider';
+import { P } from '@/lib/permissions/constants';
 import { FormSettingsPanel } from '@/components/forms/FormSettingsPanel';
 import { FormEditorPanel } from '@/components/forms/editor/FormEditorPanel';
 import { FormPreviewPanel } from '@/components/forms/FormPreviewPanel';
@@ -44,6 +47,8 @@ export function FormDetailPage() {
   const router = useRouter();
   const { formId } = router.query;
   const auth = useAuth();
+  const { selectedLocationOrgId } = useLocationContext();
+  const { has, loading: permissionsLoading } = usePermissions();
   const [activeTab, setActiveTab] = React.useState(0);
   const [template, setTemplate] = React.useState<FormTemplate | null>(null);
   const [groups, setGroups] = React.useState<FormGroup[]>([]);
@@ -65,12 +70,12 @@ export function FormDetailPage() {
     }
   }, [auth.isLoaded, auth.authUser, router]);
 
-  // Redirect non-admins (wait for appUser to load so role is populated)
+  // Redirect users without form view permission
   React.useEffect(() => {
-    if (auth.isLoaded && auth.authUser && auth.appUser && auth.role !== 'Levelset Admin') {
+    if (auth.isLoaded && auth.authUser && !permissionsLoading && !has(P.FM_VIEW_FORMS)) {
       router.push('/form-management');
     }
-  }, [auth.isLoaded, auth.authUser, auth.appUser, auth.role, router]);
+  }, [auth.isLoaded, auth.authUser, permissionsLoading, has, router]);
 
   const getAccessToken = React.useCallback(async (): Promise<string | null> => {
     try {
@@ -87,6 +92,11 @@ export function FormDetailPage() {
   // dataFetchedRef prevents refetches on TOKEN_REFRESHED events (which fire
   // when the browser tab regains focus and would destroy editor state).
   const dataFetchedRef = React.useRef(false);
+
+  // Reset data fetch when org changes
+  React.useEffect(() => {
+    dataFetchedRef.current = false;
+  }, [selectedLocationOrgId]);
 
   // Coerce auth objects to stable booleans so the effect re-runs when they
   // go from null → object, but NOT when the object reference changes.
@@ -105,9 +115,10 @@ export function FormDetailPage() {
         const headers: Record<string, string> = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
+        const orgParam = selectedLocationOrgId ? `org_id=${selectedLocationOrgId}` : '';
         const [templateRes, groupsRes] = await Promise.all([
-          fetch(`/api/forms/${formId}`, { headers }),
-          fetch('/api/forms/groups', { headers }),
+          fetch(`/api/forms/${formId}?${orgParam}`, { headers }),
+          fetch(`/api/forms/groups?${orgParam}`, { headers }),
         ]);
 
         if (templateRes.ok) {
@@ -141,7 +152,8 @@ export function FormDetailPage() {
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`/api/forms/submissions?template_id=${template.id}`, { headers });
+      const orgParam = selectedLocationOrgId ? `&org_id=${selectedLocationOrgId}` : '';
+      const res = await fetch(`/api/forms/submissions?template_id=${template.id}${orgParam}`, { headers });
       if (res.ok) {
         const data = await res.json();
         setSubmissions(data);
@@ -170,7 +182,8 @@ export function FormDetailPage() {
     setSaving(true);
     try {
       const token = await getAccessToken();
-      const res = await fetch(`/api/forms/${template.id}`, {
+      const orgParam = selectedLocationOrgId ? `?org_id=${selectedLocationOrgId}` : '';
+      const res = await fetch(`/api/forms/${template.id}${orgParam}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -201,7 +214,8 @@ export function FormDetailPage() {
 
       try {
         const token = await getAccessToken();
-        const res = await fetch(`/api/forms/${template.id}`, {
+        const orgParam = selectedLocationOrgId ? `?org_id=${selectedLocationOrgId}` : '';
+        const res = await fetch(`/api/forms/${template.id}${orgParam}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -235,7 +249,8 @@ export function FormDetailPage() {
           ...(template.settings || {}),
           evaluation: evaluationSettings,
         };
-        const res = await fetch(`/api/forms/${template.id}`, {
+        const orgParam = selectedLocationOrgId ? `?org_id=${selectedLocationOrgId}` : '';
+        const res = await fetch(`/api/forms/${template.id}${orgParam}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -264,7 +279,8 @@ export function FormDetailPage() {
 
     try {
       const token = await getAccessToken();
-      const res = await fetch(`/api/forms/${template.id}`, {
+      const orgParam = selectedLocationOrgId ? `?org_id=${selectedLocationOrgId}` : '';
+      const res = await fetch(`/api/forms/${template.id}${orgParam}`, {
         method: 'DELETE',
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

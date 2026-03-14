@@ -9,6 +9,10 @@ import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useLocationContext } from '@/components/CodeComponents/LocationContext';
+import { usePermissions } from '@/lib/providers/PermissionsProvider';
+import { P } from '@/lib/permissions/constants';
+import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
 import { FormManagementToolbar } from '@/components/forms/FormManagementToolbar';
 import { FormGroupsList } from '@/components/forms/FormGroupsList';
 import { CreateFormDialog } from '@/components/forms/CreateFormDialog';
@@ -26,6 +30,9 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
 export function FormManagementPage() {
   const router = useRouter();
   const auth = useAuth();
+  const { selectedLocationOrgId } = useLocationContext();
+  const { has, loading: permissionsLoading } = usePermissions();
+  const { hasFeature } = useOrgFeatures();
   const [activeTab, setActiveTab] = React.useState(0);
 
   // Data state
@@ -76,9 +83,10 @@ export function FormManagementPage() {
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
+      const orgParam = selectedLocationOrgId ? `org_id=${selectedLocationOrgId}` : '';
       const [groupsRes, templatesRes] = await Promise.all([
-        fetch('/api/forms/groups', { headers }),
-        fetch('/api/forms', { headers }),
+        fetch(`/api/forms/groups?${orgParam}`, { headers }),
+        fetch(`/api/forms?${orgParam}`, { headers }),
       ]);
 
       if (groupsRes.ok) {
@@ -95,12 +103,13 @@ export function FormManagementPage() {
     } finally {
       setLoading(false);
     }
-  }, [getAccessToken]);
+  }, [getAccessToken, selectedLocationOrgId]);
 
   React.useEffect(() => {
-    if (!auth.isLoaded || !auth.authUser || !auth.appUser || auth.role !== 'Levelset Admin') return;
+    if (!auth.isLoaded || !auth.authUser || !auth.appUser || permissionsLoading || !selectedLocationOrgId) return;
+    if (!has(P.FM_VIEW_FORMS)) return;
     fetchData();
-  }, [auth.isLoaded, auth.authUser, auth.role, fetchData]);
+  }, [auth.isLoaded, auth.authUser, auth.appUser, permissionsLoading, selectedLocationOrgId, has, fetchData]);
 
   // Fetch all submissions for org
   const fetchSubmissions = React.useCallback(async () => {
@@ -110,7 +119,8 @@ export function FormManagementPage() {
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('/api/forms/submissions', { headers });
+      const orgParam = selectedLocationOrgId ? `org_id=${selectedLocationOrgId}` : '';
+      const res = await fetch(`/api/forms/submissions?${orgParam}`, { headers });
       if (res.ok) {
         const data = await res.json();
         setSubmissions(data);
@@ -120,14 +130,14 @@ export function FormManagementPage() {
     } finally {
       setSubmissionsLoading(false);
     }
-  }, [getAccessToken]);
+  }, [getAccessToken, selectedLocationOrgId]);
 
   // Load submissions when switching to submissions tab
   React.useEffect(() => {
-    if (activeTab === 1 && auth.role === 'Levelset Admin') {
+    if (activeTab === 1 && has(P.FM_VIEW_SUBMISSIONS)) {
       fetchSubmissions();
     }
-  }, [activeTab, auth.role, fetchSubmissions]);
+  }, [activeTab, has, fetchSubmissions]);
 
   const handleDuplicateTemplate = async (template: FormTemplate) => {
     try {
@@ -144,6 +154,7 @@ export function FormManagementPage() {
           description: template.description,
           group_id: template.group_id,
           form_type: template.form_type,
+          org_id: selectedLocationOrgId,
         }),
       });
 
@@ -162,7 +173,7 @@ export function FormManagementPage() {
   const handleArchiveTemplate = async (template: FormTemplate) => {
     try {
       const token = await getAccessToken();
-      const res = await fetch(`/api/forms/${template.id}`, {
+      const res = await fetch(`/api/forms/${template.id}?org_id=${selectedLocationOrgId}`, {
         method: 'DELETE',
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -186,7 +197,9 @@ export function FormManagementPage() {
     return <AuthLoadingScreen />;
   }
 
-  const isLevelsetAdmin = auth.role === 'Levelset Admin';
+  const canViewForms = has(P.FM_VIEW_FORMS);
+  const canCreateForms = has(P.FM_CREATE_FORMS);
+  const canDeleteForms = has(P.FM_DELETE_FORMS);
 
   return (
     <>
@@ -219,18 +232,17 @@ export function FormManagementPage() {
 
         <div className={sty.contentWrapper}>
           <div className={sty.contentInner}>
-            {!isLevelsetAdmin ? (
-              // Coming Soon state for non-admin users
+            {!canViewForms || !hasFeature(F.FORM_MANAGEMENT) ? (
               <div className={sty.comingSoonContainer}>
                 <DescriptionOutlinedIcon className={sty.comingSoonIcon} />
                 <h2 className={sty.comingSoonTitle}>Form Management</h2>
                 <p className={sty.comingSoonDescription}>
-                  Create and manage custom forms for your organization. This feature is currently being developed.
+                  {!hasFeature(F.FORM_MANAGEMENT)
+                    ? 'This feature is not available for your organization.'
+                    : 'You do not have permission to manage forms.'}
                 </p>
-                <span className={sty.comingSoonBadge}>Coming Soon</span>
               </div>
             ) : (
-              // Admin view with tabs
               <>
                 <div className={sty.pageHeader}>
                   <h1 className={sty.pageTitle}>Form Management</h1>
@@ -270,9 +282,9 @@ export function FormManagementPage() {
                         onSearchChange={setSearchQuery}
                         activeTypeFilter={typeFilter}
                         onTypeFilterChange={setTypeFilter}
-                        onCreateForm={() => setCreateFormOpen(true)}
-                        onCreateGroup={() => setCreateGroupOpen(true)}
-                        onImportForm={() => setImportFormOpen(true)}
+                        onCreateForm={canCreateForms ? () => setCreateFormOpen(true) : undefined}
+                        onCreateGroup={canCreateForms ? () => setCreateGroupOpen(true) : undefined}
+                        onImportForm={canCreateForms ? () => setImportFormOpen(true) : undefined}
                       />
 
                       {loading ? (
@@ -336,6 +348,7 @@ export function FormManagementPage() {
         }}
         groups={groups}
         getAccessToken={getAccessToken}
+        orgId={selectedLocationOrgId}
       />
 
       <CreateGroupDialog
@@ -346,6 +359,7 @@ export function FormManagementPage() {
           fetchData();
         }}
         getAccessToken={getAccessToken}
+        orgId={selectedLocationOrgId}
       />
 
       <ImportFormDialog
@@ -358,6 +372,7 @@ export function FormManagementPage() {
         }}
         groups={groups}
         getAccessToken={getAccessToken}
+        orgId={selectedLocationOrgId}
       />
 
       <Snackbar

@@ -1,44 +1,18 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { withPermissionAndContext, type AuthenticatedRequest } from '@/lib/permissions/middleware';
+import { P } from '@/lib/permissions/constants';
+import { checkPermission } from '@/lib/permissions/service';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
+async function handler(
+  req: AuthenticatedRequest,
+  res: NextApiResponse,
+  context: { userId: string; orgId: string }
 ) {
   const supabase = createServerSupabaseClient();
-
-  // Get authenticated user and their org_id
-  const {
-    data: { user },
-  } = await supabase.auth.getUser(
-    req.headers.authorization?.replace('Bearer ', '') || ''
-  );
-
-  if (!user) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  // Get the app_user to find org_id (prefer Levelset Admin if multiple records)
-  const { data: appUsers } = await supabase
-    .from('app_users')
-    .select('org_id, role')
-    .eq('auth_user_id', user.id)
-    .order('created_at');
-
-  if (!appUsers || appUsers.length === 0) {
-    return res.status(403).json({ error: 'No user profile found' });
-  }
-
-  const appUser = appUsers.find(u => u.role === 'Levelset Admin') || appUsers[0];
-
-  if (!appUser?.org_id) {
-    return res.status(403).json({ error: 'No organization found' });
-  }
-
-  const orgId = appUser.org_id;
+  const { orgId, userId } = context;
 
   if (req.method === 'GET') {
-    // List all form groups for the org with template counts
     const { data: groups, error } = await supabase
       .from('form_groups')
       .select('*, form_templates(count)')
@@ -49,7 +23,6 @@ export default async function handler(
       return res.status(500).json({ error: error.message });
     }
 
-    // Transform the count from the join
     const transformed = (groups || []).map((g: any) => ({
       ...g,
       template_count: g.form_templates?.[0]?.count || 0,
@@ -60,9 +33,9 @@ export default async function handler(
   }
 
   if (req.method === 'POST') {
-    // Only Levelset Admin can create groups for now
-    if (appUser.role !== 'Levelset Admin') {
-      return res.status(403).json({ error: 'Insufficient permissions' });
+    const hasCreate = await checkPermission(supabase, userId, orgId, P.FM_CREATE_FORMS);
+    if (!hasCreate) {
+      return res.status(403).json({ error: 'Permission denied' });
     }
 
     const { name, name_es, description, description_es, icon } = req.body;
@@ -71,13 +44,11 @@ export default async function handler(
       return res.status(400).json({ error: 'Name is required' });
     }
 
-    // Generate slug from name
     const slug = name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/(^_|_$)/g, '');
 
-    // Check for duplicate slug
     const { data: existing } = await supabase
       .from('form_groups')
       .select('id')
@@ -89,7 +60,6 @@ export default async function handler(
       return res.status(409).json({ error: 'A group with this name already exists' });
     }
 
-    // Get max display_order
     const { data: maxOrder } = await supabase
       .from('form_groups')
       .select('display_order')
@@ -123,3 +93,5 @@ export default async function handler(
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
+export default withPermissionAndContext(P.FM_VIEW_FORMS, handler);

@@ -26,6 +26,7 @@ interface CreateGroupDialogProps {
   onClose: () => void;
   onCreated: () => void;
   getAccessToken: () => Promise<string | null>;
+  orgId?: string | null;
 }
 
 export function CreateGroupDialog({
@@ -33,6 +34,7 @@ export function CreateGroupDialog({
   onClose,
   onCreated,
   getAccessToken,
+  orgId,
 }: CreateGroupDialogProps) {
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
@@ -68,6 +70,7 @@ export function CreateGroupDialog({
         body: JSON.stringify({
           name: name.trim(),
           description: description.trim() || null,
+          org_id: orgId,
         }),
       });
 

@@ -1,6 +1,6 @@
 // apps/dashboard/pages/api/forms/import.ts
 
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { generateUniqueSlug } from '@/lib/forms/slugify';
 import { fieldsToJsonSchema, generateFieldId } from '@/lib/forms/schema-builder';
@@ -10,6 +10,8 @@ import {
   FORM_PARSER_TOOL,
   type ParsedFormResult,
 } from '@/lib/forms/import-prompt';
+import { withPermissionAndContext, type AuthenticatedRequest } from '@/lib/permissions/middleware';
+import { P } from '@/lib/permissions/constants';
 
 // Increase body size limit for PDF uploads (default is 1mb)
 export const config = {
@@ -22,9 +24,10 @@ export const config = {
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
+async function importHandler(
+  req: AuthenticatedRequest,
+  res: NextApiResponse,
+  context: { userId: string; orgId: string }
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -35,40 +38,15 @@ export default async function handler(
   }
 
   const supabase = createServerSupabaseClient();
+  const { orgId, userId } = context;
 
-  // ── Auth (same pattern as /api/forms/index.ts) ──
-  const {
-    data: { user },
-  } = await supabase.auth.getUser(
-    req.headers.authorization?.replace('Bearer ', '') || ''
-  );
-
-  if (!user) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const { data: appUsers } = await supabase
+  // Look up app_user for created_by
+  const { data: appUser } = await supabase
     .from('app_users')
-    .select('id, org_id, role')
-    .eq('auth_user_id', user.id)
-    .order('created_at');
-
-  if (!appUsers || appUsers.length === 0) {
-    return res.status(403).json({ error: 'No user profile found' });
-  }
-
-  const appUser =
-    appUsers.find((u) => u.role === 'Levelset Admin') || appUsers[0];
-
-  if (appUser.role !== 'Levelset Admin') {
-    return res.status(403).json({ error: 'Insufficient permissions' });
-  }
-
-  if (!appUser?.org_id) {
-    return res.status(403).json({ error: 'No organization found' });
-  }
-
-  const orgId = appUser.org_id;
+    .select('id')
+    .eq('auth_user_id', userId)
+    .eq('org_id', orgId)
+    .maybeSingle();
 
   // ── Parse request body ──
   const {
@@ -398,7 +376,7 @@ export default async function handler(
         settings,
         is_active: true,
         is_system: false,
-        created_by: appUser.id,
+        created_by: appUser?.id || null,
       })
       .select()
       .single();
@@ -420,3 +398,5 @@ export default async function handler(
     });
   }
 }
+
+export default withPermissionAndContext(P.FM_CREATE_FORMS, importHandler);
