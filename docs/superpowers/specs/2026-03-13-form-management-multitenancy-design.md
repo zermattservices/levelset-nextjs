@@ -71,6 +71,7 @@ const orgId = appUser.org_id;
 | `/api/forms/submissions` | GET | authenticated | `P.FM_VIEW_SUBMISSIONS` |
 | `/api/forms/submissions` | POST | authenticated + per-type | keep existing per-type checks |
 | `/api/forms/import` | POST | Levelset Admin | `P.FM_CREATE_FORMS` |
+| `/api/forms/submissions/[id]` | GET/PATCH | authenticated | `P.FM_VIEW_SUBMISSIONS` / `P.FM_MANAGE_SUBMISSIONS` |
 
 **Implementation approach**: Wrap each route handler with `withPermission()` or `withPermissionAndContext()`. The middleware handles JWT decode, org resolution, admin bypass, and permission check. This replaces the manual `supabase.auth.getUser()` + `appUsers.find()` pattern in each route.
 
@@ -85,12 +86,6 @@ The `P.FM_*` constants already exist in `constants.ts`:
 The seed script (`scripts/seed-permission-modules.ts`) reads from constants dynamically, so running it will populate the `permission_modules` and `permission_sub_items` tables.
 
 **Action needed**: Run `npx tsx scripts/seed-permission-modules.ts` to seed the form management permissions, then `npx tsx scripts/seed-default-profiles.ts` to add them to default profiles.
-
-### Feature Flag
-
-The `F.FORM_MANAGEMENT` flag exists in `OrgFeaturesProvider.tsx`. It should be checked:
-- On `FormManagementPage`: if `!hasFeature(F.FORM_MANAGEMENT)` and not Levelset Admin, show "feature not available" state
-- On API routes: not strictly required (permissions handle access), but could add as defense-in-depth
 
 ### Data State
 
@@ -109,9 +104,26 @@ The `F.FORM_MANAGEMENT` flag exists in `OrgFeaturesProvider.tsx`. It should be c
 | `pages/api/forms/groups.ts` | Use `withPermissionAndContext`, accept org_id from request |
 | `pages/api/forms/submissions.ts` | Use `withPermissionAndContext` for GET, keep existing POST logic |
 | `pages/api/forms/import.ts` | Use `withPermissionAndContext`, accept org_id from request |
+| `pages/api/forms/submissions/[id].ts` | Use `withPermissionAndContext`, accept org_id from request |
+
+## Already Correct (no changes needed)
+
+- `pages/api/forms/widget-data.ts` — already accepts `org_id` from `req.query`
+- `pages/api/forms/submission-documents.ts` — already uses JWT decode + permission checks
+- `pages/api/forms/connectors.ts` — system-level data, no org scoping needed
+
+## Deployment Notes
+
+- Dashboard frontend and API routes deploy atomically on Vercel, so no coordination issue between frontend sending `org_id` and API expecting it.
+- The `withPermissionAndContext` middleware reads JWT from `Authorization: Bearer` header — same header the frontend already sends. No change needed to how tokens are sent, only adding `org_id` query params.
+- `pages/api/forms/template-by-slug.ts` is called by the mobile app which does NOT send `org_id`. This route must keep the `appUser.org_id` fallback to avoid breaking mobile. Wrap with middleware but preserve fallback.
+
+## Feature Flag
+
+The `F.FORM_MANAGEMENT` flag exists in `OrgFeaturesProvider.tsx`. `hasFeature()` already returns `true` for Levelset Admin, so the check is simply: `if (!hasFeature(F.FORM_MANAGEMENT))` — no separate admin check needed.
 
 ## Out of Scope
 
 - Submissions POST route already has proper per-type permission checks (PE_SUBMIT_RATINGS, DISC_SUBMIT_INFRACTIONS) — no changes needed there beyond org resolution
 - No new DB migration needed
-- No changes to mobile/PWA form routes
+- No changes to mobile/PWA form routes (but `template-by-slug.ts` keeps backward-compat fallback)
