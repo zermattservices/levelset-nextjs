@@ -23,21 +23,6 @@ interface EditorCanvasProps {
   onUpdateEvaluationQuestion?: (fieldId: string, updates: Partial<{ section_id: string; weight: number }>) => void;
 }
 
-function SectionDropZone({ sectionId, children }: { sectionId: string; children: React.ReactNode }) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: `section-${sectionId}`,
-    data: { type: 'section-drop', sectionId },
-  });
-  return (
-    <div
-      ref={setNodeRef}
-      style={isOver ? { backgroundColor: 'var(--ls-color-brand-soft)', borderRadius: 6 } : undefined}
-    >
-      {children}
-    </div>
-  );
-}
-
 export function EditorCanvas({
   fields,
   selectedFieldId,
@@ -69,33 +54,36 @@ export function EditorCanvas({
 
   const isEvalGrouped = formType === 'evaluation' && evaluationSections && evaluationSections.length > 0;
 
-  // Group fields by section for evaluation forms
-  const { sectionGroups, unscoredFields, totalWeight } = React.useMemo(() => {
-    if (!isEvalGrouped || !evaluationQuestions) {
-      return { sectionGroups: [], unscoredFields: fields, totalWeight: 0 };
+  // Build section lookup and stats
+  const sectionStats = React.useMemo(() => {
+    if (!isEvalGrouped || !evaluationQuestions) return new Map<string, { fieldCount: number; totalWeight: number }>();
+    const stats = new Map<string, { fieldCount: number; totalWeight: number }>();
+    for (const section of evaluationSections!) {
+      const sectionFields = fields.filter((f) => evaluationQuestions[f.id]?.section_id === section.id);
+      stats.set(section.id, {
+        fieldCount: sectionFields.length,
+        totalWeight: sectionFields.reduce((sum, f) => sum + (evaluationQuestions[f.id]?.weight || 0), 0),
+      });
     }
-
-    const groups = evaluationSections!.map((section) => {
-      const sectionFields = fields.filter(
-        (f) => evaluationQuestions[f.id]?.section_id === section.id
-      );
-      const sectionWeight = sectionFields.reduce(
-        (sum, f) => sum + (evaluationQuestions[f.id]?.weight || 0),
-        0
-      );
-      return { ...section, fields: sectionFields, totalWeight: sectionWeight };
-    });
-
-    const assignedIds = new Set(
-      fields
-        .filter((f) => evaluationQuestions[f.id]?.section_id)
-        .map((f) => f.id)
-    );
-    const unscored = fields.filter((f) => !assignedIds.has(f.id));
-    const total = groups.reduce((sum, g) => sum + g.totalWeight, 0);
-
-    return { sectionGroups: groups, unscoredFields: unscored, totalWeight: total };
+    return stats;
   }, [isEvalGrouped, evaluationSections, evaluationQuestions, fields]);
+
+  const totalWeight = React.useMemo(() => {
+    let sum = 0;
+    sectionStats.forEach((s) => { sum += s.totalWeight; });
+    return sum;
+  }, [sectionStats]);
+
+  // Build the field-to-section mapping
+  const fieldSectionMap = React.useMemo(() => {
+    if (!isEvalGrouped || !evaluationQuestions) return new Map<string, string>();
+    const map = new Map<string, string>();
+    for (const f of fields) {
+      const sid = evaluationQuestions[f.id]?.section_id;
+      if (sid) map.set(f.id, sid);
+    }
+    return map;
+  }, [isEvalGrouped, evaluationQuestions, fields]);
 
   const renderFieldCard = (field: FormField) => (
     <EditorFieldCard
@@ -114,6 +102,81 @@ export function EditorCanvas({
       }
     />
   );
+
+  // For eval forms: build render items in order — sections appear before their first field,
+  // unscored fields render directly in the list
+  const evalRenderItems = React.useMemo(() => {
+    if (!isEvalGrouped) return null;
+
+    const items: Array<
+      | { type: 'section-header'; sectionId: string; name: string; stats: { fieldCount: number; totalWeight: number } }
+      | { type: 'section-fields'; sectionId: string; fields: FormField[] }
+      | { type: 'field'; field: FormField }
+    > = [];
+
+    // Track which sections we've already opened
+    const renderedSections = new Set<string>();
+
+    // Group consecutive fields by section
+    let currentSectionId: string | null = null;
+    let currentSectionFields: FormField[] = [];
+
+    const flushSection = () => {
+      if (currentSectionId && currentSectionFields.length > 0) {
+        items.push({ type: 'section-fields', sectionId: currentSectionId, fields: currentSectionFields });
+        currentSectionFields = [];
+      }
+      currentSectionId = null;
+    };
+
+    for (const field of fields) {
+      const sid = fieldSectionMap.get(field.id);
+
+      if (sid) {
+        // Field belongs to a section
+        if (sid !== currentSectionId) {
+          // Flush previous section's fields if any
+          flushSection();
+
+          // Emit section header if not already rendered
+          if (!renderedSections.has(sid)) {
+            const section = evaluationSections!.find((s) => s.id === sid);
+            if (section) {
+              renderedSections.add(sid);
+              items.push({
+                type: 'section-header',
+                sectionId: sid,
+                name: section.name,
+                stats: sectionStats.get(sid) || { fieldCount: 0, totalWeight: 0 },
+              });
+            }
+          }
+          currentSectionId = sid;
+        }
+        currentSectionFields.push(field);
+      } else {
+        // Unscored field — flush any open section, then render inline
+        flushSection();
+        items.push({ type: 'field', field });
+      }
+    }
+    // Flush remaining
+    flushSection();
+
+    // Render any sections that had no fields yet (empty sections)
+    for (const section of evaluationSections!) {
+      if (!renderedSections.has(section.id)) {
+        items.push({
+          type: 'section-header',
+          sectionId: section.id,
+          name: section.name,
+          stats: sectionStats.get(section.id) || { fieldCount: 0, totalWeight: 0 },
+        });
+      }
+    }
+
+    return items;
+  }, [isEvalGrouped, fields, fieldSectionMap, evaluationSections, sectionStats]);
 
   return (
     <div
@@ -135,57 +198,54 @@ export function EditorCanvas({
         </div>
       ) : (
         <SortableContext items={fieldIds} strategy={verticalListSortingStrategy}>
-          {isEvalGrouped ? (
+          {isEvalGrouped && evalRenderItems ? (
             <div className={sty.fieldList}>
-              {sectionGroups.map((section) => {
-                const isCollapsed = collapsedSections.has(section.id);
-                return (
-                  <div key={section.id} className={sty.sectionContainer}>
-                    <div
-                      className={`${sty.sectionHeader} ${isCollapsed ? sty.sectionHeaderCollapsed : ''}`}
-                      onClick={() => toggleSection(section.id)}
-                    >
-                      {isCollapsed ? (
-                        <KeyboardArrowRightIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
-                      ) : (
-                        <KeyboardArrowDownIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
-                      )}
-                      <span className={sty.sectionName}>{section.name}</span>
-                      <div className={sty.sectionMeta}>
-                        <span className={sty.sectionFieldCount}>
-                          {section.fields.length} field{section.fields.length !== 1 ? 's' : ''}
-                        </span>
-                        <span className={sty.sectionWeight}>
-                          {section.totalWeight}pts
-                        </span>
-                      </div>
-                    </div>
-                    {!isCollapsed && (
-                      <SectionDropZone sectionId={section.id}>
-                        {section.fields.length === 0 ? (
-                          <div className={sty.sectionFieldsEmpty}>
-                            Drag fields here to score them
-                          </div>
+              {evalRenderItems.map((item) => {
+                if (item.type === 'section-header') {
+                  const isCollapsed = collapsedSections.has(item.sectionId);
+                  return (
+                    <div key={`sh-${item.sectionId}`} className={sty.sectionContainer}>
+                      <div
+                        className={`${sty.sectionHeader} ${isCollapsed ? sty.sectionHeaderCollapsed : ''}`}
+                        onClick={() => toggleSection(item.sectionId)}
+                      >
+                        {isCollapsed ? (
+                          <KeyboardArrowRightIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
                         ) : (
-                          <div className={sty.sectionFields}>
-                            {section.fields.map(renderFieldCard)}
-                          </div>
+                          <KeyboardArrowDownIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
                         )}
-                      </SectionDropZone>
-                    )}
-                  </div>
-                );
-              })}
+                        <span className={sty.sectionName}>{item.name}</span>
+                        <div className={sty.sectionMeta}>
+                          <span className={sty.sectionFieldCount}>
+                            {item.stats.fieldCount} field{item.stats.fieldCount !== 1 ? 's' : ''}
+                          </span>
+                          <span className={sty.sectionWeight}>
+                            {item.stats.totalWeight}pts
+                          </span>
+                        </div>
+                      </div>
+                      {!isCollapsed && item.stats.fieldCount === 0 && (
+                        <div className={sty.sectionFieldsEmpty}>
+                          Drag fields here to score them
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
 
-              {/* Unscored fields */}
-              {unscoredFields.length > 0 && (
-                <div className={sty.unscoredArea}>
-                  <span className={sty.unscoredHeader}>Unscored Fields</span>
-                  <SectionDropZone sectionId="">
-                    {unscoredFields.map(renderFieldCard)}
-                  </SectionDropZone>
-                </div>
-              )}
+                if (item.type === 'section-fields') {
+                  const isCollapsed = collapsedSections.has(item.sectionId);
+                  if (isCollapsed) return null;
+                  return (
+                    <div key={`sf-${item.sectionId}`} className={sty.sectionFieldsInline}>
+                      {item.fields.map(renderFieldCard)}
+                    </div>
+                  );
+                }
+
+                // Unscored field
+                return renderFieldCard(item.field);
+              })}
 
               {/* Weight total bar */}
               <div className={sty.weightTotalBar}>

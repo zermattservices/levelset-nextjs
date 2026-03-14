@@ -85,8 +85,8 @@ const FIELD_TYPE_DESCRIPTIONS = `
 
 When a field clearly asks for organizational data, use type "select" with settings.dataSource set to one of these values:
 
-- **employees**: Use when the field asks for an employee name, team member, or "who" in the context of selecting a person from the organization.
-- **leaders**: Use when the field asks for a supervisor, manager, leader, evaluator, or "who is conducting" this form. Optionally set settings.maxHierarchyLevel (default 2) to control which roles are included.
+- **employees**: Use when the field asks for an employee name, team member, or "who" in the context of selecting a person from the organization. Common patterns: a field labeled "Name", "Employee Name", "Team Member", "Trainer" on an evaluation or review form — these are almost always employee selects, NOT text inputs.
+- **leaders**: Use when the field asks for a supervisor, manager, leader, evaluator, reviewer, or "who is conducting" this form. Optionally set settings.maxHierarchyLevel (default 2) to control which roles are included.
 - **positions**: Use when the field asks for a job position, role, or station.
 - **infractions**: Use ONLY when the field asks for a type of infraction or violation from a discipline rubric.
 - **disc_actions**: Use ONLY when the field asks for a disciplinary action type.
@@ -123,18 +123,64 @@ ${FIELD_TYPE_DESCRIPTIONS}`;
   if (includeScoring && formType === 'evaluation') {
     prompt += `
 
-## Scoring Extraction (Evaluation Forms)
+## Scoring Extraction (Evaluation Forms) — CRITICAL
 
-This form is being imported as an **evaluation** form type. Look for scoring information:
+This form is being imported as an **evaluation** form type. You MUST carefully analyze the scoring structure.
 
-1. **Weights/Points**: If fields have point values, weights, or maximum scores assigned, capture them in settings.weight.
-2. **Rating Scales**: If a field uses a rating scale (1-3, 1-5), use the appropriate rating field type AND set settings.scoringType to match ('rating_1_3' or 'rating_1_5').
-3. **True/False Scoring**: If a yes/no question has points assigned, use true_false type and set settings.scoringType to 'true_false'.
-4. **Percentage Fields**: If a field represents a percentage score, use percentage type and set settings.scoringType to 'percentage'.
-5. **Sections**: If scoring is grouped into sections (e.g., "Leadership - 30 points", "Technical Skills - 20 points"), create evaluation sections. Each section needs an id (sec_snake_case_name), name, nameEs, and order.
-6. **Section Assignment**: For scored fields, set sectionId to the section's field ID (not the evaluation section id).
+### How Evaluation Scoring Works in Our System
 
-If no scoring information is present in the form, that's fine — just parse the fields without scoring.`;
+Our evaluation system has **scoring sections** (separate from visual section headers). Each scored question is assigned to a scoring section and has a **weight** (points). The total weight across all sections should represent the full score of the evaluation.
+
+### Step-by-Step Scoring Analysis
+
+1. **Identify scoring sections**: Look for labeled parts/sections that group scored questions (e.g., "Part 1 - Team Culture", "Part 2 - Characteristics"). These become \`evaluationSections\` entries with an \`id\` like \`sec_team_culture\`, \`sec_characteristics\`, etc.
+
+2. **Identify the rating scale**: Look for column headers like "(1) = Below Standard, (2) = Meet Standard, (3) = Exceeding Standard". This tells you the scoring type:
+   - 3-point scale (1-3 checkboxes) → use field type \`rating_1_3\` with \`settings.scoringType: 'rating_1_3'\`
+   - 5-point scale → use field type \`rating_1_5\` with \`settings.scoringType: 'rating_1_5'\`
+
+3. **Each rated row is a scored field**: Every row with checkboxes/rating marks is a scored question. Set:
+   - \`type\`: the rating type (e.g., \`rating_1_3\`)
+   - \`settings.scoringType\`: matching type
+   - \`settings.weight\`: the max score for that single question (e.g., 3 for a 1-3 scale, 5 for a 1-5 scale)
+   - \`sectionId\`: the field ID of the section header this question belongs under
+
+4. **Calculate weights from totals**: If the form says "SCORE: __ OUT OF 9 POINTS" for 3 questions, each question's weight = 3 (since 3 questions × 3 points each = 9). If it says "OUT OF 15 POINTS" for 5 questions on a 1-3 scale, each weight = 3.
+
+5. **Handle weighted sections**: If a section says "*20% weighted" or similar, note this. The weight per question is still the max rating value (e.g., 3 for a 1-3 scale) — the percentage weighting is informational.
+
+6. **Yes/No verification questions**: Questions with YES/NO checkboxes that are NOT rated/scored should be \`true_false\` type WITHOUT \`settings.scoringType\` or \`settings.weight\`. These are verification items, not scored items.
+
+7. **Score summary fields (SKIP THESE)**: Lines like "TOTAL SCORE: ___" or "Part 1 Score ___ + Part 2 Score ___" are computed summaries — do NOT create fields for these. They are calculated automatically by our system.
+
+8. **Free text areas**: Fields like "3 Areas to Focus On" are \`textarea\` fields, not scored.
+
+### Evaluation Sections Output
+
+Return \`evaluationSections\` array with entries for each scoring section:
+\`\`\`json
+{
+  "id": "sec_team_culture",
+  "name": "Team Culture",
+  "nameEs": "Cultura del Equipo",
+  "order": 0
+}
+\`\`\`
+
+### Connecting Fields to Evaluation Sections
+
+For each scored field, set \`sectionId\` to the field ID of the corresponding section header in the fields array. The API route will map these to evaluation sections by matching section header field IDs.
+
+IMPORTANT: Also include the section \`id\` from evaluationSections in the field's \`settings\` as \`settings.evaluationSectionId\` so we can directly map scored fields to their evaluation section.
+
+### Example: A form with "Part 1 - Team Culture" containing 3 questions rated 1-3
+
+evaluationSections: [{ id: "sec_team_culture", name: "Team Culture", order: 0 }]
+
+Fields:
+- { type: "section", label: "Part 1 - Team Culture", settings: { sectionName: "Part 1 - Team Culture" } }
+- { type: "rating_1_3", label: "Hospitality", settings: { scoringType: "rating_1_3", weight: 3, evaluationSectionId: "sec_team_culture" }, sectionId: "section_part_1_team_culture", required: true }
+- { type: "rating_1_3", label: "Hustle", settings: { scoringType: "rating_1_3", weight: 3, evaluationSectionId: "sec_team_culture" }, sectionId: "section_part_1_team_culture", required: true }`;
   }
 
   prompt += `
@@ -266,6 +312,7 @@ export const FORM_PARSER_TOOL = {
                 },
                 content: { type: 'string', description: 'HTML content for text_block fields (English)' },
                 contentEs: { type: 'string', description: 'HTML content for text_block fields (Spanish)' },
+                evaluationSectionId: { type: 'string', description: 'The evaluation section ID (e.g., sec_team_culture) this scored field belongs to. Must match an id in evaluationSections.' },
               },
             },
             sectionId: {

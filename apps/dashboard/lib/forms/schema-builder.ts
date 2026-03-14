@@ -51,6 +51,8 @@ export interface FieldSettings {
   /** For text_block: rich text content */
   content?: string;
   contentEs?: string;
+  /** For import: maps scored field to evaluation section ID */
+  evaluationSectionId?: string;
 }
 
 /**

@@ -224,7 +224,7 @@ export default async function handler(
         'X-Title': 'Levelset Form Import',
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-sonnet-4-20250514',
+        model: 'anthropic/claude-sonnet-4.5',
         max_tokens: 8192,
         messages: [
           { role: 'system', content: systemPrompt },
@@ -357,8 +357,10 @@ export default async function handler(
       const questions: Record<string, any> = {};
       for (const field of formFields) {
         if (field.settings.weight || field.settings.scoringType) {
+          // Prefer evaluationSectionId (direct mapping) over sectionId (field reference)
+          const evalSectionId = field.settings.evaluationSectionId || undefined;
           questions[field.id] = {
-            section_id: field.sectionId || undefined,
+            section_id: evalSectionId,
             weight: field.settings.weight || 1,
             scoring_type: field.settings.scoringType || field.type,
           };

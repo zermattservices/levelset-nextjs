@@ -28,6 +28,13 @@ import type { FormTemplate } from '@/lib/forms/types';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
+const DEFAULT_EVAL_SECTIONS = [
+  { id: 'sec_leadership', name: 'Leadership Culture' },
+  { id: 'sec_execution', name: 'Execution of Core Strategy' },
+  { id: 'sec_win', name: "What's Important Now" },
+  { id: 'sec_results', name: 'Business Results' },
+];
+
 type SaveStatus = 'saved' | 'saving' | 'unsaved';
 
 interface FormEditorPanelProps {
@@ -47,10 +54,13 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
 
   // Evaluation data plumbing
   const evalSettings = template.settings?.evaluation || {};
-  const evaluationSections = React.useMemo(
-    () => (evalSettings.sections || []).map((s: any) => ({ id: s.id, name: s.name })),
-    [evalSettings.sections]
-  );
+  const evaluationSections = React.useMemo(() => {
+    const saved = evalSettings.sections;
+    if (saved && saved.length > 0) {
+      return saved.map((s: any) => ({ id: s.id, name: s.name }));
+    }
+    return DEFAULT_EVAL_SECTIONS;
+  }, [evalSettings.sections]);
   const evaluationQuestions = evalSettings.questions || {};
 
   const handleEvalQuestionUpdate = React.useCallback(
@@ -199,13 +209,6 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
       });
     }
 
-    // Evaluation: detect cross-section drops
-    if (template.form_type === 'evaluation' && activeData?.type === 'canvas-field') {
-      const overData = over.data.current;
-      if (overData?.type === 'section-drop' && overData.sectionId !== undefined) {
-        handleEvalQuestionUpdate(active.id as string, { section_id: overData.sectionId });
-      }
-    }
   };
 
   const handleDragCancel = () => {

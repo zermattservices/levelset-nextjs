@@ -16,6 +16,7 @@ interface TextBlockEditorProps {
 
 export function TextBlockEditor({ content, onChange }: TextBlockEditorProps) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: false,

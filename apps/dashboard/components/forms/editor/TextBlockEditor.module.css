@@ -1,7 +1,7 @@
 .editorWrapper {
   border: 1px solid var(--ls-color-muted-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--ls-color-bg-card);
   overflow: hidden;
 }
 
