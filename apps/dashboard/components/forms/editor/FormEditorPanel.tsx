@@ -2,9 +2,10 @@ import * as React from 'react';
 import {
   DndContext,
   DragOverlay,
-  closestCenter,
+  pointerWithin,
   type DragStartEvent,
   type DragEndEvent,
+  type CollisionDetection,
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Chip } from '@mui/material';
@@ -22,29 +23,22 @@ import {
   createFieldFromType,
   fieldsToJsonSchema,
   jsonSchemaToFields,
+  migrateEvaluationToFields,
   type FormField,
 } from '@/lib/forms/schema-builder';
 import type { FormTemplate } from '@/lib/forms/types';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
-const DEFAULT_EVAL_SECTIONS = [
-  { id: 'sec_leadership', name: 'Leadership Culture' },
-  { id: 'sec_execution', name: 'Execution of Core Strategy' },
-  { id: 'sec_win', name: "What's Important Now" },
-  { id: 'sec_results', name: 'Business Results' },
-];
-
 type SaveStatus = 'saved' | 'saving' | 'unsaved';
 
 interface FormEditorPanelProps {
   template: FormTemplate;
   onSave: (schema: Record<string, any>, uiSchema: Record<string, any>) => Promise<void>;
-  onSaveSettings?: (settings: Record<string, any>) => Promise<void>;
   readOnly?: boolean;
 }
 
-export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: FormEditorPanelProps) {
+export function FormEditorPanel({ template, onSave, readOnly }: FormEditorPanelProps) {
   const [fields, setFields] = React.useState<FormField[]>([]);
   const [selectedFieldId, setSelectedFieldId] = React.useState<string | null>(null);
   const [draggedField, setDraggedField] = React.useState<FormField | null>(null);
@@ -52,38 +46,45 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
   const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const fieldsInitialized = React.useRef(false);
 
-  // Evaluation data plumbing
-  const evalSettings = template.settings?.evaluation || {};
-  const evaluationSections = React.useMemo(() => {
-    const saved = evalSettings.sections;
-    if (saved && saved.length > 0) {
-      return saved.map((s: any) => ({ id: s.id, name: s.name }));
-    }
-    return DEFAULT_EVAL_SECTIONS;
-  }, [evalSettings.sections]);
-  const evaluationQuestions = evalSettings.questions || {};
+  // Collision detection for DnD — handles section bodies, gaps, and field reordering
+  const collisionDetection = React.useMemo<CollisionDetection>(() => {
+    return (args) => {
+      const nonCanvas = args.droppableContainers.filter((c) => c.id !== 'editor-canvas');
 
-  const handleEvalQuestionUpdate = React.useCallback(
-    (fieldId: string, updates: Partial<{ section_id: string; weight: number }>) => {
-      if (!onSaveSettings) return;
-      const currentEval = template.settings?.evaluation || {};
-      const questions = currentEval.questions || {};
-      const current = questions[fieldId] || { section_id: '', weight: 1, scoring_type: 'rating_1_5' };
-      const updatedQuestions = { ...questions, [fieldId]: { ...current, ...updates } };
-      onSaveSettings({
-        ...template.settings,
-        evaluation: { ...currentEval, questions: updatedQuestions },
-      });
-    },
-    [template, onSaveSettings]
-  );
+      if (nonCanvas.length > 0) {
+        const hits = pointerWithin({ ...args, droppableContainers: nonCanvas });
+
+        if (hits.length > 0) {
+          // 1. Gap droppables — highest priority
+          const gapHit = hits.find((h) => String(h.id).startsWith('section-gap-'));
+          if (gapHit) return [gapHit];
+
+          // 2. Section body droppable
+          const sectionHit = hits.find((h) => String(h.id).startsWith('section-drop-'));
+          if (sectionHit) return [sectionHit];
+
+          // 3. Field reorder
+          return [hits[0]];
+        }
+      }
+
+      return pointerWithin(args);
+    };
+  }, []);
 
   // Initialize fields from template schema
   React.useEffect(() => {
     if (fieldsInitialized.current) return;
 
     if (template.schema && Object.keys(template.schema).length > 0) {
-      const restored = jsonSchemaToFields(template.schema, template.ui_schema || {});
+      let restored = jsonSchemaToFields(template.schema, template.ui_schema || {});
+
+      // Migrate legacy evaluation forms: reconstruct sections and scoring
+      // from template.settings.evaluation into the fields array
+      if (template.settings?.evaluation) {
+        restored = migrateEvaluationToFields(restored, template.settings.evaluation);
+      }
+
       setFields(restored);
     }
     fieldsInitialized.current = true;
@@ -92,7 +93,7 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
   // Auto-save with 1s debounce (disabled in readOnly mode)
   const triggerAutoSave = React.useCallback(
     (updatedFields: FormField[]) => {
-      if (readOnly) return; // System forms — no saving
+      if (readOnly) return;
 
       setSaveStatus('unsaved');
 
@@ -140,7 +141,17 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
       if (selectedFieldId === id) {
         setSelectedFieldId(null);
       }
-      updateFields((prev) => prev.filter((f) => f.id !== id));
+      updateFields((prev) => {
+        // Remove the field
+        const filtered = prev.filter((f) => f.id !== id);
+        // Clean up any section children references to this field
+        return filtered.map((f) => {
+          if (f.type === 'section' && f.children?.includes(id)) {
+            return { ...f, children: f.children.filter((childId) => childId !== id) };
+          }
+          return f;
+        });
+      });
     },
     [selectedFieldId, updateFields]
   );
@@ -160,7 +171,6 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
     const data = active.data.current;
 
     if (data?.type === 'palette') {
-      // Creating a preview of the field being dragged from palette
       const newField = createFieldFromType(data.fieldType);
       setDraggedField(newField);
     } else if (data?.type === 'canvas-field') {
@@ -172,43 +182,117 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setDraggedField(null);
-
     if (!over) return;
 
     const activeData = active.data.current;
+    const overData = over.data.current;
 
     // Dropping from palette onto canvas
     if (activeData?.type === 'palette') {
       const newField = createFieldFromType(activeData.fieldType);
 
-      updateFields((prev) => {
-        // If dropped over an existing field, insert after it
-        if (over.id !== 'editor-canvas') {
+      if (overData?.type === 'section') {
+        // Dropped into a section — add to section's children
+        const targetSectionId = overData.sectionId as string;
+        updateFields((prev) => {
+          const next = [...prev, newField];
+          return next.map((f) =>
+            f.id === targetSectionId
+              ? { ...f, children: [...(f.children || []), newField.id] }
+              : f
+          );
+        });
+      } else if (over.id !== 'editor-canvas') {
+        // Dropped over a field — insert after it
+        updateFields((prev) => {
           const overIndex = prev.findIndex((f) => f.id === over.id);
           if (overIndex >= 0) {
             const next = [...prev];
             next.splice(overIndex + 1, 0, newField);
             return next;
           }
-        }
-        // Otherwise append
-        return [...prev, newField];
-      });
+          return [...prev, newField];
+        });
+      } else {
+        // Dropped on canvas background — append
+        updateFields((prev) => [...prev, newField]);
+      }
 
       setSelectedFieldId(newField.id);
       return;
     }
 
-    // Reordering within canvas
+    // Dropping a field into a section
+    if (activeData?.type === 'canvas-field' && overData?.type === 'section') {
+      const fieldId = active.id as string;
+      const targetSectionId = overData.sectionId as string;
+
+      updateFields((prev) =>
+        prev.map((f) => {
+          // Remove from any current section's children
+          if (f.type === 'section' && f.children?.includes(fieldId)) {
+            return { ...f, children: f.children.filter((id) => id !== fieldId) };
+          }
+          // Add to target section's children
+          if (f.id === targetSectionId) {
+            return { ...f, children: [...(f.children || []).filter((id) => id !== fieldId), fieldId] };
+          }
+          return f;
+        })
+      );
+      return;
+    }
+
+    // Dropping a field into a gap (between sections) — remove from section
+    if (activeData?.type === 'canvas-field' && overData?.type === 'section-gap') {
+      const fieldId = active.id as string;
+      updateFields((prev) =>
+        prev.map((f) => {
+          if (f.type === 'section' && f.children?.includes(fieldId)) {
+            return { ...f, children: f.children.filter((id) => id !== fieldId) };
+          }
+          return f;
+        })
+      );
+      return;
+    }
+
+    // Dropping a field onto the canvas background — no-op
+    if (activeData?.type === 'canvas-field' && over.id === 'editor-canvas') {
+      return;
+    }
+
+    // Reordering within canvas (includes within-section reordering)
     if (activeData?.type === 'canvas-field' && active.id !== over.id) {
+      const fieldId = active.id as string;
+      const overId = over.id as string;
+
       updateFields((prev) => {
+        // Check if both fields are in the same section — reorder children array
+        const parentSection = prev.find(
+          (f) => f.type === 'section' && f.children?.includes(fieldId) && f.children?.includes(overId)
+        );
+
+        if (parentSection && parentSection.children) {
+          const oldIdx = parentSection.children.indexOf(fieldId);
+          const newIdx = parentSection.children.indexOf(overId);
+          if (oldIdx >= 0 && newIdx >= 0) {
+            const newChildren = [...parentSection.children];
+            newChildren.splice(oldIdx, 1);
+            newChildren.splice(newIdx, 0, fieldId);
+            return prev.map((f) =>
+              f.id === parentSection.id ? { ...f, children: newChildren } : f
+            );
+          }
+        }
+
+        // Top-level reorder
         const oldIndex = prev.findIndex((f) => f.id === active.id);
         const newIndex = prev.findIndex((f) => f.id === over.id);
         if (oldIndex < 0 || newIndex < 0) return prev;
         return arrayMove(prev, oldIndex, newIndex);
       });
     }
-
   };
 
   const handleDragCancel = () => {
@@ -250,7 +334,7 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
       {/* Editor body */}
       <div className={sty.editorBody}>
         <DndContext
-          collisionDetection={closestCenter}
+          collisionDetection={collisionDetection}
           onDragStart={readOnly ? undefined : handleDragStart}
           onDragEnd={readOnly ? undefined : handleDragEnd}
           onDragCancel={readOnly ? undefined : handleDragCancel}
@@ -264,9 +348,6 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
             onDeleteField={readOnly ? () => {} : handleDeleteField}
             onUpdateField={readOnly ? undefined : handleUpdateField}
             formType={template.form_type}
-            evaluationSections={template.form_type === 'evaluation' ? evaluationSections : undefined}
-            evaluationQuestions={template.form_type === 'evaluation' ? evaluationQuestions : undefined}
-            onUpdateEvaluationQuestion={template.form_type === 'evaluation' ? handleEvalQuestionUpdate : undefined}
           />
 
           {!readOnly && (
@@ -289,19 +370,7 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
           <FieldConfigPanel
             field={selectedField}
             onUpdateField={handleUpdateField}
-            isEvaluation={template.form_type === 'evaluation'}
             formType={template.form_type}
-            evaluationSections={template.form_type === 'evaluation' ? evaluationSections : undefined}
-            evaluationQuestion={
-              template.form_type === 'evaluation' && selectedField
-                ? evaluationQuestions[selectedField.id]
-                : undefined
-            }
-            onAssignSection={
-              template.form_type === 'evaluation'
-                ? (fieldId, sectionId) => handleEvalQuestionUpdate(fieldId, { section_id: sectionId })
-                : undefined
-            }
           />
         )}
       </div>

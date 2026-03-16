@@ -45,10 +45,10 @@ const TYPE_TAG_ICON_MAP: Record<string, React.ReactNode> = {
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 const SCORING_TYPES: Record<string, { label: string; color: string }> = {
-  rating_1_3: { label: '1–3', color: 'var(--ls-color-brand)' },
-  rating_1_5: { label: '1–5', color: 'var(--ls-color-brand)' },
+  rating_1_3: { label: '1-3', color: 'var(--ls-color-brand)' },
+  rating_1_5: { label: '1-5', color: 'var(--ls-color-brand)' },
   true_false: { label: 'T/F', color: '#6366F1' },
-  percentage: { label: '%', color: '#D97706' },
+  numeric_score: { label: '#', color: '#D97706' },
 };
 
 interface EditorFieldCardProps {
@@ -57,13 +57,9 @@ interface EditorFieldCardProps {
   onSelect: () => void;
   onDelete: () => void;
   onUpdateField?: (id: string, updates: Partial<FormField>) => void;
-  /** Render as overlay during drag */
   isOverlay?: boolean;
   formType?: string;
-  /** Evaluation scoring info — show inline weight + type chip when present and assigned to a section */
-  evaluationQuestion?: { section_id: string; weight: number; scoring_type: string };
-  /** Callback when weight is changed inline */
-  onUpdateWeight?: (weight: number) => void;
+  disableSortTransform?: boolean;
 }
 
 export function EditorFieldCard({
@@ -74,9 +70,11 @@ export function EditorFieldCard({
   onUpdateField,
   isOverlay,
   formType,
-  evaluationQuestion,
-  onUpdateWeight,
+  disableSortTransform,
 }: EditorFieldCardProps) {
+  // Section fields are rendered as containers by EditorCanvas
+  if (field.type === 'section') return null;
+
   const {
     attributes,
     listeners,
@@ -92,8 +90,8 @@ export function EditorFieldCard({
   const style: React.CSSProperties = isOverlay
     ? {}
     : {
-        transform: CSS.Transform.toString(transform),
-        transition,
+        transform: disableSortTransform ? undefined : CSS.Transform.toString(transform),
+        transition: disableSortTransform ? undefined : transition,
         opacity: isDragging ? 0.3 : 1,
       };
 
@@ -101,10 +99,8 @@ export function EditorFieldCard({
   const typeLabel = fieldDef?.displayTypeLabel || fieldDef?.label || field.type;
   const typeIconName = fieldDef?.displayTypeIcon || fieldDef?.icon;
   const typeIcon = typeIconName ? TYPE_TAG_ICON_MAP[typeIconName] : null;
-  const isSection = field.type === 'section';
 
   const handleClick = (e: React.MouseEvent) => {
-    // Don't select when clicking delete
     if ((e.target as HTMLElement).closest('button')) return;
     onSelect();
   };
@@ -113,7 +109,7 @@ export function EditorFieldCard({
     <div
       ref={isOverlay ? undefined : setNodeRef}
       style={style}
-      className={`${sty.card} ${isSelected ? sty.cardSelected : ''} ${isSection ? sty.cardSection : ''} ${isOverlay ? sty.cardOverlay : ''}`}
+      className={`${sty.card} ${isSelected ? sty.cardSelected : ''} ${isOverlay ? sty.cardOverlay : ''}`}
       onClick={handleClick}
     >
       <div className={sty.dragHandle} {...(isOverlay ? {} : { ...listeners, ...attributes })}>
@@ -122,10 +118,10 @@ export function EditorFieldCard({
 
       <div className={sty.cardContent}>
         <div className={sty.cardTop}>
-          <span className={isSection ? sty.sectionLabel : sty.fieldLabel}>
+          <span className={sty.fieldLabel}>
             {field.label}
           </span>
-          {field.required && !isSection && (
+          {field.required && (
             <Chip
               label="Required"
               size="small"
@@ -175,10 +171,10 @@ export function EditorFieldCard({
         )}
       </div>
 
-      {evaluationQuestion && evaluationQuestion.section_id && (
+      {field.settings.scored && field.settings.weight != null && (
         <div className={sty.scoringControls}>
           <Chip
-            label={SCORING_TYPES[evaluationQuestion.scoring_type]?.label || '?'}
+            label={SCORING_TYPES[field.type]?.label || '?'}
             size="small"
             sx={{
               fontFamily,
@@ -187,7 +183,7 @@ export function EditorFieldCard({
               height: 20,
               minWidth: 32,
               borderRadius: '4px',
-              backgroundColor: SCORING_TYPES[evaluationQuestion.scoring_type]?.color || 'var(--ls-color-brand)',
+              backgroundColor: SCORING_TYPES[field.type]?.color || 'var(--ls-color-brand)',
               color: '#fff',
               '& .MuiChip-label': { padding: '0 5px' },
             }}
@@ -195,13 +191,14 @@ export function EditorFieldCard({
           <input
             type="number"
             className={sty.weightInput}
-            value={evaluationQuestion.weight}
+            value={field.settings.weight}
             min={0}
-            max={100}
             aria-label={`Weight for ${field.label}`}
             onChange={(e) => {
-              const val = Math.max(0, Math.min(100, Number(e.target.value) || 0));
-              onUpdateWeight?.(val);
+              const val = Math.max(0, Number(e.target.value) || 0);
+              onUpdateField?.(field.id, {
+                settings: { ...field.settings, weight: val },
+              });
             }}
             onClick={(e) => e.stopPropagation()}
           />

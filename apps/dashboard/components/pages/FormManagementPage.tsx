@@ -201,6 +201,12 @@ export function FormManagementPage() {
   const canCreateForms = has(P.FM_CREATE_FORMS);
   const canDeleteForms = has(P.FM_DELETE_FORMS);
 
+  // Groups available for create/import dialogs — exclude PE and Discipline system groups
+  const editableGroups = React.useMemo(() => {
+    const LOCKED_SLUGS = ['positional_excellence', 'discipline'];
+    return groups.filter((g) => !LOCKED_SLUGS.includes(g.slug));
+  }, [groups]);
+
   return (
     <>
       <Head>
@@ -346,7 +352,7 @@ export function FormManagementPage() {
           setSnackbar({ open: true, message: 'Form created', severity: 'success' });
           fetchData();
         }}
-        groups={groups}
+        groups={editableGroups}
         getAccessToken={getAccessToken}
         orgId={selectedLocationOrgId}
       />
@@ -370,7 +376,7 @@ export function FormManagementPage() {
           setSnackbar({ open: true, message: 'Form imported successfully', severity: 'success' });
           router.push(`/form-management/${slug}`);
         }}
-        groups={groups}
+        groups={editableGroups}
         getAccessToken={getAccessToken}
         orgId={selectedLocationOrgId}
       />

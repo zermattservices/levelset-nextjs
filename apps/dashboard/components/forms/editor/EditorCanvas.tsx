@@ -4,9 +4,56 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { IconButton } from '@mui/material';
 import sty from './EditorCanvas.module.css';
 import { EditorFieldCard } from './EditorFieldCard';
 import type { FormField } from '@/lib/forms/schema-builder';
+
+/** Registers the section body (not header) as a droppable target. */
+function DroppableSectionBody({ sectionId, isEmpty, fieldIds, children }: { sectionId: string; isEmpty: boolean; fieldIds: string[]; children?: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `section-drop-${sectionId}`,
+    data: { type: 'section', sectionId },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={sty.sectionBody}
+      style={{
+        background: isOver ? 'var(--ls-color-brand-soft)' : 'transparent',
+        minHeight: isEmpty ? 48 : undefined,
+      }}
+    >
+      <SortableContext items={fieldIds} strategy={verticalListSortingStrategy}>
+        {children}
+      </SortableContext>
+      {isEmpty && !isOver && (
+        <span className={sty.sectionFieldsEmptyText}>Drag fields here</span>
+      )}
+    </div>
+  );
+}
+
+/** Thin droppable zone between section cards — dropping here removes section assignment. */
+function SectionGapDropzone({ gapId, afterSectionId }: { gapId: string; afterSectionId?: string }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: gapId,
+    data: { type: 'section-gap', afterSectionId },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${sty.sectionGap} ${isOver ? sty.sectionGapOver : ''}`}
+    >
+      {isOver && (
+        <span className={sty.sectionGapLabel}>Drop between sections</span>
+      )}
+    </div>
+  );
+}
 
 interface EditorCanvasProps {
   fields: FormField[];
@@ -15,12 +62,6 @@ interface EditorCanvasProps {
   onDeleteField: (id: string) => void;
   onUpdateField?: (id: string, updates: Partial<FormField>) => void;
   formType?: string;
-  /** Evaluation-specific: scoring sections to group fields into */
-  evaluationSections?: Array<{ id: string; name: string }>;
-  /** Evaluation-specific: question config keyed by field ID */
-  evaluationQuestions?: Record<string, { section_id: string; weight: number; scoring_type: string }>;
-  /** Evaluation-specific: callback to update a question's section or weight */
-  onUpdateEvaluationQuestion?: (fieldId: string, updates: Partial<{ section_id: string; weight: number }>) => void;
 }
 
 export function EditorCanvas({
@@ -30,16 +71,11 @@ export function EditorCanvas({
   onDeleteField,
   onUpdateField,
   formType,
-  evaluationSections,
-  evaluationQuestions,
-  onUpdateEvaluationQuestion,
 }: EditorCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: 'editor-canvas',
     data: { type: 'canvas' },
   });
-
-  const fieldIds = React.useMemo(() => fields.map((f) => f.id), [fields]);
 
   const [collapsedSections, setCollapsedSections] = React.useState<Set<string>>(new Set());
 
@@ -52,38 +88,72 @@ export function EditorCanvas({
     });
   };
 
-  const isEvalGrouped = formType === 'evaluation' && evaluationSections && evaluationSections.length > 0;
+  // Identify sections and build structure from the fields array
+  const sectionFields = React.useMemo(
+    () => fields.filter((f) => f.type === 'section'),
+    [fields]
+  );
 
-  // Build section lookup and stats
+  const hasSections = sectionFields.length > 0;
+
+  // Build a set of all field IDs that are children of a section
+  const childFieldIds = React.useMemo(() => {
+    const set = new Set<string>();
+    for (const section of sectionFields) {
+      for (const childId of section.children || []) {
+        set.add(childId);
+      }
+    }
+    return set;
+  }, [sectionFields]);
+
+  // Build fieldIds in visual order for SortableContext
+  const fieldIds = React.useMemo(() => {
+    if (!hasSections) return fields.map((f) => f.id);
+
+    const ordered: string[] = [];
+    for (const field of fields) {
+      if (field.type === 'section') {
+        for (const childId of field.children || []) {
+          ordered.push(childId);
+        }
+      } else if (!childFieldIds.has(field.id)) {
+        ordered.push(field.id);
+      }
+    }
+    return ordered;
+  }, [fields, hasSections, childFieldIds]);
+
+  // Section stats: field count and total weight from scored children
   const sectionStats = React.useMemo(() => {
-    if (!isEvalGrouped || !evaluationQuestions) return new Map<string, { fieldCount: number; totalWeight: number }>();
     const stats = new Map<string, { fieldCount: number; totalWeight: number }>();
-    for (const section of evaluationSections!) {
-      const sectionFields = fields.filter((f) => evaluationQuestions[f.id]?.section_id === section.id);
-      stats.set(section.id, {
-        fieldCount: sectionFields.length,
-        totalWeight: sectionFields.reduce((sum, f) => sum + (evaluationQuestions[f.id]?.weight || 0), 0),
-      });
+    const fieldMap = new Map(fields.map((f) => [f.id, f]));
+
+    for (const section of sectionFields) {
+      let fieldCount = 0;
+      let totalWeight = 0;
+      for (const childId of section.children || []) {
+        const child = fieldMap.get(childId);
+        if (child) {
+          fieldCount++;
+          if (child.settings.scored && child.settings.weight) {
+            totalWeight += child.settings.weight;
+          }
+        }
+      }
+      stats.set(section.id, { fieldCount, totalWeight });
     }
     return stats;
-  }, [isEvalGrouped, evaluationSections, evaluationQuestions, fields]);
+  }, [fields, sectionFields]);
 
+  // Total weight across ALL scored fields (in sections + top-level)
   const totalWeight = React.useMemo(() => {
-    let sum = 0;
-    sectionStats.forEach((s) => { sum += s.totalWeight; });
-    return sum;
-  }, [sectionStats]);
+    return fields
+      .filter((f) => f.settings.scored && f.settings.weight)
+      .reduce((sum, f) => sum + (f.settings.weight || 0), 0);
+  }, [fields]);
 
-  // Build the field-to-section mapping
-  const fieldSectionMap = React.useMemo(() => {
-    if (!isEvalGrouped || !evaluationQuestions) return new Map<string, string>();
-    const map = new Map<string, string>();
-    for (const f of fields) {
-      const sid = evaluationQuestions[f.id]?.section_id;
-      if (sid) map.set(f.id, sid);
-    }
-    return map;
-  }, [isEvalGrouped, evaluationQuestions, fields]);
+  const hasScoredFields = totalWeight > 0;
 
   const renderFieldCard = (field: FormField) => (
     <EditorFieldCard
@@ -94,89 +164,8 @@ export function EditorCanvas({
       onDelete={() => onDeleteField(field.id)}
       onUpdateField={onUpdateField}
       formType={formType}
-      evaluationQuestion={evaluationQuestions?.[field.id]}
-      onUpdateWeight={
-        onUpdateEvaluationQuestion
-          ? (weight) => onUpdateEvaluationQuestion(field.id, { weight })
-          : undefined
-      }
     />
   );
-
-  // For eval forms: build render items in order — sections appear before their first field,
-  // unscored fields render directly in the list
-  const evalRenderItems = React.useMemo(() => {
-    if (!isEvalGrouped) return null;
-
-    const items: Array<
-      | { type: 'section-header'; sectionId: string; name: string; stats: { fieldCount: number; totalWeight: number } }
-      | { type: 'section-fields'; sectionId: string; fields: FormField[] }
-      | { type: 'field'; field: FormField }
-    > = [];
-
-    // Track which sections we've already opened
-    const renderedSections = new Set<string>();
-
-    // Group consecutive fields by section
-    let currentSectionId: string | null = null;
-    let currentSectionFields: FormField[] = [];
-
-    const flushSection = () => {
-      if (currentSectionId && currentSectionFields.length > 0) {
-        items.push({ type: 'section-fields', sectionId: currentSectionId, fields: currentSectionFields });
-        currentSectionFields = [];
-      }
-      currentSectionId = null;
-    };
-
-    for (const field of fields) {
-      const sid = fieldSectionMap.get(field.id);
-
-      if (sid) {
-        // Field belongs to a section
-        if (sid !== currentSectionId) {
-          // Flush previous section's fields if any
-          flushSection();
-
-          // Emit section header if not already rendered
-          if (!renderedSections.has(sid)) {
-            const section = evaluationSections!.find((s) => s.id === sid);
-            if (section) {
-              renderedSections.add(sid);
-              items.push({
-                type: 'section-header',
-                sectionId: sid,
-                name: section.name,
-                stats: sectionStats.get(sid) || { fieldCount: 0, totalWeight: 0 },
-              });
-            }
-          }
-          currentSectionId = sid;
-        }
-        currentSectionFields.push(field);
-      } else {
-        // Unscored field — flush any open section, then render inline
-        flushSection();
-        items.push({ type: 'field', field });
-      }
-    }
-    // Flush remaining
-    flushSection();
-
-    // Render any sections that had no fields yet (empty sections)
-    for (const section of evaluationSections!) {
-      if (!renderedSections.has(section.id)) {
-        items.push({
-          type: 'section-header',
-          sectionId: section.id,
-          name: section.name,
-          stats: sectionStats.get(section.id) || { fieldCount: 0, totalWeight: 0 },
-        });
-      }
-    }
-
-    return items;
-  }, [isEvalGrouped, fields, fieldSectionMap, evaluationSections, sectionStats]);
 
   return (
     <div
@@ -198,79 +187,93 @@ export function EditorCanvas({
         </div>
       ) : (
         <SortableContext items={fieldIds} strategy={verticalListSortingStrategy}>
-          {isEvalGrouped && evalRenderItems ? (
-            <div className={sty.fieldList}>
-              {evalRenderItems.map((item) => {
-                if (item.type === 'section-header') {
-                  const isCollapsed = collapsedSections.has(item.sectionId);
-                  return (
-                    <div key={`sh-${item.sectionId}`} className={sty.sectionContainer}>
+          <div className={sty.fieldList}>
+            {fields.map((field) => {
+              if (field.type === 'section') {
+                const childFields = (field.children || [])
+                  .map((id) => fields.find((f) => f.id === id))
+                  .filter(Boolean) as FormField[];
+                const stats = sectionStats.get(field.id) || { fieldCount: 0, totalWeight: 0 };
+                const isCollapsed = collapsedSections.has(field.id);
+
+                return (
+                  <React.Fragment key={`section-${field.id}`}>
+                    <div className={sty.sectionContainer}>
                       <div
                         className={`${sty.sectionHeader} ${isCollapsed ? sty.sectionHeaderCollapsed : ''}`}
-                        onClick={() => toggleSection(item.sectionId)}
+                        onClick={() => {
+                          toggleSection(field.id);
+                          onSelectField(field.id);
+                        }}
                       >
                         {isCollapsed ? (
                           <KeyboardArrowRightIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
                         ) : (
                           <KeyboardArrowDownIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
                         )}
-                        <span className={sty.sectionName}>{item.name}</span>
+                        <span className={sty.sectionName}>
+                          {field.settings.sectionName || field.label}
+                        </span>
                         <div className={sty.sectionMeta}>
                           <span className={sty.sectionFieldCount}>
-                            {item.stats.fieldCount} field{item.stats.fieldCount !== 1 ? 's' : ''}
+                            {stats.fieldCount} field{stats.fieldCount !== 1 ? 's' : ''}
                           </span>
-                          <span className={sty.sectionWeight}>
-                            {item.stats.totalWeight}pts
-                          </span>
+                          {stats.totalWeight > 0 && (
+                            <span className={sty.sectionWeight}>
+                              {stats.totalWeight}pts
+                            </span>
+                          )}
                         </div>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteField(field.id);
+                          }}
+                          sx={{
+                            padding: '2px',
+                            opacity: 0.4,
+                            '&:hover': { opacity: 1, color: 'var(--ls-color-destructive)' },
+                          }}
+                        >
+                          <DeleteOutlineIcon sx={{ fontSize: 14 }} />
+                        </IconButton>
                       </div>
-                      {!isCollapsed && item.stats.fieldCount === 0 && (
-                        <div className={sty.sectionFieldsEmpty}>
-                          Drag fields here to score them
-                        </div>
+                      {!isCollapsed && (
+                        <DroppableSectionBody
+                          sectionId={field.id}
+                          isEmpty={childFields.length === 0}
+                          fieldIds={childFields.map((f) => f.id)}
+                        >
+                          {childFields.map((f) => renderFieldCard(f))}
+                        </DroppableSectionBody>
                       )}
                     </div>
-                  );
-                }
+                    <SectionGapDropzone
+                      key={`gap-after-${field.id}`}
+                      gapId={`section-gap-after-${field.id}`}
+                      afterSectionId={field.id}
+                    />
+                  </React.Fragment>
+                );
+              }
 
-                if (item.type === 'section-fields') {
-                  const isCollapsed = collapsedSections.has(item.sectionId);
-                  if (isCollapsed) return null;
-                  return (
-                    <div key={`sf-${item.sectionId}`} className={sty.sectionFieldsInline}>
-                      {item.fields.map(renderFieldCard)}
-                    </div>
-                  );
-                }
+              // Skip fields that are children of a section (rendered inside their section above)
+              if (childFieldIds.has(field.id)) return null;
 
-                // Unscored field
-                return renderFieldCard(item.field);
-              })}
+              // Top-level field
+              return renderFieldCard(field);
+            })}
 
-              {/* Weight total bar */}
+            {/* Weight total bar — only show when there are scored fields */}
+            {hasScoredFields && (
               <div className={sty.weightTotalBar}>
-                <span
-                  className={`${sty.weightTotalText} ${totalWeight === 100 ? sty.weightBalanced : sty.weightUnbalanced}`}
-                >
-                  Total: {totalWeight} / 100
+                <span className={sty.weightTotalText}>
+                  Total: {totalWeight} pts
                 </span>
               </div>
-            </div>
-          ) : (
-            <div className={sty.fieldList}>
-              {fields.map((field) => (
-                <EditorFieldCard
-                  key={field.id}
-                  field={field}
-                  isSelected={selectedFieldId === field.id}
-                  onSelect={() => onSelectField(field.id)}
-                  onDelete={() => onDeleteField(field.id)}
-                  onUpdateField={onUpdateField}
-                  formType={formType}
-                />
-              ))}
-            </div>
-          )}
+            )}
+          </div>
         </SortableContext>
       )}
     </div>

@@ -494,7 +494,7 @@ export function formatDailyVisitorReport(event: DailyVisitorReportEvent) {
       elements: [
         {
           type: 'mrkdwn',
-          text: `Sent by Levi  |  <${DASHBOARD_URL}/admin/locations?tab=visitor-analytics|View Dashboard>`,
+          text: `${event.botSessions > 0 ? `${event.botSessions} bot session${event.botSessions === 1 ? '' : 's'} filtered  |  ` : ''}Sent by Levi  |  <${DASHBOARD_URL}/admin/locations?tab=visitor-analytics|View Dashboard>`,
         },
       ],
     },

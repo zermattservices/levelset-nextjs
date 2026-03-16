@@ -1,25 +1,13 @@
 import * as React from 'react';
 import {
   Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
   IconButton,
   CircularProgress,
-  Alert,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  StyledTextField,
-  dialogPaperSx,
-  dialogTitleSx,
-  dialogContentSx,
-  dialogActionsSx,
-  cancelButtonSx,
-  primaryButtonSx,
-  alertSx,
-} from './dialogStyles';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import { fontFamily } from './dialogStyles';
+import sty from './ImportFormDialog.module.css';
 
 interface CreateGroupDialogProps {
   open: boolean;
@@ -41,7 +29,6 @@ export function CreateGroupDialog({
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Reset form when dialog opens
   React.useEffect(() => {
     if (open) {
       setName('');
@@ -94,57 +81,77 @@ export function CreateGroupDialog({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{ sx: dialogPaperSx }}
+      PaperProps={{
+        sx: {
+          borderRadius: '14px',
+          fontFamily,
+          overflow: 'hidden',
+          backgroundImage: 'none',
+        },
+      }}
     >
-      <DialogTitle sx={dialogTitleSx}>
-        Create New Group
+      {/* Header */}
+      <div className={sty.header}>
+        <span className={sty.title}>Create New Group</span>
         <IconButton size="small" onClick={onClose}>
-          <CloseIcon sx={{ fontSize: 18 }} />
+          <CloseIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
         </IconButton>
-      </DialogTitle>
+      </div>
 
-      <DialogContent sx={dialogContentSx}>
-        {error && (
-          <Alert severity="error" sx={alertSx}>
-            {error}
-          </Alert>
-        )}
+      {/* Content */}
+      <div className={sty.content}>
+        {error && <div className={sty.errorBanner}>{error}</div>}
 
-        <StyledTextField
-          label="Group Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          fullWidth
-          size="small"
-          required
-        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={sty.fieldGroup}>
+            <span className={sty.fieldLabel}>Group Name</span>
+            <input
+              type="text"
+              className={sty.textInput}
+              placeholder="e.g. Safety Forms"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+            />
+          </div>
 
-        <StyledTextField
-          label="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          fullWidth
-          size="small"
-          multiline
-          rows={2}
-          InputLabelProps={{ shrink: true }}
-        />
-      </DialogContent>
+          <div className={sty.fieldGroup}>
+            <span className={sty.fieldLabel}>Description (optional)</span>
+            <textarea
+              className={sty.textArea}
+              placeholder="What types of forms belong in this group?"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+            />
+          </div>
+        </div>
+      </div>
 
-      <DialogActions sx={dialogActionsSx}>
-        <Button onClick={onClose} disabled={saving} sx={cancelButtonSx}>
+      {/* Footer */}
+      <div className={sty.footer}>
+        <button
+          type="button"
+          className={sty.cancelBtn}
+          onClick={onClose}
+          disabled={saving}
+        >
           Cancel
-        </Button>
-        <Button
-          variant="contained"
+        </button>
+        <button
+          type="button"
+          className={`${sty.primaryBtn} ${(saving || !name.trim()) ? sty.primaryBtnDisabled : ''}`}
           onClick={handleCreate}
           disabled={saving || !name.trim()}
-          startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
-          sx={primaryButtonSx}
         >
+          {saving ? (
+            <CircularProgress size={14} sx={{ color: '#fff' }} />
+          ) : (
+            <AddOutlinedIcon sx={{ fontSize: 15 }} />
+          )}
           {saving ? 'Creating...' : 'Create'}
-        </Button>
-      </DialogActions>
+        </button>
+      </div>
     </Dialog>
   );
 }

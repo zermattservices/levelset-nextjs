@@ -84,6 +84,7 @@ export interface DailyVisitorReportEvent {
   avgDwellSeconds: number;
   topPages: Array<{ url: string; views: number }>;
   topReferrers: Array<{ source: string; sessions: number }>;
+  botSessions: number;
   comparison: {
     visitorsChange: number;
     sessionsChange: number;

@@ -10,20 +10,11 @@ export default function FormsLayout() {
         sheetGrabberVisible: true,
         sheetAllowedDetents: [0.95],
         contentStyle: { backgroundColor: colors.background },
-        headerShown: true,
-        headerTransparent: true,
-        headerShadowVisible: false,
-        headerTintColor: colors.onSurface,
+        headerShown: false,
       }}
     >
-      <Stack.Screen
-        name="ratings"
-        options={{ title: "Positional Ratings" }}
-      />
-      <Stack.Screen
-        name="infractions"
-        options={{ title: "Discipline Infraction" }}
-      />
+      <Stack.Screen name="ratings" />
+      <Stack.Screen name="infractions" />
     </Stack>
   );
 }

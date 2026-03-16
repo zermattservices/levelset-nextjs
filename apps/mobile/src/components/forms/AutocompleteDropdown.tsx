@@ -1,7 +1,7 @@
 /**
  * AutocompleteDropdown Component
  * A searchable dropdown with autocomplete functionality
- * Uses native formSheet presentation to match the app's modal pattern
+ * Uses native formSheet presentation to match the edit-profile modal pattern
  */
 
 import React, { useState, useCallback, useMemo } from "react";
@@ -14,7 +14,8 @@ import {
   Pressable,
   FlatList,
   Modal,
-  Platform,
+  Keyboard,
+  ScrollView,
 } from "react-native";
 import { AppIcon } from "../ui";
 import { useColors } from "../../context/ThemeContext";
@@ -88,12 +89,14 @@ export function AutocompleteDropdown({
   }, [disabled]);
 
   const handleClose = useCallback(() => {
+    Keyboard.dismiss();
     setIsOpen(false);
     setSearchText("");
   }, []);
 
   const handleSelect = useCallback(
     (option: DropdownOption) => {
+      Keyboard.dismiss();
       haptics.selection();
       onChange(option.value);
       handleClose();
@@ -200,8 +203,13 @@ export function AutocompleteDropdown({
         presentationStyle="formSheet"
         onRequestClose={handleClose}
       >
-        <View style={[styles.modalContainer, { backgroundColor: Platform.OS === "ios" ? "transparent" : colors.background }]}>
-          {/* Header — matches edit-profile pattern */}
+        <ScrollView
+          style={[styles.modalContainer, { backgroundColor: colors.background }]}
+          contentContainerStyle={{ flex: 1 }}
+          keyboardShouldPersistTaps="always"
+          scrollEnabled={false}
+        >
+          {/* Header — matches edit-profile pattern: Cancel | Title | (spacer) */}
           <View style={styles.header}>
             <Pressable
               onPress={() => {
@@ -210,7 +218,7 @@ export function AutocompleteDropdown({
               }}
               style={styles.headerButton}
             >
-              <Text style={[styles.closeText, { color: colors.primary }]}>Close</Text>
+              <Text style={[styles.cancelText, { color: colors.primary }]}>Cancel</Text>
             </Pressable>
             <Text style={[styles.headerTitle, { color: colors.onSurface }]}>{label}</Text>
             <View style={styles.headerButton} />
@@ -241,7 +249,7 @@ export function AutocompleteDropdown({
               renderItem={renderOption}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
+              keyboardShouldPersistTaps="always"
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
                   <Text style={[styles.emptyText, { color: colors.onSurfaceVariant }]}>No results found</Text>
@@ -249,7 +257,7 @@ export function AutocompleteDropdown({
               }
             />
           )}
-        </View>
+        </ScrollView>
       </Modal>
     </View>
   );
@@ -302,7 +310,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     flex: 1,
   },
-  closeText: {
+  cancelText: {
     ...typography.bodyMedium,
   },
   searchWrapper: {

@@ -18,37 +18,53 @@ import { FIELD_TYPES, DATA_SOURCE_OPTIONS } from '@/lib/forms/field-palette';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import OpenInNewOutlinedIcon from '@mui/icons-material/OpenInNewOutlined';
 import type { FormField, FieldOption } from '@/lib/forms/schema-builder';
+import { isScorable } from '@/lib/forms/scoring';
 import { ConnectedQuestionPicker } from '../evaluation/ConnectedQuestionPicker';
+import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 
 interface FieldConfigPanelProps {
   field: FormField | null;
   onUpdateField: (id: string, updates: Partial<FormField>) => void;
-  isEvaluation?: boolean;
   formType?: string;
-  /** Available evaluation sections for section assignment dropdown */
-  evaluationSections?: Array<{ id: string; name: string }>;
-  /** Current evaluation question config for the selected field */
-  evaluationQuestion?: { section_id: string; weight: number; scoring_type: string };
-  /** Callback to assign field to a section */
-  onAssignSection?: (fieldId: string, sectionId: string) => void;
 }
 
-const SCORING_TYPES = [
-  { value: 'rating_1_3', label: 'Rating (1-3)' },
-  { value: 'rating_1_5', label: 'Rating (1-5)' },
-  { value: 'true_false', label: 'True / False' },
-  { value: 'percentage', label: 'Percentage' },
-];
+/**
+ * Hook to fetch org roles for the role filter UI.
+ * Uses orgId passed explicitly to avoid SSR hydration issues.
+ */
+function useOrgRoles(orgId: string | null | undefined) {
+  const [roles, setRoles] = React.useState<string[]>([]);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => { setMounted(true); }, []);
+
+  React.useEffect(() => {
+    if (!mounted || !orgId) return;
+    let cancelled = false;
+
+    fetch(`/api/forms/widget-data?type=org_roles&org_id=${encodeURIComponent(orgId)}`)
+      .then(res => res.json())
+      .then(json => {
+        if (!cancelled && json.data) {
+          setRoles(json.data.map((r: any) => r.role_name));
+        }
+      })
+      .catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [mounted, orgId]);
+
+  return roles;
+}
 
 export function FieldConfigPanel({
   field,
   onUpdateField,
-  isEvaluation,
   formType,
-  evaluationSections,
-  evaluationQuestion,
-  onAssignSection,
 }: FieldConfigPanelProps) {
+  const { selectedLocationOrgId } = useLocationContext();
+  const orgRoles = useOrgRoles(selectedLocationOrgId);
+
   if (!field) {
     return (
       <div className={sty.panel}>
@@ -64,11 +80,19 @@ export function FieldConfigPanel({
   const isTextBlock = field.type === 'text_block';
 
   const handleLabelChange = (value: string) => {
-    onUpdateField(field.id, { label: value });
+    const updates: Partial<FormField> = { label: value };
+    if (field.type === 'section') {
+      updates.settings = { ...field.settings, sectionName: value };
+    }
+    onUpdateField(field.id, updates);
   };
 
   const handleLabelEsChange = (value: string) => {
-    onUpdateField(field.id, { labelEs: value });
+    const updates: Partial<FormField> = { labelEs: value };
+    if (field.type === 'section') {
+      updates.settings = { ...field.settings, sectionNameEs: value };
+    }
+    onUpdateField(field.id, updates);
   };
 
   const handleDescriptionChange = (value: string) => {
@@ -97,7 +121,6 @@ export function FieldConfigPanel({
   const handleOptionUpdate = (index: number, updates: Partial<FieldOption>) => {
     const newOptions = [...(field.options || [])];
     newOptions[index] = { ...newOptions[index], ...updates };
-    // Auto-sync value from label if value hasn't been manually edited
     if (updates.label && newOptions[index].value.startsWith('option_')) {
       newOptions[index].value = updates.label
         .toLowerCase()
@@ -232,7 +255,9 @@ export function FieldConfigPanel({
             <FormControl fullWidth size="small">
               <InputLabel sx={inputLabelSx}>Source</InputLabel>
               <StyledSelect
-                value={field.settings.dataSource || 'custom'}
+                value={
+                  field.settings.dataSource === 'leaders' ? 'employees' : (field.settings.dataSource || 'custom')
+                }
                 onChange={(e) => {
                   const newSource = e.target.value as string;
                   const updates: Partial<FormField> = {
@@ -241,7 +266,6 @@ export function FieldConfigPanel({
                       dataSource: newSource as any,
                     },
                   };
-                  // Clear options when switching to predefined source
                   if (newSource !== 'custom') {
                     updates.options = undefined;
                   } else if (!field.options || field.options.length === 0) {
@@ -262,8 +286,8 @@ export function FieldConfigPanel({
               </StyledSelect>
             </FormControl>
 
-            {/* Data source info card */}
-            {field.settings.dataSource && field.settings.dataSource !== 'custom' && (() => {
+            {/* Info card for non-employee data sources */}
+            {field.settings.dataSource && !['custom', 'employees', 'leaders'].includes(field.settings.dataSource) && (() => {
               const sourceInfo = DATA_SOURCE_OPTIONS.find(o => o.value === field.settings.dataSource);
               if (!sourceInfo) return null;
               return (
@@ -282,17 +306,54 @@ export function FieldConfigPanel({
               );
             })()}
 
-            {/* Leader hierarchy filter */}
-            {field.settings.dataSource === 'leaders' && (
-              <StyledTextField
-                label="Max Hierarchy Level"
-                type="number"
-                value={field.settings.maxHierarchyLevel ?? 2}
-                onChange={(e) => handleSettingsChange('maxHierarchyLevel', Math.max(0, Math.min(10, Number(e.target.value))))}
-                size="small"
-                slotProps={{ htmlInput: { min: 0, max: 10 } }}
-                helperText="Include roles at this hierarchy level and above (0 = top level)"
-              />
+            {/* Employee role filter checkboxes */}
+            {(field.settings.dataSource === 'employees' || field.settings.dataSource === 'leaders') && orgRoles.length > 0 && (
+              <div>
+                <span style={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block', marginBottom: 6 }}>
+                  Filter by Role
+                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {orgRoles.map((role) => {
+                    const currentFilter = field.settings.roleFilter;
+                    const isChecked = !currentFilter || currentFilter.length === 0 || currentFilter.includes(role);
+                    return (
+                      <FormControlLabel
+                        key={role}
+                        sx={{ marginLeft: 0, marginRight: 0 }}
+                        control={
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              let newFilter: string[];
+                              if (!currentFilter || currentFilter.length === 0) {
+                                newFilter = orgRoles.filter(r => r !== role);
+                              } else if (e.target.checked) {
+                                newFilter = [...currentFilter, role];
+                                if (newFilter.length === orgRoles.length) {
+                                  newFilter = [];
+                                }
+                              } else {
+                                newFilter = currentFilter.filter(r => r !== role);
+                                if (newFilter.length === 0) return;
+                              }
+                              handleSettingsChange('roleFilter', newFilter.length > 0 ? newFilter : undefined);
+                            }}
+                            style={{
+                              width: 16,
+                              height: 16,
+                              marginRight: 8,
+                              accentColor: 'var(--ls-color-brand)',
+                              cursor: 'pointer',
+                            }}
+                          />
+                        }
+                        label={<span style={{ fontFamily, fontSize: 13, color: 'var(--ls-color-text-primary)' }}>{role}</span>}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </div>
         </>
@@ -350,7 +411,7 @@ export function FieldConfigPanel({
       )}
 
       {/* Range settings (for number fields) */}
-      {fieldDef?.hasRange && (
+      {fieldDef?.hasRange && field.type !== 'numeric_score' && (
         <>
           <Divider sx={{ margin: '8px 0' }} />
           <div className={sty.configSection}>
@@ -377,6 +438,25 @@ export function FieldConfigPanel({
         </>
       )}
 
+      {/* Max Value for numeric_score */}
+      {field.type === 'numeric_score' && (
+        <>
+          <Divider sx={{ margin: '8px 0' }} />
+          <div className={sty.configSection}>
+            <span className={sty.sectionLabel}>Max Value</span>
+            <StyledTextField
+              label="Maximum score value"
+              type="number"
+              value={field.settings.maxValue ?? 10}
+              onChange={(e) => handleSettingsChange('maxValue', Math.max(0.1, Number(e.target.value)))}
+              size="small"
+              slotProps={{ htmlInput: { min: 0.1, step: 0.5 } }}
+              helperText="The denominator shown as ___ / max"
+            />
+          </div>
+        </>
+      )}
+
       {/* Textarea rows */}
       {field.type === 'textarea' && (
         <>
@@ -395,90 +475,75 @@ export function FieldConfigPanel({
         </>
       )}
 
-      {/* Evaluation section assignment */}
-      {isEvaluation && !isSection && evaluationSections && evaluationSections.length > 0 && (
-        <>
-          <Divider sx={{ margin: '8px 0' }} />
-          <div className={sty.configSection}>
-            <span className={sty.sectionLabel}>Section</span>
-            <FormControl fullWidth size="small">
-              <InputLabel sx={inputLabelSx}>Section</InputLabel>
-              <StyledSelect
-                value={evaluationQuestion?.section_id || ''}
-                onChange={(e) => onAssignSection?.(field.id, e.target.value as string)}
-                label="Section"
-              >
-                <MenuItem value="" sx={{ fontFamily, fontSize: 13 }}>
-                  <em>Unscored</em>
-                </MenuItem>
-                {evaluationSections.map((s) => (
-                  <MenuItem key={s.id} value={s.id} sx={{ fontFamily, fontSize: 13 }}>
-                    {s.name}
-                  </MenuItem>
-                ))}
-              </StyledSelect>
-            </FormControl>
-          </div>
-        </>
-      )}
-
-      {/* Evaluation scoring settings */}
-      {isEvaluation && !isSection && (
+      {/* Scored toggle — only for scorable field types */}
+      {isScorable(field.type) && (
         <>
           <Divider sx={{ margin: '8px 0' }} />
           <div className={sty.configSection}>
             <span className={sty.sectionLabel}>Scoring</span>
-            <FormControl fullWidth size="small">
-              <InputLabel sx={inputLabelSx}>Scoring Type</InputLabel>
-              <StyledSelect
-                value={field.settings.scoringType || ''}
-                onChange={(e) => handleSettingsChange('scoringType', e.target.value || undefined)}
-                label="Scoring Type"
-              >
-                <MenuItem value="">
-                  <em>None (not scored)</em>
-                </MenuItem>
-                {SCORING_TYPES.map((st) => (
-                  <MenuItem key={st.value} value={st.value} sx={{ fontFamily, fontSize: 13 }}>
-                    {st.label}
-                  </MenuItem>
-                ))}
-              </StyledSelect>
-            </FormControl>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={!!field.settings.scored}
+                  onChange={(e) => {
+                    const scored = e.target.checked;
+                    onUpdateField(field.id, {
+                      settings: {
+                        ...field.settings,
+                        scored,
+                        weight: scored ? (field.settings.weight || 10) : undefined,
+                      },
+                    });
+                  }}
+                  size="small"
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: 'var(--ls-color-brand)',
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: 'var(--ls-color-brand)',
+                    },
+                  }}
+                />
+              }
+              label={
+                <span style={{ fontFamily, fontSize: 13 }}>Scored</span>
+              }
+            />
 
-            {field.settings.scoringType && (
+            {field.settings.scored && (
               <StyledTextField
                 label="Weight (points)"
                 type="number"
                 value={field.settings.weight ?? 10}
-                onChange={(e) => handleSettingsChange('weight', Math.max(0, Math.min(100, Number(e.target.value))))}
+                onChange={(e) => handleSettingsChange('weight', Math.max(0, Number(e.target.value)))}
                 size="small"
-                slotProps={{ htmlInput: { min: 0, max: 100 } }}
+                slotProps={{ htmlInput: { min: 0, step: 1 } }}
               />
             )}
-          </div>
 
-          {field.settings.scoringType && (
-            <>
-              <Divider sx={{ margin: '8px 0' }} />
-              <div className={sty.configSection}>
-                <span className={sty.sectionLabel}>Data Connection</span>
-                <ConnectedQuestionPicker
-                  connectedTo={field.settings.connectedTo}
-                  connectorParams={field.settings.connectorParams}
-                  onChange={(connectedTo, params) => {
-                    onUpdateField(field.id, {
-                      settings: {
-                        ...field.settings,
-                        connectedTo,
-                        connectorParams: params,
-                      },
-                    });
-                  }}
-                />
-              </div>
-            </>
-          )}
+            {field.settings.scored && field.settings.connectedTo !== undefined && (
+              <>
+                <Divider sx={{ margin: '8px 0' }} />
+                <div className={sty.configSection}>
+                  <span className={sty.sectionLabel}>Data Connection</span>
+                  <ConnectedQuestionPicker
+                    connectedTo={field.settings.connectedTo}
+                    connectorParams={field.settings.connectorParams}
+                    onChange={(connectedTo, params) => {
+                      onUpdateField(field.id, {
+                        settings: {
+                          ...field.settings,
+                          connectedTo,
+                          connectorParams: params,
+                        },
+                      });
+                    }}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </>
       )}
     </div>

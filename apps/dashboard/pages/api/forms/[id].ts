@@ -8,10 +8,10 @@ import { checkPermission } from '@/lib/permissions/service';
 async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse,
-  context: { userId: string; orgId: string }
+  context: { userId: string; orgId: string; isAdmin?: boolean }
 ) {
   const supabase = createServerSupabaseClient();
-  const { orgId, userId } = context;
+  const { orgId, userId, isAdmin } = context;
   const { id } = req.query;
 
   if (!id || typeof id !== 'string') {
@@ -43,9 +43,11 @@ async function handler(
   }
 
   if (req.method === 'PATCH') {
-    const hasEdit = await checkPermission(supabase, userId, orgId, P.FM_EDIT_FORMS);
-    if (!hasEdit) {
-      return res.status(403).json({ error: 'Permission denied' });
+    if (!isAdmin) {
+      const hasEdit = await checkPermission(supabase, userId, orgId, P.FM_EDIT_FORMS);
+      if (!hasEdit) {
+        return res.status(403).json({ error: 'Permission denied' });
+      }
     }
 
     const {
@@ -126,9 +128,11 @@ async function handler(
   }
 
   if (req.method === 'DELETE') {
-    const hasDelete = await checkPermission(supabase, userId, orgId, P.FM_DELETE_FORMS);
-    if (!hasDelete) {
-      return res.status(403).json({ error: 'Permission denied' });
+    if (!isAdmin) {
+      const hasDelete = await checkPermission(supabase, userId, orgId, P.FM_DELETE_FORMS);
+      if (!hasDelete) {
+        return res.status(403).json({ error: 'Permission denied' });
+      }
     }
 
     const { data: existing } = await supabase

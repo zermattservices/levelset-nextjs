@@ -14,6 +14,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import { AppState, AppStateStatus } from "react-native";
 import { User, Session } from "@supabase/supabase-js";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
@@ -253,11 +254,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setError(null);
           setIsLoading(false);
         } else if (currentSession) {
-          // Keep/set isLoading true — the useEffect below will set it
-          // to false once app user data finishes loading.
-          setIsLoading(true);
-          setUser(currentSession.user);
-          setSession(currentSession);
+          // For token refreshes where the user hasn't changed, just update
+          // the session and clear loading — no need to re-fetch app user data.
+          if (event === "TOKEN_REFRESHED") {
+            setSession(currentSession);
+            setIsLoading(false);
+          } else {
+            // New sign-in or initial session — fetch app user data.
+            setIsLoading(true);
+            setUser(currentSession.user);
+            setSession(currentSession);
+          }
         } else {
           // No session (e.g. INITIAL_SESSION with expired refresh token)
           setUser(null);
@@ -279,6 +286,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       subscription.unsubscribe();
     };
+  }, []);
+
+  // Refresh session when app comes back to foreground.
+  // Without this, a stale/expired token after backgrounding causes an
+  // infinite spinner because onAuthStateChange never fires.
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (appStateRef.current !== "active" && nextState === "active") {
+        console.log("[Auth] App foregrounded — refreshing session");
+        supabase.auth.getSession().then(({ data, error: sessionError }) => {
+          if (sessionError || !data.session) {
+            console.log("[Auth] Session expired after background, signing out");
+            supabase.auth.signOut();
+          } else {
+            // Session is still valid — make sure we're not stuck loading
+            setIsLoading(false);
+          }
+        });
+      }
+      appStateRef.current = nextState;
+    });
+
+    return () => subscription.remove();
   }, []);
 
   // Fetch app user data when auth user changes (kept outside onAuthStateChange

@@ -141,7 +141,7 @@ export function FormSettingsPanel({
             fullWidth
             size="small"
             multiline
-            rows={2}
+            rows={3}
             InputLabelProps={{ shrink: true }}
             InputProps={isSystem ? { readOnly: true } : undefined}
             sx={isSystem ? readOnlyInputSx : undefined}
@@ -153,7 +153,7 @@ export function FormSettingsPanel({
             fullWidth
             size="small"
             multiline
-            rows={2}
+            rows={3}
             InputLabelProps={{ shrink: true }}
             InputProps={isSystem ? { readOnly: true } : undefined}
             sx={isSystem ? readOnlyInputSx : undefined}

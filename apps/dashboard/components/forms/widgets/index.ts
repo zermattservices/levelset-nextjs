@@ -11,17 +11,21 @@ import { RatingScaleWidget } from './RatingScaleWidget';
 import { SignatureWidget } from './SignatureWidget';
 import { DataSelectWidget } from './DataSelectWidget';
 import { FileUploadWidget } from './FileUploadWidget';
+import { NumericScoreWidget } from './NumericScoreWidget';
 import { TextBlockField } from './TextBlockField';
+import { SectionField } from './SectionField';
 
 export const customWidgets: RegistryWidgetsType = {
   signature: SignatureWidget,
   ratingScale: RatingScaleWidget,
   data_select: DataSelectWidget,
   file: FileUploadWidget,
+  numeric_score: NumericScoreWidget,
 };
 
 export const customFields: RegistryFieldsType = {
   textBlock: TextBlockField as any,
+  section: SectionField as any,
 };
 
 /**

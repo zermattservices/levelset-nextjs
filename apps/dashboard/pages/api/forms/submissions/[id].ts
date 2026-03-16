@@ -7,7 +7,7 @@ import { checkPermission } from '@/lib/permissions/service';
 async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse,
-  context: { userId: string; orgId: string }
+  context: { userId: string; orgId: string; isAdmin?: boolean }
 ) {
   const supabase = createServerSupabaseClient();
   const { orgId, userId } = context;
@@ -70,9 +70,11 @@ async function handler(
   }
 
   if (req.method === 'PATCH') {
-    const hasManage = await checkPermission(supabase, userId, orgId, P.FM_MANAGE_SUBMISSIONS);
-    if (!hasManage) {
-      return res.status(403).json({ error: 'Permission denied' });
+    if (!context.isAdmin) {
+      const hasManage = await checkPermission(supabase, userId, orgId, P.FM_MANAGE_SUBMISSIONS);
+      if (!hasManage) {
+        return res.status(403).json({ error: 'Permission denied' });
+      }
     }
 
     const { status } = req.body;

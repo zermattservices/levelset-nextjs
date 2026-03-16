@@ -29,6 +29,7 @@ export function DataSelectWidget(props: WidgetProps) {
   const meta = props.uiSchema?.['ui:fieldMeta'] || {};
   const dataSource = meta.dataSource || 'employees';
   const maxHierarchyLevel = meta.maxHierarchyLevel;
+  const roleFilter: string[] | undefined = meta.roleFilter;
 
   const [options, setOptions] = React.useState<DataOption[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -47,34 +48,19 @@ export function DataSelectWidget(props: WidgetProps) {
       try {
         let fetchedOptions: DataOption[] = [];
 
-        if (dataSource === 'employees') {
+        if (dataSource === 'employees' || dataSource === 'leaders') {
           if (!location_id) { setLoading(false); return; }
           const res = await fetch(`/api/employees?location_id=${encodeURIComponent(location_id)}`);
           const json = await res.json();
           if (json.employees) {
-            fetchedOptions = json.employees.map((e: any) => ({
+            let employees = json.employees;
+            // Apply role filter if configured
+            if (roleFilter && roleFilter.length > 0) {
+              employees = employees.filter((e: any) => roleFilter.includes(e.role));
+            }
+            fetchedOptions = employees.map((e: any) => ({
               id: e.id,
               label: e.full_name?.trim() || `${e.first_name ?? ''} ${e.last_name ?? ''}`.trim() || 'Unnamed',
-              sublabel: e.role ?? undefined,
-            }));
-          }
-        } else if (dataSource === 'leaders') {
-          if (!location_id) { setLoading(false); return; }
-          const params = new URLSearchParams({
-            type: 'leaders',
-            org_id,
-            location_id,
-            form_type: formType,
-          });
-          if (maxHierarchyLevel !== undefined) {
-            params.set('max_hierarchy', String(maxHierarchyLevel));
-          }
-          const res = await fetch(`/api/forms/widget-data?${params}`);
-          const json = await res.json();
-          if (json.data) {
-            fetchedOptions = json.data.map((e: any) => ({
-              id: e.id,
-              label: e.full_name || 'Unnamed',
               sublabel: e.role ?? undefined,
             }));
           }
@@ -121,7 +107,7 @@ export function DataSelectWidget(props: WidgetProps) {
 
     fetchData();
     return () => { cancelled = true; };
-  }, [org_id, location_id, formType, dataSource, maxHierarchyLevel]);
+  }, [org_id, location_id, formType, dataSource, maxHierarchyLevel, roleFilter]);
 
   const selectedOption = React.useMemo(() => {
     if (!value) return null;

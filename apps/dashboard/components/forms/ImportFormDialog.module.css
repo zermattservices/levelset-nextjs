@@ -1,25 +1,95 @@
 /* apps/dashboard/components/forms/ImportFormDialog.module.css */
 
+/* ── Header ───────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px 12px;
+}
+
+.title {
+  font-family: "Mont", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ls-color-text-primary);
+}
+
+/* ── Content ──────────────────────────────────── */
+
+.content {
+  padding: 0 24px 20px;
+}
+
+.errorBanner {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--ls-color-destructive-soft);
+  color: var(--ls-color-destructive);
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+/* ── Tab bar ──────────────────────────────────── */
+
+.tabBar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  margin: 0 -24px;
+  padding: 0 24px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
+  margin-bottom: -1px;
+}
+
+.tab:hover {
+  color: var(--ls-color-text-primary);
+}
+
+.tabActive {
+  color: var(--ls-color-brand);
+  font-weight: 600;
+  border-bottom-color: var(--ls-color-brand);
+}
+
 .tabContent {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 8px;
+  padding-top: 16px;
 }
 
+/* ── Drop zone ─────────────────────────────────── */
+
 .dropZone {
-  border: 2px dashed var(--ls-color-muted-border);
-  border-radius: 12px;
-  padding: 32px 24px;
+  border: 2px dashed var(--ls-color-border-light);
+  border-radius: 10px;
+  padding: 28px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  background: var(--ls-color-neutral-foreground);
-  min-height: 120px;
+  transition: border-color 150ms ease, background-color 150ms ease;
+  background: var(--ls-color-bg-input);
 }
 
 .dropZone:hover,
@@ -30,13 +100,19 @@
 
 .dropZoneIcon {
   color: var(--ls-color-muted);
-  font-size: 32px !important;
+  font-size: 28px !important;
+  opacity: 0.6;
+}
+
+.dropZoneActive .dropZoneIcon {
+  color: var(--ls-color-brand);
+  opacity: 1;
 }
 
 .dropZoneText {
   font-family: "Satoshi", sans-serif;
-  font-size: 14px;
-  color: var(--ls-color-muted);
+  font-size: 13px;
+  color: var(--ls-color-text-secondary);
   text-align: center;
   margin: 0;
 }
@@ -49,19 +125,21 @@
 
 .dropZoneHint {
   font-family: "Satoshi", sans-serif;
-  font-size: 12px;
-  color: var(--ls-color-muted);
+  font-size: 11px;
+  color: var(--ls-color-text-placeholder);
   margin: 0;
 }
+
+/* ── File preview ──────────────────────────────── */
 
 .filePreview {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  background: var(--ls-color-neutral-foreground);
+  padding: 10px 14px;
+  background: var(--ls-color-bg-input);
   border-radius: 8px;
-  border: 1px solid var(--ls-color-muted-border);
+  border: 1px solid var(--ls-color-brand-border);
 }
 
 .fileInfo {
@@ -71,7 +149,7 @@
 
 .fileName {
   font-family: "Satoshi", sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--ls-color-text-primary);
   margin: 0;
@@ -82,22 +160,197 @@
 
 .fileSize {
   font-family: "Satoshi", sans-serif;
-  font-size: 12px;
-  color: var(--ls-color-muted);
-  margin: 0;
+  font-size: 11px;
+  color: var(--ls-color-text-secondary);
+  margin: 2px 0 0;
 }
+
+/* ── Form fields section ───────────────────────── */
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fieldLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ls-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.groupSelector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.groupChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-text-secondary);
+  background: var(--ls-color-bg-input);
+  border: 1px solid var(--ls-color-border-light);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.groupChip:hover {
+  border-color: var(--ls-color-brand-border);
+  color: var(--ls-color-text-primary);
+}
+
+.groupChipSelected {
+  background: var(--ls-color-brand-soft);
+  border-color: var(--ls-color-brand);
+  color: var(--ls-color-brand-soft-foreground);
+  font-weight: 600;
+}
+
+/* ── Text inputs ──────────────────────────────── */
+
+.textInput {
+  width: 100%;
+  padding: 9px 12px;
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-text-primary);
+  background: var(--ls-color-bg-input);
+  border: 1px solid var(--ls-color-border-light);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 150ms ease;
+  box-sizing: border-box;
+}
+
+.textInput::placeholder {
+  color: var(--ls-color-text-placeholder);
+}
+
+.textInput:focus {
+  border-color: var(--ls-color-brand);
+}
+
+.textArea {
+  width: 100%;
+  padding: 9px 12px;
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-text-primary);
+  background: var(--ls-color-bg-input);
+  border: 1px solid var(--ls-color-border-light);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 150ms ease;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.textArea::placeholder {
+  color: var(--ls-color-text-placeholder);
+}
+
+.textArea:focus {
+  border-color: var(--ls-color-brand);
+}
+
+/* ── Processing state ──────────────────────────── */
 
 .processingState {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 32px 24px;
+  gap: 16px;
+  padding: 40px 24px;
+}
+
+.processingAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--ls-color-brand-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.processingTitle {
+  font-family: "Mont", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ls-color-text-primary);
+  margin: 0;
 }
 
 .processingText {
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
-  color: var(--ls-color-muted);
+  font-weight: 500;
+  color: var(--ls-color-text-secondary);
   margin: 0;
+}
+
+/* ── Footer ────────────────────────────────────── */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 24px 16px;
+  border-top: 1px solid var(--ls-color-border-light);
+}
+
+.cancelBtn {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  color: var(--ls-color-text-primary);
+}
+
+.primaryBtn {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ls-color-brand);
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 150ms ease;
+}
+
+.primaryBtn:hover {
+  opacity: 0.9;
+}
+
+.primaryBtnDisabled {
+  background: var(--ls-color-muted-border);
+  cursor: default;
+}
+
+.primaryBtnDisabled:hover {
+  opacity: 1;
 }

@@ -1,32 +1,15 @@
 import * as React from 'react';
 import {
   Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Button,
   IconButton,
   CircularProgress,
-  Alert,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import { fontFamily } from './dialogStyles';
+import sty from './ImportFormDialog.module.css';
 import type { FormGroup, FormType } from '@/lib/forms/types';
-import {
-  StyledTextField,
-  StyledSelect,
-  inputLabelSx,
-  dialogPaperSx,
-  dialogTitleSx,
-  dialogContentSx,
-  dialogActionsSx,
-  cancelButtonSx,
-  primaryButtonSx,
-  fontFamily,
-  alertSx,
-} from './dialogStyles';
 
 interface CreateFormDialogProps {
   open: boolean;
@@ -37,13 +20,9 @@ interface CreateFormDialogProps {
   orgId?: string | null;
 }
 
-/** Maps system group slugs to their fixed form types */
 const SLUG_TO_TYPE: Record<string, FormType> = {
-  positional_excellence: 'rating',
-  discipline: 'discipline',
   evaluations: 'evaluation',
 };
-
 
 export function CreateFormDialog({
   open,
@@ -59,30 +38,27 @@ export function CreateFormDialog({
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Derive form type from the selected group's slug
   const selectedGroup = groups.find((g) => g.id === groupId);
   const formType: FormType =
     (selectedGroup?.slug && SLUG_TO_TYPE[selectedGroup.slug]) || 'custom';
 
-  // Reset form when dialog opens
+  const sortedGroups = React.useMemo(
+    () => [...groups].sort((a, b) => a.name.localeCompare(b.name)),
+    [groups]
+  );
+
   React.useEffect(() => {
     if (open) {
       setName('');
       setDescription('');
-      setGroupId(groups[0]?.id || '');
+      setGroupId(sortedGroups[0]?.id || '');
       setError(null);
     }
-  }, [open, groups]);
+  }, [open, sortedGroups]);
 
   const handleCreate = async () => {
-    if (!name.trim()) {
-      setError('Form name is required');
-      return;
-    }
-    if (!groupId) {
-      setError('Please select a group');
-      return;
-    }
+    if (!name.trim()) { setError('Form name is required'); return; }
+    if (!groupId) { setError('Please select a group'); return; }
 
     setSaving(true);
     setError(null);
@@ -125,72 +101,99 @@ export function CreateFormDialog({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{ sx: dialogPaperSx }}
+      PaperProps={{
+        sx: {
+          borderRadius: '14px',
+          fontFamily,
+          overflow: 'hidden',
+          backgroundImage: 'none',
+        },
+      }}
     >
-      <DialogTitle sx={dialogTitleSx}>
-        Create New Form
+      {/* Header */}
+      <div className={sty.header}>
+        <span className={sty.title}>Create New Form</span>
         <IconButton size="small" onClick={onClose}>
-          <CloseIcon sx={{ fontSize: 18 }} />
+          <CloseIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
         </IconButton>
-      </DialogTitle>
+      </div>
 
-      <DialogContent sx={dialogContentSx}>
-        {error && (
-          <Alert severity="error" sx={alertSx}>
-            {error}
-          </Alert>
-        )}
+      {/* Content */}
+      <div className={sty.content}>
+        {error && <div className={sty.errorBanner}>{error}</div>}
 
-        <StyledTextField
-          label="Form Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          fullWidth
-          size="small"
-          required
-        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Form name */}
+          <div className={sty.fieldGroup}>
+            <span className={sty.fieldLabel}>Form Name</span>
+            <input
+              type="text"
+              className={sty.textInput}
+              placeholder="e.g. Quarterly Review"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+            />
+          </div>
 
-        <StyledTextField
-          label="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          fullWidth
-          size="small"
-          multiline
-          rows={2}
-          InputLabelProps={{ shrink: true }}
-        />
+          {/* Description */}
+          <div className={sty.fieldGroup}>
+            <span className={sty.fieldLabel}>Description (optional)</span>
+            <textarea
+              className={sty.textArea}
+              placeholder="What is this form for?"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+            />
+          </div>
 
-        <FormControl fullWidth size="small">
-          <InputLabel sx={inputLabelSx}>Form Group</InputLabel>
-          <StyledSelect
-            value={groupId}
-            onChange={(e) => setGroupId(e.target.value as string)}
-            label="Form Group"
-          >
-            {groups.map((group) => (
-              <MenuItem key={group.id} value={group.id} sx={{ fontFamily, fontSize: 13 }}>
-                {group.name}
-              </MenuItem>
-            ))}
-          </StyledSelect>
-        </FormControl>
-      </DialogContent>
+          {/* Group selector */}
+          <div className={sty.fieldGroup}>
+            <span className={sty.fieldLabel}>Group</span>
+            <div className={sty.groupSelector}>
+              {sortedGroups.map((g) => (
+                <button
+                  key={g.id}
+                  type="button"
+                  className={`${sty.groupChip} ${groupId === g.id ? sty.groupChipSelected : ''}`}
+                  onClick={() => setGroupId(g.id)}
+                >
+                  {groupId === g.id && (
+                    <CheckCircleOutlineIcon sx={{ fontSize: 14 }} />
+                  )}
+                  {g.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <DialogActions sx={dialogActionsSx}>
-        <Button onClick={onClose} disabled={saving} sx={cancelButtonSx}>
+      {/* Footer */}
+      <div className={sty.footer}>
+        <button
+          type="button"
+          className={sty.cancelBtn}
+          onClick={onClose}
+          disabled={saving}
+        >
           Cancel
-        </Button>
-        <Button
-          variant="contained"
+        </button>
+        <button
+          type="button"
+          className={`${sty.primaryBtn} ${(saving || !name.trim()) ? sty.primaryBtnDisabled : ''}`}
           onClick={handleCreate}
           disabled={saving || !name.trim()}
-          startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
-          sx={primaryButtonSx}
         >
+          {saving ? (
+            <CircularProgress size={14} sx={{ color: '#fff' }} />
+          ) : (
+            <AddOutlinedIcon sx={{ fontSize: 15 }} />
+          )}
           {saving ? 'Creating...' : 'Create'}
-        </Button>
-      </DialogActions>
+        </button>
+      </div>
     </Dialog>
   );
 }

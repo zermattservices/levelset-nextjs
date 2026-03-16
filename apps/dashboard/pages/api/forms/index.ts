@@ -8,7 +8,7 @@ import { checkPermission } from '@/lib/permissions/service';
 async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse,
-  context: { userId: string; orgId: string }
+  context: { userId: string; orgId: string; isAdmin?: boolean }
 ) {
   const supabase = createServerSupabaseClient();
   const { orgId, userId } = context;
@@ -49,29 +49,27 @@ async function handler(
 
   if (req.method === 'POST') {
     // POST requires create permission (middleware only checked view)
-    const hasCreate = await checkPermission(supabase, userId, orgId, P.FM_CREATE_FORMS);
-    if (!hasCreate) {
-      return res.status(403).json({ error: 'Permission denied' });
+    if (!context.isAdmin) {
+      const hasCreate = await checkPermission(supabase, userId, orgId, P.FM_CREATE_FORMS);
+      if (!hasCreate) {
+        return res.status(403).json({ error: 'Permission denied' });
+      }
     }
 
     const { intent } = req.body;
 
     if (intent === 'create_template') {
-      const { name, name_es, description, description_es, group_id, form_type } = req.body;
+      const { name, name_es, description, description_es, group_id } = req.body;
+      let { form_type } = req.body;
 
-      if (!name || !group_id || !form_type) {
-        return res.status(400).json({ error: 'Name, group_id, and form_type are required' });
-      }
-
-      const validTypes = ['rating', 'discipline', 'evaluation', 'custom'];
-      if (!validTypes.includes(form_type)) {
-        return res.status(400).json({ error: 'Invalid form_type' });
+      if (!name || !group_id) {
+        return res.status(400).json({ error: 'Name and group_id are required' });
       }
 
       // Verify group belongs to this org
       const { data: group } = await supabase
         .from('form_groups')
-        .select('id, org_id, slug')
+        .select('id, org_id, slug, is_system')
         .eq('id', group_id)
         .eq('org_id', orgId)
         .single();
@@ -80,16 +78,30 @@ async function handler(
         return res.status(404).json({ error: 'Form group not found' });
       }
 
-      // Validate form_type matches system group slug
+      // PE and Discipline system groups are locked — cannot add forms
+      const lockedSlugs = ['positional_excellence', 'discipline'];
+      if (lockedSlugs.includes(group.slug)) {
+        return res.status(400).json({ error: 'Cannot add forms to this system group' });
+      }
+
+      // Auto-derive form_type from group slug, fall back to 'custom'
       const slugToType: Record<string, string> = {
-        positional_excellence: 'rating',
-        discipline: 'discipline',
         evaluations: 'evaluation',
       };
-      const expectedType = slugToType[group.slug];
-      if (expectedType && form_type !== expectedType) {
+      const derivedType = slugToType[group.slug] || 'custom';
+      if (!form_type) {
+        form_type = derivedType;
+      }
+
+      const validTypes = ['rating', 'discipline', 'evaluation', 'custom'];
+      if (!validTypes.includes(form_type)) {
+        return res.status(400).json({ error: 'Invalid form_type' });
+      }
+
+      // Validate form_type matches expected type for the group
+      if (slugToType[group.slug] && form_type !== derivedType) {
         return res.status(400).json({
-          error: `The "${group.slug}" group requires form type "${expectedType}"`,
+          error: `The "${group.slug}" group requires form type "${derivedType}"`,
         });
       }
 

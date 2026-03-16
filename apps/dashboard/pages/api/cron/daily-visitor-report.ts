@@ -44,6 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       referrersRes,
       prevVisitorsRes,
       prevSessionRes,
+      botSessionsRes,
     ] = await Promise.all([
       supabase.rpc('count_unique_visitors', { from_ts: fromIso, to_ts: toIso }),
       supabase.rpc('session_analytics_summary', { from_ts: fromIso, to_ts: toIso }),
@@ -51,6 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       supabase.rpc('top_referrers', { from_ts: fromIso, to_ts: toIso, max_results: 5 }),
       supabase.rpc('count_unique_visitors', { from_ts: prevFromIso, to_ts: prevToIso }),
       supabase.rpc('session_analytics_summary', { from_ts: prevFromIso, to_ts: prevToIso }),
+      supabase.rpc('count_bot_sessions', { from_ts: fromIso, to_ts: toIso }),
     ]);
 
     const uniqueVisitors = Number(visitorsRes.data) || 0;
@@ -79,6 +81,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       sessions: Number(r.sessions) || 0,
     }));
 
+    const botSessions = Number(botSessionsRes.data) || 0;
+
     await notifyDailyVisitorReport({
       date: yesterday.toISOString().split('T')[0],
       uniqueVisitors,
@@ -87,6 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       avgDwellSeconds: Math.round(avgDuration),
       topPages,
       topReferrers,
+      botSessions,
       comparison: {
         visitorsChange: pctChange(uniqueVisitors, prevVisitors),
         sessionsChange: pctChange(totalSessions, prevSessions),

@@ -1,41 +1,15 @@
 // apps/dashboard/components/forms/ImportFormDialog.tsx
 
 import * as React from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Button,
-  IconButton,
-  CircularProgress,
-  Alert,
-  Tab,
-  Tabs,
-  LinearProgress,
-} from '@mui/material';
+import { Dialog, IconButton, LinearProgress } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
-import {
-  StyledTextField,
-  StyledSelect,
-  inputLabelSx,
-  dialogPaperSx,
-  dialogTitleSx,
-  dialogContentSx,
-  dialogActionsSx,
-  cancelButtonSx,
-  primaryButtonSx,
-  menuItemSx,
-  alertSx,
-  fontFamily,
-} from './dialogStyles';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import { fontFamily } from './dialogStyles';
+import { LeviIcon } from '@/components/levi/LeviIcon';
 import sty from './ImportFormDialog.module.css';
 import type { FormGroup, FormType } from '@/lib/forms/types';
 
@@ -48,12 +22,9 @@ interface ImportFormDialogProps {
   orgId?: string | null;
 }
 
-const FORM_TYPE_OPTIONS: { value: FormType; label: string }[] = [
-  { value: 'custom', label: 'Custom' },
-  { value: 'rating', label: 'Rating' },
-  { value: 'discipline', label: 'Discipline' },
-  { value: 'evaluation', label: 'Evaluation' },
-];
+const SLUG_TO_TYPE: Record<string, FormType> = {
+  evaluations: 'evaluation',
+};
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -73,7 +44,6 @@ export function ImportFormDialog({
   const [formName, setFormName] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [groupId, setGroupId] = React.useState('');
-  const [formType, setFormType] = React.useState<FormType>('custom');
   const [url, setUrl] = React.useState('');
   const [file, setFile] = React.useState<File | null>(null);
   const [dragActive, setDragActive] = React.useState(false);
@@ -82,42 +52,46 @@ export function ImportFormDialog({
   const [processingMessage, setProcessingMessage] = React.useState('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  const selectedGroup = groups.find((g) => g.id === groupId);
+  const formType: FormType =
+    (selectedGroup?.slug && SLUG_TO_TYPE[selectedGroup.slug]) || 'custom';
+
+  // Auto-select first group alphabetically
+  const sortedGroups = React.useMemo(
+    () => [...groups].sort((a, b) => a.name.localeCompare(b.name)),
+    [groups]
+  );
+
   React.useEffect(() => {
     if (!open) {
       setActiveTab(0);
       setFormName('');
       setDescription('');
       setGroupId('');
-      setFormType('custom');
       setUrl('');
       setFile(null);
       setError('');
       setImporting(false);
       setProcessingMessage('');
+    } else if (sortedGroups.length > 0 && !groupId) {
+      setGroupId(sortedGroups[0].id);
     }
-  }, [open]);
+  }, [open, sortedGroups]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
-    }
+    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
+    else if (e.type === 'dragleave') setDragActive(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
     const droppedFile = e.dataTransfer.files?.[0];
     if (droppedFile && droppedFile.type === 'application/pdf') {
-      if (droppedFile.size > 10 * 1024 * 1024) {
-        setError('File size must be under 10 MB.');
-        return;
-      }
+      if (droppedFile.size > 10 * 1024 * 1024) { setError('File size must be under 10 MB.'); return; }
       setFile(droppedFile);
       setError('');
     } else {
@@ -128,14 +102,8 @@ export function ImportFormDialog({
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type !== 'application/pdf') {
-        setError('Please upload a PDF file.');
-        return;
-      }
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        setError('File size must be under 10 MB.');
-        return;
-      }
+      if (selectedFile.type !== 'application/pdf') { setError('Please upload a PDF file.'); return; }
+      if (selectedFile.size > 10 * 1024 * 1024) { setError('File size must be under 10 MB.'); return; }
       setFile(selectedFile);
       setError('');
     }
@@ -143,79 +111,46 @@ export function ImportFormDialog({
 
   const handleImport = async () => {
     setError('');
-
-    if (!groupId) {
-      setError('Please select a form group.');
-      return;
-    }
-    if (activeTab === 0 && !file) {
-      setError('Please upload a PDF file.');
-      return;
-    }
-    if (activeTab === 1 && !url.trim()) {
-      setError('Please enter a URL.');
-      return;
-    }
+    if (!groupId) { setError('Please select a group.'); return; }
+    if (activeTab === 0 && !file) { setError('Please upload a PDF file.'); return; }
+    if (activeTab === 1 && !url.trim()) { setError('Please enter a URL.'); return; }
 
     setImporting(true);
     setProcessingMessage('Analyzing form structure...');
 
     try {
       const token = await getAccessToken();
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
       let body: Record<string, any>;
 
       if (activeTab === 0 && file) {
-        setProcessingMessage('Reading PDF...');
+        setProcessingMessage('Reading your PDF...');
         const arrayBuffer = await file.arrayBuffer();
         const base64 = btoa(
-          new Uint8Array(arrayBuffer).reduce(
-            (data, byte) => data + String.fromCharCode(byte),
-            ''
-          )
+          new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
         );
-
-        setProcessingMessage('Parsing form with AI...');
+        setProcessingMessage('Extracting form fields...');
         body = {
-          source_type: 'pdf',
-          file_data: base64,
-          file_media_type: 'application/pdf',
-          name: formName || undefined,
-          description: description || undefined,
-          group_id: groupId,
-          form_type: formType,
-          org_id: orgId,
+          source_type: 'pdf', file_data: base64, file_media_type: 'application/pdf',
+          name: formName || undefined, description: description || undefined,
+          group_id: groupId, form_type: formType, org_id: orgId,
         };
       } else {
-        setProcessingMessage('Fetching form page...');
+        setProcessingMessage('Fetching the page...');
         body = {
-          source_type: 'url',
-          url: url.trim(),
-          name: formName || undefined,
-          description: description || undefined,
-          group_id: groupId,
-          form_type: formType,
-          org_id: orgId,
+          source_type: 'url', url: url.trim(),
+          name: formName || undefined, description: description || undefined,
+          group_id: groupId, form_type: formType, org_id: orgId,
         };
       }
 
-      const res = await fetch('/api/forms/import', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body),
-      });
-
+      const res = await fetch('/api/forms/import', { method: 'POST', headers, body: JSON.stringify(body) });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Import failed');
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Import failed');
-      }
-
-      setProcessingMessage('Form created! Opening editor...');
+      setProcessingMessage('Done! Opening editor...');
       onImported(data.slug || data.id);
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
@@ -224,10 +159,7 @@ export function ImportFormDialog({
     }
   };
 
-  const canImport =
-    groupId &&
-    ((activeTab === 0 && file) || (activeTab === 1 && url.trim())) &&
-    !importing;
+  const canImport = groupId && ((activeTab === 0 && file) || (activeTab === 1 && url.trim())) && !importing;
 
   return (
     <Dialog
@@ -235,211 +167,133 @@ export function ImportFormDialog({
       onClose={importing ? undefined : onClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{ sx: dialogPaperSx }}
+      PaperProps={{ sx: { borderRadius: '14px', fontFamily, overflow: 'hidden', backgroundImage: 'none' } }}
     >
-      <DialogTitle sx={dialogTitleSx}>
-        Import Form
-        <IconButton
-          size="small"
-          onClick={onClose}
-          disabled={importing}
-        >
-          <CloseIcon sx={{ fontSize: 18 }} />
+      {/* Header */}
+      <div className={sty.header}>
+        <span className={sty.title}>Import Form</span>
+        <IconButton size="small" onClick={onClose} disabled={importing}>
+          <CloseIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
         </IconButton>
-      </DialogTitle>
+      </div>
 
-      <DialogContent sx={dialogContentSx}>
-        {error && (
-          <Alert severity="error" sx={alertSx}>
-            {error}
-          </Alert>
-        )}
+      {/* Content */}
+      <div className={sty.content}>
+        {error && <div className={sty.errorBanner}>{error}</div>}
 
         {importing ? (
           <div className={sty.processingState}>
-            <CircularProgress size={40} sx={{ color: 'var(--ls-color-brand)' }} />
-            <p className={sty.processingText}>{processingMessage}</p>
+            <div className={sty.processingAvatar}>
+              <LeviIcon size={28} color="var(--ls-color-brand)" />
+            </div>
+            <span className={sty.processingTitle}>Levi is processing your upload</span>
+            <span className={sty.processingText}>{processingMessage}</span>
             <LinearProgress
               sx={{
-                width: '100%',
-                borderRadius: 4,
-                '& .MuiLinearProgress-bar': {
-                  backgroundColor: 'var(--ls-color-brand)',
-                },
+                width: '100%', borderRadius: 4, height: 3,
+                backgroundColor: 'var(--ls-color-border-light)',
+                '& .MuiLinearProgress-bar': { backgroundColor: 'var(--ls-color-brand)' },
               }}
             />
           </div>
         ) : (
           <>
-            <Tabs
-              value={activeTab}
-              onChange={(_, v) => setActiveTab(v)}
-              sx={{
-                minHeight: 36,
-                '& .MuiTabs-indicator': {
-                  backgroundColor: 'var(--ls-color-brand)',
-                },
-                '& .MuiTab-root': {
-                  fontFamily,
-                  fontSize: 13,
-                  fontWeight: 500,
-                  textTransform: 'none',
-                  minHeight: 36,
-                  padding: '6px 16px',
-                  color: 'var(--ls-color-muted)',
-                  '&.Mui-selected': {
-                    color: 'var(--ls-color-brand)',
-                    fontWeight: 600,
-                  },
-                },
-              }}
-            >
-              <Tab
-                icon={<PictureAsPdfOutlinedIcon sx={{ fontSize: 16 }} />}
-                iconPosition="start"
-                label="Upload PDF"
-              />
-              <Tab
-                icon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}
-                iconPosition="start"
-                label="Paste URL"
-              />
-            </Tabs>
+            {/* Tab bar */}
+            <div className={sty.tabBar}>
+              <button type="button" className={`${sty.tab} ${activeTab === 0 ? sty.tabActive : ''}`} onClick={() => setActiveTab(0)}>
+                <PictureAsPdfOutlinedIcon sx={{ fontSize: 15 }} />
+                Upload PDF
+              </button>
+              <button type="button" className={`${sty.tab} ${activeTab === 1 ? sty.tabActive : ''}`} onClick={() => setActiveTab(1)}>
+                <LinkOutlinedIcon sx={{ fontSize: 15 }} />
+                Paste URL
+              </button>
+            </div>
 
             <div className={sty.tabContent}>
+              {/* Source input */}
               {activeTab === 0 && (
-                <>
-                  {!file ? (
-                    <div
-                      className={`${sty.dropZone} ${dragActive ? sty.dropZoneActive : ''}`}
-                      onDragEnter={handleDrag}
-                      onDragOver={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDrop={handleDrop}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <UploadFileOutlinedIcon className={sty.dropZoneIcon} />
-                      <p className={sty.dropZoneText}>
-                        Drag & drop a PDF here, or{' '}
-                        <span className={sty.dropZoneBrowse}>browse</span>
-                      </p>
-                      <p className={sty.dropZoneHint}>PDF only, max 10 MB</p>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".pdf,application/pdf"
-                        onChange={handleFileSelect}
-                        style={{ display: 'none' }}
-                      />
+                !file ? (
+                  <div
+                    className={`${sty.dropZone} ${dragActive ? sty.dropZoneActive : ''}`}
+                    onDragEnter={handleDrag} onDragOver={handleDrag}
+                    onDragLeave={handleDrag} onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <UploadFileOutlinedIcon className={sty.dropZoneIcon} />
+                    <p className={sty.dropZoneText}>Drop a PDF here or <span className={sty.dropZoneBrowse}>browse</span></p>
+                    <p className={sty.dropZoneHint}>Max 10 MB</p>
+                    <input ref={fileInputRef} type="file" accept=".pdf,application/pdf" onChange={handleFileSelect} style={{ display: 'none' }} />
+                  </div>
+                ) : (
+                  <div className={sty.filePreview}>
+                    <InsertDriveFileOutlinedIcon sx={{ fontSize: 24, color: 'var(--ls-color-brand)' }} />
+                    <div className={sty.fileInfo}>
+                      <p className={sty.fileName}>{file.name}</p>
+                      <p className={sty.fileSize}>{formatFileSize(file.size)}</p>
                     </div>
-                  ) : (
-                    <div className={sty.filePreview}>
-                      <InsertDriveFileOutlinedIcon
-                        sx={{ fontSize: 28, color: 'var(--ls-color-brand)' }}
-                      />
-                      <div className={sty.fileInfo}>
-                        <p className={sty.fileName}>{file.name}</p>
-                        <p className={sty.fileSize}>{formatFileSize(file.size)}</p>
-                      </div>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setFile(null);
-                          if (fileInputRef.current) fileInputRef.current.value = '';
-                        }}
-                      >
-                        <CloseIcon sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </div>
-                  )}
-                </>
+                    <IconButton size="small" onClick={() => { setFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}>
+                      <CloseIcon sx={{ fontSize: 14, color: 'var(--ls-color-muted)' }} />
+                    </IconButton>
+                  </div>
+                )
               )}
 
               {activeTab === 1 && (
-                <StyledTextField
-                  size="small"
-                  label="Form URL"
+                <input
+                  type="url"
+                  className={sty.textInput}
                   placeholder="https://forms.google.com/..."
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  fullWidth
-                  InputLabelProps={{ sx: inputLabelSx }}
                 />
               )}
+
+              {/* Group selector */}
+              <div className={sty.fieldGroup}>
+                <span className={sty.fieldLabel}>Group</span>
+                <div className={sty.groupSelector}>
+                  {sortedGroups.map((g) => (
+                    <button key={g.id} type="button" className={`${sty.groupChip} ${groupId === g.id ? sty.groupChipSelected : ''}`} onClick={() => setGroupId(g.id)}>
+                      {groupId === g.id && <CheckCircleOutlineIcon sx={{ fontSize: 14 }} />}
+                      {g.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Optional fields */}
+              <div className={sty.fieldGroup}>
+                <span className={sty.fieldLabel}>Details (optional)</span>
+                <input
+                  type="text"
+                  className={sty.textInput}
+                  placeholder="Form name — leave blank for AI suggestion"
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                />
+                <textarea
+                  className={sty.textArea}
+                  placeholder="Description — leave blank for AI suggestion"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={2}
+                />
+              </div>
             </div>
-
-            <FormControl fullWidth size="small">
-              <InputLabel sx={inputLabelSx}>Form Group *</InputLabel>
-              <StyledSelect
-                value={groupId}
-                onChange={(e) => setGroupId(e.target.value as string)}
-                label="Form Group *"
-              >
-                {groups.map((g) => (
-                  <MenuItem key={g.id} value={g.id} sx={menuItemSx}>
-                    {g.name}
-                  </MenuItem>
-                ))}
-              </StyledSelect>
-            </FormControl>
-
-            <FormControl fullWidth size="small">
-              <InputLabel sx={inputLabelSx}>Form Type *</InputLabel>
-              <StyledSelect
-                value={formType}
-                onChange={(e) => setFormType(e.target.value as FormType)}
-                label="Form Type *"
-              >
-                {FORM_TYPE_OPTIONS.map((opt) => (
-                  <MenuItem key={opt.value} value={opt.value} sx={menuItemSx}>
-                    {opt.label}
-                  </MenuItem>
-                ))}
-              </StyledSelect>
-            </FormControl>
-
-            <StyledTextField
-              size="small"
-              label="Form Name (optional)"
-              placeholder="Leave blank to use AI-suggested name"
-              value={formName}
-              onChange={(e) => setFormName(e.target.value)}
-              fullWidth
-              InputLabelProps={{ sx: inputLabelSx }}
-            />
-
-            <StyledTextField
-              size="small"
-              label="Description (optional)"
-              placeholder="Leave blank to use AI-suggested description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              fullWidth
-              multiline
-              rows={2}
-              InputLabelProps={{ shrink: true, sx: inputLabelSx }}
-            />
           </>
         )}
-      </DialogContent>
+      </div>
 
+      {/* Footer */}
       {!importing && (
-        <DialogActions sx={dialogActionsSx}>
-          <Button onClick={onClose} sx={cancelButtonSx}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleImport}
-            disabled={!canImport}
-            startIcon={
-              <UploadFileOutlinedIcon sx={{ fontSize: 16 }} />
-            }
-            sx={primaryButtonSx}
-          >
+        <div className={sty.footer}>
+          <button type="button" className={sty.cancelBtn} onClick={onClose}>Cancel</button>
+          <button type="button" className={`${sty.primaryBtn} ${!canImport ? sty.primaryBtnDisabled : ''}`} onClick={handleImport} disabled={!canImport}>
+            <UploadFileOutlinedIcon sx={{ fontSize: 15 }} />
             Import
-          </Button>
-        </DialogActions>
+          </button>
+        </div>
       )}
     </Dialog>
   );

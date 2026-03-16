@@ -73,8 +73,8 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
   },
   section: {
     type: 'section',
-    label: 'Section Header',
-    labelEs: 'Encabezado de Seccion',
+    label: 'Section',
+    labelEs: 'Seccion',
     icon: 'ViewAgendaOutlined',
     category: 'basic',
     schema: { type: 'null' },
@@ -159,17 +159,18 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
     },
     uiWidget: 'ratingScale',
   },
-  percentage: {
-    type: 'percentage',
-    label: 'Percentage',
-    labelEs: 'Porcentaje',
+  numeric_score: {
+    type: 'numeric_score',
+    label: 'Numeric Score',
+    labelEs: 'Puntuacion Numerica',
     icon: 'PercentOutlined',
     category: 'advanced',
     schema: {
       type: 'number',
       minimum: 0,
-      maximum: 100,
     },
+    uiWidget: 'numeric_score',
+    hasRange: true,
   },
   signature: {
     type: 'signature',
@@ -191,7 +192,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
   },
 };
 
-/** Predefined data sources for the select field */
+/** Predefined data sources for the select field. 'leaders' is deprecated — treated as 'employees'. */
 export type DataSource = 'custom' | 'employees' | 'leaders' | 'positions' | 'infractions' | 'disc_actions';
 
 export interface DataSourceOption {
@@ -214,13 +215,7 @@ export const DATA_SOURCE_OPTIONS: DataSourceOption[] = [
     value: 'employees',
     label: 'Employees',
     labelEs: 'Empleados',
-    description: 'All active team members at this location.',
-  },
-  {
-    value: 'leaders',
-    label: 'Leaders',
-    labelEs: 'Lideres',
-    description: 'Filters employees by role hierarchy level.',
+    description: 'Active team members at this location. Use the role filter below to limit which roles appear.',
   },
   {
     value: 'positions',

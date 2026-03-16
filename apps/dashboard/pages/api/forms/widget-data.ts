@@ -6,7 +6,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
  * Uses server-side Supabase client (service role) to bypass RLS.
  *
  * Query params:
- *   type        — 'positions' | 'infractions' | 'disc_actions' | 'leaders'
+ *   type        — 'positions' | 'infractions' | 'disc_actions' | 'leaders' | 'org_roles'
  *   org_id      — required
  *   location_id — required for type=leaders
  *   form_type   — optional for type=leaders ('rating' | 'discipline' | 'evaluation' | 'custom'), defaults to hierarchy fallback
@@ -71,6 +71,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (error) {
           console.error('widget-data disc_actions error:', error);
           return res.status(500).json({ error: 'Failed to fetch discipline actions' });
+        }
+
+        return res.status(200).json({ data: data || [] });
+      }
+
+      case 'org_roles': {
+        const { data, error } = await supabase
+          .from('org_roles')
+          .select('role_name, hierarchy_level')
+          .eq('org_id', org_id)
+          .order('hierarchy_level', { ascending: true });
+
+        if (error) {
+          console.error('widget-data org_roles error:', error);
+          return res.status(500).json({ error: 'Failed to fetch roles' });
         }
 
         return res.status(200).json({ data: data || [] });

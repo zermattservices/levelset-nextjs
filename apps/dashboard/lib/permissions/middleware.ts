@@ -166,7 +166,7 @@ export function withPermissionAndContext(
   handler: (
     req: AuthenticatedRequest,
     res: NextApiResponse,
-    context: { userId: string; orgId: string }
+    context: { userId: string; orgId: string; isAdmin?: boolean }
   ) => Promise<void> | void,
   mode: 'all' | 'any' = 'all'
 ): NextApiHandler {
@@ -213,11 +213,12 @@ export function withPermissionAndContext(
       }
 
       // Levelset Admin bypasses all permission checks
-      if (await isLevelsetAdmin(supabase, userId)) {
+      const admin = await isLevelsetAdmin(supabase, userId);
+      if (admin) {
         const authenticatedReq = req as AuthenticatedRequest;
         authenticatedReq.user = { id: userId };
         authenticatedReq.orgId = orgId as string;
-        return handler(authenticatedReq, res, { userId, orgId: orgId as string });
+        return handler(authenticatedReq, res, { userId, orgId: orgId as string, isAdmin: true });
       }
 
       // Check permission(s)

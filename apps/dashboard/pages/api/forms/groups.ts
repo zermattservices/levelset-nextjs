@@ -7,7 +7,7 @@ import { checkPermission } from '@/lib/permissions/service';
 async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse,
-  context: { userId: string; orgId: string }
+  context: { userId: string; orgId: string; isAdmin?: boolean }
 ) {
   const supabase = createServerSupabaseClient();
   const { orgId, userId } = context;
@@ -33,9 +33,11 @@ async function handler(
   }
 
   if (req.method === 'POST') {
-    const hasCreate = await checkPermission(supabase, userId, orgId, P.FM_CREATE_FORMS);
-    if (!hasCreate) {
-      return res.status(403).json({ error: 'Permission denied' });
+    if (!context.isAdmin) {
+      const hasCreate = await checkPermission(supabase, userId, orgId, P.FM_CREATE_FORMS);
+      if (!hasCreate) {
+        return res.status(403).json({ error: 'Permission denied' });
+      }
     }
 
     const { name, name_es, description, description_es, icon } = req.body;
