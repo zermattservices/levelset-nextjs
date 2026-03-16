@@ -1,6 +1,7 @@
 import type { NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
-import { calculateEvaluationScore } from '@/lib/forms/scoring';
+import { calculateEvaluationScore, calculateEvaluationScoreLegacy } from '@/lib/forms/scoring';
+import { jsonSchemaToFields } from '@/lib/forms/schema-builder';
 import { resolveConnectedQuestions } from '@/lib/forms/connectors-resolver';
 import { checkPermission } from '@/lib/permissions/service';
 import { P } from '@/lib/permissions/constants';
@@ -10,7 +11,7 @@ import { withPermissionAndContext, type AuthenticatedRequest } from '@/lib/permi
 async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse,
-  context: { userId: string; orgId: string }
+  context: { userId: string; orgId: string; isAdmin?: boolean }
 ) {
   const supabase = createServerSupabaseClient();
   const { orgId, userId } = context;
@@ -21,7 +22,7 @@ async function handler(
 
     let query = supabase
       .from('form_submissions')
-      .select('*, form_templates!inner(id, name, name_es, form_type)')
+      .select('*, form_templates!inner(id, name, name_es, form_type, ui_schema, settings)')
       .eq('org_id', orgId)
       .order('created_at', { ascending: false });
 
@@ -82,6 +83,8 @@ async function handler(
             name: s.form_templates.name,
             name_es: s.form_templates.name_es,
             form_type: s.form_templates.form_type,
+            ui_schema: s.form_templates.ui_schema,
+            settings: s.form_templates.settings,
           }
         : null,
       form_templates: undefined,
@@ -139,8 +142,7 @@ async function handler(
       }
 
       // Levelset Admin bypasses permission checks
-      const isAdmin = appUser?.role === 'Levelset Admin';
-      if (!isAdmin) {
+      if (!context.isAdmin) {
         const permissionKey = template.form_type === 'rating'
           ? P.PE_SUBMIT_RATINGS
           : P.DISC_SUBMIT_INFRACTIONS;
@@ -156,49 +158,89 @@ async function handler(
     let score: number | null = null;
     const metadata: Record<string, any> = {};
 
-    if (template.form_type === 'evaluation' && template.settings?.evaluation) {
-      const evalSettings = template.settings.evaluation;
+    if (template.form_type === 'evaluation') {
       let scoringData = { ...response_data };
 
-      // Resolve connected questions if the evaluation has any
-      const connectedQuestions = Object.entries(evalSettings.questions || {})
-        .filter(([_, q]: [string, any]) => q.connected_to)
-        .map(([fieldId, q]: [string, any]) => ({
-          key: q.connected_to as string,
-          params: q.connector_params,
-          fieldId,
-        }));
+      // Check for new format: scoring data embedded in schema fields
+      const fields = jsonSchemaToFields(template.schema, template.ui_schema);
+      const hasScoredFields = fields.some((f) => f.settings.scored);
 
-      if (connectedQuestions.length > 0 && employee_id) {
-        const connectorInputs = connectedQuestions.map((cq) => ({
-          key: cq.key,
-          params: cq.params,
-        }));
+      if (hasScoredFields) {
+        // New format: scoring from fields
+        const connectedFields = fields.filter((f) => f.settings.connectedTo);
+        if (connectedFields.length > 0 && employee_id) {
+          const connectorInputs = connectedFields.map((f) => ({
+            key: f.settings.connectedTo!,
+            params: f.settings.connectorParams || {},
+          }));
 
-        const resolved = await resolveConnectedQuestions(
-          supabase,
-          employee_id,
-          orgId,
-          location_id || null,
-          connectorInputs
-        );
+          const resolved = await resolveConnectedQuestions(
+            supabase,
+            employee_id,
+            orgId,
+            location_id || null,
+            connectorInputs
+          );
 
-        for (const cq of connectedQuestions) {
-          if (resolved[cq.key] !== undefined) {
-            scoringData[cq.fieldId] = resolved[cq.key];
+          for (const f of connectedFields) {
+            if (resolved[f.settings.connectedTo!] !== undefined) {
+              scoringData[f.id] = resolved[f.settings.connectedTo!];
+            }
           }
         }
-      }
 
-      const result = calculateEvaluationScore(scoringData, evalSettings);
-      score = result.overallPercentage;
-      metadata.section_scores = result.sections.map((s) => ({
-        sectionId: s.sectionId,
-        sectionName: s.sectionName,
-        earned: s.earnedPoints,
-        max: s.maxPoints,
-        percentage: s.percentage,
-      }));
+        const result = calculateEvaluationScore(fields, scoringData);
+        score = result.overallPercentage;
+        metadata.section_scores = result.sections.map((s) => ({
+          sectionId: s.sectionId,
+          sectionName: s.sectionName,
+          earned: s.earnedPoints,
+          max: s.maxPoints,
+          percentage: s.percentage,
+        }));
+      } else if (template.settings?.evaluation) {
+        // Legacy format: scoring from template.settings.evaluation
+        const evalSettings = template.settings.evaluation;
+
+        const connectedQuestions = Object.entries(evalSettings.questions || {})
+          .filter(([_, q]: [string, any]) => q.connected_to)
+          .map(([fieldId, q]: [string, any]) => ({
+            key: q.connected_to as string,
+            params: q.connector_params,
+            fieldId,
+          }));
+
+        if (connectedQuestions.length > 0 && employee_id) {
+          const connectorInputs = connectedQuestions.map((cq) => ({
+            key: cq.key,
+            params: cq.params,
+          }));
+
+          const resolved = await resolveConnectedQuestions(
+            supabase,
+            employee_id,
+            orgId,
+            location_id || null,
+            connectorInputs
+          );
+
+          for (const cq of connectedQuestions) {
+            if (resolved[cq.key] !== undefined) {
+              scoringData[cq.fieldId] = resolved[cq.key];
+            }
+          }
+        }
+
+        const result = calculateEvaluationScoreLegacy(scoringData, evalSettings);
+        score = result.overallPercentage;
+        metadata.section_scores = result.sections.map((s) => ({
+          sectionId: s.sectionId,
+          sectionName: s.sectionName,
+          earned: s.earnedPoints,
+          max: s.maxPoints,
+          percentage: s.percentage,
+        }));
+      }
     }
 
     // Create the submission with schema snapshot

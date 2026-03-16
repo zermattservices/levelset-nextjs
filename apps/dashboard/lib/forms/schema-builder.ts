@@ -21,6 +21,8 @@ export interface FormField {
   settings: FieldSettings;
   /** Section grouping (ID of a section field) */
   sectionId?: string;
+  /** For section fields: ordered list of child field IDs */
+  children?: string[];
 }
 
 export interface FieldOption {
@@ -35,19 +37,22 @@ export interface FieldSettings {
   max?: number;
   /** For textarea */
   rows?: number;
-  /** For evaluation scoring */
+  /** Whether this field is scored (only for scorable types) */
+  scored?: boolean;
+  /** Points this question is worth when scored */
   weight?: number;
-  scoringType?: 'rating_1_3' | 'rating_1_5' | 'true_false' | 'percentage';
+  /** For numeric_score: maximum input value (denominator) */
+  maxValue?: number;
   /** Connected question config */
   connectedTo?: string;
   connectorParams?: Record<string, any>;
-  /** For section headers */
+  /** For sections */
   sectionName?: string;
   sectionNameEs?: string;
   /** For select fields: data source (default: 'custom') */
   dataSource?: DataSource;
-  /** For leader data source: max hierarchy level to include (default 2) */
-  maxHierarchyLevel?: number;
+  /** For employees data source: filter by specific roles */
+  roleFilter?: string[];
   /** For text_block: rich text content */
   content?: string;
   contentEs?: string;
@@ -110,6 +115,18 @@ export function createFieldFromType(fieldType: string): FormField {
     field.settings.contentEs = '<p>Ingrese texto aqui...</p>';
   }
 
+  // Set default maxValue for numeric_score
+  if (fieldType === 'numeric_score') {
+    field.settings.maxValue = 10;
+  }
+
+  // Set default section settings
+  if (fieldType === 'section') {
+    field.settings.sectionName = 'New Section';
+    field.settings.sectionNameEs = 'Nueva Seccion';
+    field.children = [];
+  }
+
   return field;
 }
 
@@ -126,11 +143,23 @@ export function fieldsToJsonSchema(fields: FormField[]): {
     'ui:order': [] as string[],
   };
 
+  // Build a set of field IDs that are children of sections, so we skip them
+  // when iterating the flat array (they get added after their parent section).
+  const sectionChildIds = new Set<string>();
   for (const field of fields) {
-    const fieldDef = FIELD_TYPES[field.type];
-    if (!fieldDef) continue;
+    if (field.type === 'section' && field.children) {
+      for (const childId of field.children) {
+        sectionChildIds.add(childId);
+      }
+    }
+  }
 
-    // Section headers are purely UI — store as a null-typed property
+  // Helper to build property + uiSchema for a single field
+  const processField = (field: FormField) => {
+    const fieldDef = FIELD_TYPES[field.type];
+    if (!fieldDef) return;
+
+    // Section containers — store as null-typed property with children metadata
     if (field.type === 'section') {
       properties[field.id] = {
         type: 'null',
@@ -143,9 +172,21 @@ export function fieldsToJsonSchema(fields: FormField[]): {
           sectionName: field.settings.sectionName || field.label,
           sectionNameEs: field.settings.sectionNameEs || field.labelEs,
         },
+        'ui:fieldMeta': {
+          fieldType: 'section',
+          labelEs: field.labelEs,
+          children: field.children || [],
+        },
       };
+      // Push section ID, then its children in order
       uiSchema['ui:order'].push(field.id);
-      continue;
+      if (field.children) {
+        for (const childId of field.children) {
+          const childField = fields.find((f) => f.id === childId);
+          if (childField) processField(childField);
+        }
+      }
+      return;
     }
 
     // Text blocks are purely UI — store as a null-typed property with content
@@ -167,7 +208,7 @@ export function fieldsToJsonSchema(fields: FormField[]): {
         },
       };
       uiSchema['ui:order'].push(field.id);
-      continue;
+      return;
     }
 
     // Build property schema from field definition and overrides
@@ -210,6 +251,11 @@ export function fieldsToJsonSchema(fields: FormField[]): {
       propSchema.maximum = field.settings.max;
     }
 
+    // For numeric_score, set max from maxValue setting
+    if (field.type === 'numeric_score' && field.settings.maxValue !== undefined) {
+      propSchema.maximum = field.settings.maxValue;
+    }
+
     properties[field.id] = propSchema;
 
     // Build UI schema
@@ -246,11 +292,12 @@ export function fieldsToJsonSchema(fields: FormField[]): {
       ...(field.settings.dataSource && field.settings.dataSource !== 'custom'
         ? { dataSource: field.settings.dataSource }
         : {}),
+      ...(field.settings.scored ? { scored: true } : {}),
       ...(field.settings.weight !== undefined ? { weight: field.settings.weight } : {}),
-      ...(field.settings.scoringType ? { scoringType: field.settings.scoringType } : {}),
+      ...(field.settings.maxValue !== undefined ? { maxValue: field.settings.maxValue } : {}),
       ...(field.settings.connectedTo ? { connectedTo: field.settings.connectedTo } : {}),
       ...(field.settings.connectorParams ? { connectorParams: field.settings.connectorParams } : {}),
-      ...(field.settings.maxHierarchyLevel !== undefined ? { maxHierarchyLevel: field.settings.maxHierarchyLevel } : {}),
+      ...(field.settings.roleFilter && field.settings.roleFilter.length > 0 ? { roleFilter: field.settings.roleFilter } : {}),
     };
 
     if (Object.keys(fieldUiSchema).length > 0) {
@@ -264,6 +311,12 @@ export function fieldsToJsonSchema(fields: FormField[]): {
 
     // Track field order
     uiSchema['ui:order'].push(field.id);
+  };
+
+  for (const field of fields) {
+    // Skip children of sections — they are processed when their parent section is processed
+    if (sectionChildIds.has(field.id)) continue;
+    processField(field);
   }
 
   const schema: Record<string, any> = {
@@ -325,10 +378,11 @@ export function jsonSchemaToFields(
       field.settings.contentEs = fieldUiSchema['ui:options']?.contentEs || '';
     }
 
-    // Restore section settings
+    // Restore section settings + children
     if (fieldType === 'section') {
       field.settings.sectionName = fieldUiSchema['ui:options']?.sectionName || field.label;
       field.settings.sectionNameEs = fieldUiSchema['ui:options']?.sectionNameEs || field.labelEs;
+      field.children = meta.children || [];
     }
 
     // Restore data source for select fields
@@ -366,17 +420,120 @@ export function jsonSchemaToFields(
       field.settings.rows = fieldUiSchema['ui:options']?.rows || 3;
     }
 
-    // Restore evaluation settings from metadata
+    // Restore scoring settings
+    if (meta.scored) field.settings.scored = true;
     if (meta.weight !== undefined) field.settings.weight = meta.weight;
-    if (meta.scoringType) field.settings.scoringType = meta.scoringType;
+    if (meta.maxValue !== undefined) field.settings.maxValue = meta.maxValue;
     if (meta.connectedTo) field.settings.connectedTo = meta.connectedTo;
     if (meta.connectorParams) field.settings.connectorParams = meta.connectorParams;
-    if (meta.maxHierarchyLevel !== undefined) field.settings.maxHierarchyLevel = meta.maxHierarchyLevel;
+    if (meta.roleFilter) field.settings.roleFilter = meta.roleFilter;
+
+    // Backward compat: old format stored scoringType separately
+    if (meta.scoringType && !field.settings.scored) {
+      field.settings.scored = true;
+      if (meta.weight !== undefined) field.settings.weight = meta.weight;
+    }
 
     fields.push(field);
   }
 
   return fields;
+}
+
+/**
+ * Migrate legacy evaluation form data into the fields array.
+ *
+ * Old format: sections and question scoring metadata stored separately
+ * in template.settings.evaluation.sections and template.settings.evaluation.questions.
+ *
+ * New format: sections are fields with children[], scoring is in field.settings.
+ *
+ * Call this after jsonSchemaToFields() when template.settings.evaluation exists
+ * and the fields array has no section-type fields with children.
+ */
+export function migrateEvaluationToFields(
+  fields: FormField[],
+  evaluationSettings: {
+    sections?: Array<{ id: string; name: string; nameEs?: string; order: number }>;
+    questions?: Record<string, {
+      section_id: string;
+      weight: number;
+      scoring_type: string;
+      connected_to?: string;
+      connector_params?: Record<string, any>;
+    }>;
+  }
+): FormField[] {
+  const sections = evaluationSettings.sections || [];
+  const questions = evaluationSettings.questions || {};
+
+  // If fields already have sections with children, skip migration
+  if (fields.some((f) => f.type === 'section' && f.children && f.children.length > 0)) return fields;
+  // If no legacy sections/questions, nothing to migrate
+  if (sections.length === 0 && Object.keys(questions).length === 0) return fields;
+
+  const migratedFields = fields.map((f) => ({ ...f, settings: { ...f.settings } }));
+
+  // Apply scoring metadata from evaluationQuestions to each field
+  for (const [fieldId, qConfig] of Object.entries(questions)) {
+    const field = migratedFields.find((f) => f.id === fieldId);
+    if (!field) continue;
+
+    field.settings.scored = true;
+    field.settings.weight = qConfig.weight;
+    if (qConfig.connected_to) {
+      field.settings.connectedTo = qConfig.connected_to;
+      field.settings.connectorParams = qConfig.connector_params;
+    }
+  }
+
+  // Create section container fields from evaluation sections
+  const sortedSections = [...sections].sort((a, b) => a.order - b.order);
+  const result: FormField[] = [];
+
+  // Collect fields assigned to sections
+  const assignedFieldIds = new Set(
+    Object.entries(questions)
+      .filter(([, q]) => q.section_id)
+      .map(([fieldId]) => fieldId)
+  );
+
+  // Add unassigned fields first (top-level)
+  for (const f of migratedFields) {
+    if (!assignedFieldIds.has(f.id)) {
+      result.push(f);
+    }
+  }
+
+  // Add each section with its children
+  for (const section of sortedSections) {
+    const childIds = Object.entries(questions)
+      .filter(([, q]) => q.section_id === section.id)
+      .map(([fieldId]) => fieldId);
+
+    const sectionField: FormField = {
+      id: `section_${section.id}`,
+      type: 'section',
+      label: section.name,
+      labelEs: section.nameEs || '',
+      required: false,
+      settings: {
+        sectionName: section.name,
+        sectionNameEs: section.nameEs || '',
+      },
+      children: childIds,
+    };
+
+    result.push(sectionField);
+
+    // Add the child fields after the section
+    for (const childId of childIds) {
+      const child = migratedFields.find((f) => f.id === childId);
+      if (child) result.push(child);
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -395,6 +552,7 @@ function inferFieldType(
   if (widget === 'file') return 'file_upload';
   if (widget === 'data_select') return 'select';
   if (widget === 'textarea') return 'textarea';
+  if (widget === 'numeric_score') return 'numeric_score';
   if (widget === 'ratingScale') {
     if (propSchema.maximum === 3) return 'rating_1_3';
     return 'rating_1_5';
@@ -408,7 +566,8 @@ function inferFieldType(
   }
 
   if (propSchema.type === 'number') {
-    if (propSchema.minimum === 0 && propSchema.maximum === 100) return 'percentage';
+    // Backward compat for old percentage type
+    if (propSchema.minimum === 0 && propSchema.maximum === 100) return 'numeric_score';
     return 'number';
   }
 

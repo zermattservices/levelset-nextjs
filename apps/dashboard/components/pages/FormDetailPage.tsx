@@ -1,13 +1,12 @@
 import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { Tab, Tabs, Button, IconButton, Chip, Snackbar, Alert } from '@mui/material';
+import { Tab, Tabs, Button, Chip, Snackbar, Alert } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined';
 import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
-import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import sty from './FormDetailPage.module.css';
 import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
@@ -21,7 +20,6 @@ import { FormEditorPanel } from '@/components/forms/editor/FormEditorPanel';
 import { FormPreviewPanel } from '@/components/forms/FormPreviewPanel';
 import { FormSubmissionsTable } from '@/components/forms/FormSubmissionsTable';
 import type { FormTemplate, FormGroup, FormType, FormSubmission } from '@/lib/forms/types';
-import { EvaluationSettingsModal } from '@/components/forms/evaluation/EvaluationSettingsModal';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -56,7 +54,6 @@ export function FormDetailPage() {
   const [saving, setSaving] = React.useState(false);
   const [submissions, setSubmissions] = React.useState<FormSubmission[]>([]);
   const [submissionsLoading, setSubmissionsLoading] = React.useState(false);
-  const [settingsModalOpen, setSettingsModalOpen] = React.useState(false);
   const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -69,13 +66,6 @@ export function FormDetailPage() {
       router.push(`/auth/login?redirect=${encodeURIComponent(router.asPath)}`);
     }
   }, [auth.isLoaded, auth.authUser, router]);
-
-  // Redirect users without form view permission
-  React.useEffect(() => {
-    if (auth.isLoaded && auth.authUser && !permissionsLoading && !has(P.FM_VIEW_FORMS)) {
-      router.push('/form-management');
-    }
-  }, [auth.isLoaded, auth.authUser, permissionsLoading, has, router]);
 
   const getAccessToken = React.useCallback(async (): Promise<string | null> => {
     try {
@@ -104,7 +94,8 @@ export function FormDetailPage() {
   const hasAppUser = !!auth.appUser;
 
   React.useEffect(() => {
-    if (!formId || !auth.isLoaded || !hasAuthUser || !hasAppUser) return;
+    if (!formId || !auth.isLoaded || !hasAuthUser || !hasAppUser || permissionsLoading || !selectedLocationOrgId) return;
+    if (!has(P.FM_VIEW_FORMS)) return;
     if (dataFetchedRef.current) return;
     dataFetchedRef.current = true;
 
@@ -115,7 +106,7 @@ export function FormDetailPage() {
         const headers: Record<string, string> = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const orgParam = selectedLocationOrgId ? `org_id=${selectedLocationOrgId}` : '';
+        const orgParam = `org_id=${selectedLocationOrgId}`;
         const [templateRes, groupsRes] = await Promise.all([
           fetch(`/api/forms/${formId}?${orgParam}`, { headers }),
           fetch(`/api/forms/groups?${orgParam}`, { headers }),
@@ -141,7 +132,7 @@ export function FormDetailPage() {
     };
 
     fetchData();
-  }, [formId, auth.isLoaded, hasAuthUser, hasAppUser, getAccessToken, router]);
+  }, [formId, auth.isLoaded, hasAuthUser, hasAppUser, permissionsLoading, selectedLocationOrgId, has, getAccessToken, router]);
 
   // Fetch submissions for this template (use template.id UUID, not the slug from URL)
   const fetchSubmissions = React.useCallback(async () => {
@@ -221,7 +212,12 @@ export function FormDetailPage() {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ schema, ui_schema: uiSchema }),
+          body: JSON.stringify({
+            schema,
+            ui_schema: uiSchema,
+            // Clear legacy evaluation settings after migration to field-based scoring
+            ...(template.settings?.evaluation ? { settings: { ...template.settings, evaluation: undefined } } : {}),
+          }),
         });
 
         if (!res.ok) {
@@ -233,41 +229,6 @@ export function FormDetailPage() {
         setTemplate((prev) => (prev ? { ...prev, ...updated } : prev));
       } catch (err: any) {
         setSnackbar({ open: true, message: err.message || 'Failed to save schema', severity: 'error' });
-        throw err;
-      }
-    },
-    [template, getAccessToken]
-  );
-
-  const handleSaveEvaluationSettings = React.useCallback(
-    async (evaluationSettings: Record<string, any>) => {
-      if (!template) return;
-
-      try {
-        const token = await getAccessToken();
-        const mergedSettings = {
-          ...(template.settings || {}),
-          evaluation: evaluationSettings,
-        };
-        const orgParam = selectedLocationOrgId ? `?org_id=${selectedLocationOrgId}` : '';
-        const res = await fetch(`/api/forms/${template.id}${orgParam}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ settings: mergedSettings }),
-        });
-
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || 'Failed to save evaluation settings');
-        }
-
-        const updated = await res.json();
-        setTemplate((prev) => (prev ? { ...prev, ...updated } : prev));
-      } catch (err: any) {
-        setSnackbar({ open: true, message: err.message || 'Failed to save evaluation settings', severity: 'error' });
         throw err;
       }
     },
@@ -299,7 +260,7 @@ export function FormDetailPage() {
     }
   };
 
-  // Loading states
+  // Show loading screen while auth or data is loading
   if (!auth.isLoaded || !auth.authUser) {
     return <AuthLoadingScreen />;
   }
@@ -423,26 +384,6 @@ export function FormDetailPage() {
                   />
                 </div>
               </div>
-              {template.form_type === 'evaluation' && !isSystem && (
-                <IconButton
-                  onClick={() => setSettingsModalOpen(true)}
-                  aria-label="Evaluation settings"
-                  sx={{
-                    border: '1px solid var(--ls-color-muted-border)',
-                    borderRadius: '8px',
-                    padding: '8px',
-                    color: 'var(--ls-color-muted)',
-                    transition: 'all 200ms ease-out',
-                    '&:hover': {
-                      color: 'var(--ls-color-brand)',
-                      borderColor: 'var(--ls-color-brand)',
-                      backgroundColor: 'var(--ls-color-brand-soft)',
-                    },
-                  }}
-                >
-                  <TuneOutlinedIcon sx={{ fontSize: 20 }} />
-                </IconButton>
-              )}
             </div>
 
             {/* Tabs */}
@@ -510,7 +451,6 @@ export function FormDetailPage() {
                 <FormEditorPanel
                   template={template}
                   onSave={handleSaveSchema}
-                  onSaveSettings={template.form_type === 'evaluation' ? handleSaveEvaluationSettings : undefined}
                   readOnly={isSystem}
                 />
               )}
@@ -534,17 +474,6 @@ export function FormDetailPage() {
           </div>
         </div>
       </div>
-
-      {template.form_type === 'evaluation' && !isSystem && (
-        <EvaluationSettingsModal
-          open={settingsModalOpen}
-          onClose={() => setSettingsModalOpen(false)}
-          evaluationSettings={template.settings?.evaluation || {}}
-          onSave={async (evalSettings) => {
-            await handleSaveEvaluationSettings(evalSettings);
-          }}
-        />
-      )}
 
       <Snackbar
         open={snackbar.open}

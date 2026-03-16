@@ -22,13 +22,12 @@ export interface ParsedFormField {
     max?: number;
     rows?: number;
     weight?: number;
-    scoringType?: 'rating_1_3' | 'rating_1_5' | 'true_false' | 'percentage';
+    scored?: boolean;
+    maxValue?: number;
     sectionName?: string;
     sectionNameEs?: string;
     /** For select fields with predefined data sources */
     dataSource?: DataSource;
-    /** For leader data source: max hierarchy level to include */
-    maxHierarchyLevel?: number;
     /** For text_block: rich text HTML content */
     content?: string;
     contentEs?: string;
@@ -42,12 +41,6 @@ export interface ParsedFormResult {
   suggestedNameEs?: string;
   suggestedDescription?: string;
   suggestedDescriptionEs?: string;
-  evaluationSections?: {
-    id: string;
-    name: string;
-    nameEs?: string;
-    order: number;
-  }[];
 }
 
 /**
@@ -73,7 +66,7 @@ const FIELD_TYPE_DESCRIPTIONS = `
 ### Advanced Fields
 - **rating_1_3**: Star rating scale from 1 to 3. Use for simple quality ratings (poor/average/good).
 - **rating_1_5**: Star rating scale from 1 to 5. Use for detailed quality ratings.
-- **percentage**: Numeric input constrained to 0-100. Use for completion rates, scores as percentages.
+- **numeric_score**: Numeric input with a configurable maximum. Use for scores where the answer is a number out of a max value (e.g., 3.5 / 5). Set settings.maxValue to define the denominator.
 - **signature**: Signature capture pad. Use for signature lines, sign-off fields.
 - **file_upload**: File upload widget. Use for document or photo attachments.
 
@@ -85,8 +78,7 @@ const FIELD_TYPE_DESCRIPTIONS = `
 
 When a field clearly asks for organizational data, use type "select" with settings.dataSource set to one of these values:
 
-- **employees**: Use when the field asks for an employee name, team member, or "who" in the context of selecting a person from the organization. Common patterns: a field labeled "Name", "Employee Name", "Team Member", "Trainer" on an evaluation or review form — these are almost always employee selects, NOT text inputs.
-- **leaders**: Use when the field asks for a supervisor, manager, leader, evaluator, reviewer, or "who is conducting" this form. Optionally set settings.maxHierarchyLevel (default 2) to control which roles are included.
+- **employees**: Use when the field asks for an employee name, team member, supervisor, manager, leader, evaluator, reviewer, trainer, or "who" in the context of selecting a person from the organization. Common patterns: a field labeled "Name", "Employee Name", "Team Member", "Trainer", "Evaluator" on an evaluation or review form — these are almost always employee selects, NOT text inputs. The role filter can be configured in the editor after import.
 - **positions**: Use when the field asks for a job position, role, or station.
 - **infractions**: Use ONLY when the field asks for a type of infraction or violation from a discipline rubric.
 - **disc_actions**: Use ONLY when the field asks for a disciplinary action type.
@@ -111,12 +103,13 @@ export function buildSystemPrompt(options: {
 1. **Accuracy is paramount.** Every field in the source form MUST be represented. Do not skip fields. Do not invent fields that don't exist.
 2. **Field type selection matters.** Choose the most appropriate field type from the list below. When in doubt between text and textarea, prefer text for short labels and textarea for anything expecting paragraphs.
 3. **Bilingual output required.** For every label, provide both English (label) and Spanish (labelEs) translations. If the source is in Spanish, still provide the English translation. If the source is in English, provide accurate Spanish translations.
-4. **Preserve form structure.** If the form has sections, groups, or categories, create section fields and assign sectionId to child fields.
+4. **Preserve form structure and ordering.** If the form has sections, groups, or categories, create section fields and assign sectionId to child fields. CRITICAL: Output fields in the exact order they appear in the source document — section header first, then all fields belonging to that section, then the next section header, and so on. Do NOT output all sections first followed by fields.
 5. **Detect required fields.** If a field is marked as required (asterisk, "required" label, bold emphasis), set required: true.
 6. **Preserve options exactly.** For select/radio/checkbox fields with custom options, extract all options with their exact labels. Generate snake_case values from the labels.
-7. **Section headers are fields too.** When you see a heading that groups other fields (like "Employee Information" or "Performance Ratings"), create a section field for it. Set the sectionName in settings to the heading text.
+7. **Section headers are fields too.** When you see a heading that groups other fields (like "Employee Information" or "Performance Ratings"), create a section field for it. Set the sectionName in settings to the heading text. Section header fields MUST appear immediately before the fields they contain.
 8. **Use data sources for organizational fields.** If a field clearly asks for an employee, leader/supervisor, position, infraction type, or discipline action, use type "select" with settings.dataSource instead of a generic text or select field. Do NOT include an options array when using a data source.
 9. **Use text_block for static content.** If you see instructions, disclaimers, or explanatory text blocks on the form (not field labels/descriptions), create a text_block field with settings.content containing the HTML-formatted content.
+10. **ALWAYS extract help text / descriptions.** If a field has descriptive text, instructions, or explanatory text below or next to its label, this MUST be captured in the description field (English) and descriptionEs field (Spanish). This is critical — do not skip help text. Common patterns: italic text under a question label, smaller text explaining what the field is about, bullet points describing criteria. For example, if a field says "Hospitality" with text below saying "Serving with warmth, care, and others first mindset", the description should be "Serving with warmth, care, and others first mindset".
 
 ${FIELD_TYPE_DESCRIPTIONS}`;
 
@@ -129,58 +122,35 @@ This form is being imported as an **evaluation** form type. You MUST carefully a
 
 ### How Evaluation Scoring Works in Our System
 
-Our evaluation system has **scoring sections** (separate from visual section headers). Each scored question is assigned to a scoring section and has a **weight** (points). The total weight across all sections should represent the full score of the evaluation.
+Our evaluation system uses **sections** as containers with **per-field scoring**. Each scored question has \`settings.scored: true\` and a \`settings.weight\` (points). Scoring type is auto-derived from the field type — you do NOT set a separate scoringType. Sections aggregate points from their scored children.
 
 ### Step-by-Step Scoring Analysis
 
-1. **Identify scoring sections**: Look for labeled parts/sections that group scored questions (e.g., "Part 1 - Team Culture", "Part 2 - Characteristics"). These become \`evaluationSections\` entries with an \`id\` like \`sec_team_culture\`, \`sec_characteristics\`, etc.
+1. **Identify sections**: Look for labeled parts/sections that group questions (e.g., "Part 1 - Team Culture"). Create a \`section\` type field for each. Fields within that section should appear after the section in the array.
 
-2. **Identify the rating scale**: Look for column headers like "(1) = Below Standard, (2) = Meet Standard, (3) = Exceeding Standard". This tells you the scoring type:
-   - 3-point scale (1-3 checkboxes) → use field type \`rating_1_3\` with \`settings.scoringType: 'rating_1_3'\`
-   - 5-point scale → use field type \`rating_1_5\` with \`settings.scoringType: 'rating_1_5'\`
+2. **Identify the rating scale**: Look for column headers like "(1) = Below Standard, (2) = Meet Standard, (3) = Exceeding Standard":
+   - 3-point scale → use field type \`rating_1_3\`
+   - 5-point scale → use field type \`rating_1_5\`
 
 3. **Each rated row is a scored field**: Every row with checkboxes/rating marks is a scored question. Set:
    - \`type\`: the rating type (e.g., \`rating_1_3\`)
-   - \`settings.scoringType\`: matching type
-   - \`settings.weight\`: the max score for that single question (e.g., 3 for a 1-3 scale, 5 for a 1-5 scale)
-   - \`sectionId\`: the field ID of the section header this question belongs under
+   - \`settings.scored\`: \`true\`
+   - \`settings.weight\`: the points this question is worth
 
-4. **Calculate weights from totals**: If the form says "SCORE: __ OUT OF 9 POINTS" for 3 questions, each question's weight = 3 (since 3 questions × 3 points each = 9). If it says "OUT OF 15 POINTS" for 5 questions on a 1-3 scale, each weight = 3.
+4. **Calculate weights from totals**: If the form says "SCORE: __ OUT OF 9 POINTS" for 3 questions, each question's weight = 3 (since 3 questions × 3 points each = 9).
 
-5. **Handle weighted sections**: If a section says "*20% weighted" or similar, note this. The weight per question is still the max rating value (e.g., 3 for a 1-3 scale) — the percentage weighting is informational.
+5. **Yes/No verification questions**: Questions with YES/NO checkboxes that are NOT rated/scored should be \`true_false\` type WITHOUT \`settings.scored\`. These are verification items, not scored items.
 
-6. **Yes/No verification questions**: Questions with YES/NO checkboxes that are NOT rated/scored should be \`true_false\` type WITHOUT \`settings.scoringType\` or \`settings.weight\`. These are verification items, not scored items.
+6. **Score summary fields (SKIP THESE)**: Lines like "TOTAL SCORE: ___" are computed summaries — do NOT create fields for these.
 
-7. **Score summary fields (SKIP THESE)**: Lines like "TOTAL SCORE: ___" or "Part 1 Score ___ + Part 2 Score ___" are computed summaries — do NOT create fields for these. They are calculated automatically by our system.
-
-8. **Free text areas**: Fields like "3 Areas to Focus On" are \`textarea\` fields, not scored.
-
-### Evaluation Sections Output
-
-Return \`evaluationSections\` array with entries for each scoring section:
-\`\`\`json
-{
-  "id": "sec_team_culture",
-  "name": "Team Culture",
-  "nameEs": "Cultura del Equipo",
-  "order": 0
-}
-\`\`\`
-
-### Connecting Fields to Evaluation Sections
-
-For each scored field, set \`sectionId\` to the field ID of the corresponding section header in the fields array. The API route will map these to evaluation sections by matching section header field IDs.
-
-IMPORTANT: Also include the section \`id\` from evaluationSections in the field's \`settings\` as \`settings.evaluationSectionId\` so we can directly map scored fields to their evaluation section.
+7. **Free text areas**: Fields like "3 Areas to Focus On" are \`textarea\` fields, not scored.
 
 ### Example: A form with "Part 1 - Team Culture" containing 3 questions rated 1-3
 
-evaluationSections: [{ id: "sec_team_culture", name: "Team Culture", order: 0 }]
-
-Fields:
+Fields (in order):
 - { type: "section", label: "Part 1 - Team Culture", settings: { sectionName: "Part 1 - Team Culture" } }
-- { type: "rating_1_3", label: "Hospitality", settings: { scoringType: "rating_1_3", weight: 3, evaluationSectionId: "sec_team_culture" }, sectionId: "section_part_1_team_culture", required: true }
-- { type: "rating_1_3", label: "Hustle", settings: { scoringType: "rating_1_3", weight: 3, evaluationSectionId: "sec_team_culture" }, sectionId: "section_part_1_team_culture", required: true }`;
+- { type: "rating_1_3", label: "Hospitality", settings: { scored: true, weight: 3 }, required: true }
+- { type: "rating_1_3", label: "Hustle", settings: { scored: true, weight: 3 }, required: true }`;
   }
 
   prompt += `
@@ -204,7 +174,7 @@ Also return:
 - suggestedDescription: Brief English description of the form's purpose
 - suggestedDescriptionEs: Spanish translation
 
-${includeScoring && formType === 'evaluation' ? '- evaluationSections: Array of scoring sections if scoring structure was detected' : ''}`;
+${includeScoring && formType === 'evaluation' ? '- Scored fields should have settings.scored=true and settings.weight set. Sections contain their scored fields as children.' : ''}`;
 
   return prompt;
 }
@@ -248,7 +218,7 @@ export const FORM_PARSER_TOOL = {
               enum: [
                 'text', 'textarea', 'number', 'date',
                 'select', 'radio', 'checkbox', 'true_false',
-                'rating_1_3', 'rating_1_5', 'percentage',
+                'rating_1_3', 'rating_1_5', 'numeric_score',
                 'signature', 'file_upload', 'section', 'text_block',
               ],
               description: 'The field type',
@@ -293,26 +263,18 @@ export const FORM_PARSER_TOOL = {
                 min: { type: 'number', description: 'Minimum value (number fields)' },
                 max: { type: 'number', description: 'Maximum value (number fields)' },
                 rows: { type: 'number', description: 'Number of rows (textarea)' },
-                weight: { type: 'number', description: 'Scoring weight (evaluation fields)' },
-                scoringType: {
-                  type: 'string',
-                  enum: ['rating_1_3', 'rating_1_5', 'true_false', 'percentage'],
-                  description: 'Scoring type for evaluation fields',
-                },
+                weight: { type: 'number', description: 'Scoring weight in points (evaluation fields)' },
+                scored: { type: 'boolean', description: 'Whether this field contributes to the evaluation score' },
+                maxValue: { type: 'number', description: 'Maximum input value for numeric_score fields (the denominator)' },
                 sectionName: { type: 'string', description: 'Section heading (section fields)' },
                 sectionNameEs: { type: 'string', description: 'Spanish section heading' },
                 dataSource: {
                   type: 'string',
-                  enum: ['employees', 'leaders', 'positions', 'infractions', 'disc_actions'],
+                  enum: ['employees', 'positions', 'infractions', 'disc_actions'],
                   description: 'Data source for select fields that reference organizational data. Only set for select fields. Do not set for custom-option selects.',
-                },
-                maxHierarchyLevel: {
-                  type: 'number',
-                  description: 'Max role hierarchy level for leaders data source (default 2). Only used when dataSource is "leaders".',
                 },
                 content: { type: 'string', description: 'HTML content for text_block fields (English)' },
                 contentEs: { type: 'string', description: 'HTML content for text_block fields (Spanish)' },
-                evaluationSectionId: { type: 'string', description: 'The evaluation section ID (e.g., sec_team_culture) this scored field belongs to. Must match an id in evaluationSections.' },
               },
             },
             sectionId: {
@@ -321,20 +283,6 @@ export const FORM_PARSER_TOOL = {
             },
           },
           required: ['type', 'label', 'labelEs', 'required'],
-        },
-      },
-      evaluationSections: {
-        type: 'array',
-        description: 'Scoring sections for evaluation forms (only if scoring structure detected)',
-        items: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', description: 'Section ID in format sec_snake_case' },
-            name: { type: 'string', description: 'English section name' },
-            nameEs: { type: 'string', description: 'Spanish section name' },
-            order: { type: 'number', description: 'Display order (0-indexed)' },
-          },
-          required: ['id', 'name', 'order'],
         },
       },
     },

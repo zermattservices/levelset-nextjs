@@ -17,7 +17,8 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { FormRenderer } from './FormRenderer';
 import { EvaluationScoreDisplay } from './evaluation/EvaluationScoreDisplay';
-import { calculateEvaluationScore } from '@/lib/forms/scoring';
+import { calculateEvaluationScore, calculateEvaluationScoreLegacy } from '@/lib/forms/scoring';
+import { jsonSchemaToFields } from '@/lib/forms/schema-builder';
 import type { FormSubmission, FormType, SubmissionStatus } from '@/lib/forms/types';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -204,10 +205,28 @@ export function SubmissionDetailDialog({
 
         {/* Evaluation score display */}
         {submission.form_type === 'evaluation' && submission.metadata?.section_scores && (() => {
+          // Try new format: scoring from schema fields
+          const schemaSnapshot = submission.schema_snapshot;
+          const uiSchemaSnapshot = submission.template?.ui_schema;
+          if (schemaSnapshot && uiSchemaSnapshot) {
+            const fields = jsonSchemaToFields(schemaSnapshot, uiSchemaSnapshot);
+            const hasScoredFields = fields.some((f: any) => f.settings.scored);
+            if (hasScoredFields) {
+              const score = calculateEvaluationScore(fields, submission.response_data);
+              return (
+                <>
+                  <EvaluationScoreDisplay score={score} />
+                  <Divider sx={{ marginY: 3 }} />
+                </>
+              );
+            }
+          }
+
+          // Legacy format: scoring from template.settings.evaluation
           const evalSettings = submission.template?.settings?.evaluation ||
             submission.schema_snapshot?.['x-evaluation'] || {};
           if (evalSettings.sections && evalSettings.questions) {
-            const score = calculateEvaluationScore(submission.response_data, evalSettings);
+            const score = calculateEvaluationScoreLegacy(submission.response_data, evalSettings);
             return (
               <>
                 <EvaluationScoreDisplay score={score} />

@@ -56,12 +56,12 @@ async function importHandler(
     name,
     description,
     group_id,
-    form_type,
   } = req.body;
+  let { form_type } = req.body;
 
-  if (!source_type || !group_id || !form_type) {
+  if (!source_type || !group_id) {
     return res.status(400).json({
-      error: 'source_type, group_id, and form_type are required',
+      error: 'source_type and group_id are required',
     });
   }
 
@@ -77,16 +77,10 @@ async function importHandler(
     return res.status(400).json({ error: 'file_data is required for PDF import' });
   }
 
-  // Validate form_type
-  const validTypes = ['rating', 'discipline', 'evaluation', 'custom'];
-  if (!validTypes.includes(form_type)) {
-    return res.status(400).json({ error: 'Invalid form_type' });
-  }
-
   // Verify group belongs to this org
   const { data: group } = await supabase
     .from('form_groups')
-    .select('id, org_id, slug')
+    .select('id, org_id, slug, is_system')
     .eq('id', group_id)
     .eq('org_id', orgId)
     .single();
@@ -95,16 +89,29 @@ async function importHandler(
     return res.status(404).json({ error: 'Form group not found' });
   }
 
-  // Validate form_type matches system group slug
+  // PE and Discipline system groups are locked — cannot import into them
+  const lockedSlugs = ['positional_excellence', 'discipline'];
+  if (lockedSlugs.includes(group.slug)) {
+    return res.status(400).json({ error: 'Cannot add forms to this system group' });
+  }
+
+  // Auto-derive form_type from group slug, fall back to 'custom'
   const slugToType: Record<string, string> = {
-    positional_excellence: 'rating',
-    discipline: 'discipline',
     evaluations: 'evaluation',
   };
-  const expectedType = slugToType[group.slug];
-  if (expectedType && form_type !== expectedType) {
+  const derivedType = slugToType[group.slug] || 'custom';
+  if (!form_type) {
+    form_type = derivedType;
+  }
+
+  const validTypes = ['rating', 'discipline', 'evaluation', 'custom'];
+  if (!validTypes.includes(form_type)) {
+    return res.status(400).json({ error: 'Invalid form_type' });
+  }
+
+  if (slugToType[group.slug] && form_type !== derivedType) {
     return res.status(400).json({
-      error: `The "${group.slug}" group requires form type "${expectedType}"`,
+      error: `The "${group.slug}" group requires form type "${derivedType}"`,
     });
   }
 
@@ -289,9 +296,6 @@ async function importHandler(
       // Add data source for select fields with organizational data
       if (parsedField.type === 'select' && parsedField.settings?.dataSource) {
         field.settings.dataSource = parsedField.settings.dataSource;
-        if (parsedField.settings.dataSource === 'leaders' && parsedField.settings.maxHierarchyLevel !== undefined) {
-          field.settings.maxHierarchyLevel = parsedField.settings.maxHierarchyLevel;
-        }
       }
 
       // Add options for selection fields (only for custom-option selects, not data source selects)
@@ -302,7 +306,14 @@ async function importHandler(
       formFields.push(field);
     }
 
-    // Second pass: resolve sectionId references
+    // Second pass: resolve sectionId references and build section children arrays
+    // Initialize children arrays on all section fields
+    for (const field of formFields) {
+      if (field.type === 'section') {
+        field.children = [];
+      }
+    }
+
     for (let i = 0; i < formFields.length; i++) {
       const field = formFields[i];
       const parsedField = parsed.fields[i];
@@ -313,6 +324,11 @@ async function importHandler(
           undefined;
         if (resolvedId) {
           field.sectionId = resolvedId;
+          // Add to parent section's children array
+          const parentSection = formFields.find((f) => f.id === resolvedId);
+          if (parentSection && parentSection.children) {
+            parentSection.children.push(field.id);
+          }
         }
       }
     }
@@ -323,35 +339,8 @@ async function importHandler(
     // ── Build evaluation settings if applicable ──
     let settings: Record<string, any> = {};
 
-    if (form_type === 'evaluation' && parsed.evaluationSections && parsed.evaluationSections.length > 0) {
-      const sections = parsed.evaluationSections.map((sec, idx) => ({
-        id: sec.id,
-        name: sec.name,
-        name_es: sec.nameEs || '',
-        order: sec.order ?? idx,
-        is_predefined: false,
-      }));
-
-      const questions: Record<string, any> = {};
-      for (const field of formFields) {
-        if (field.settings.weight || field.settings.scoringType) {
-          // Prefer evaluationSectionId (direct mapping) over sectionId (field reference)
-          const evalSectionId = field.settings.evaluationSectionId || undefined;
-          questions[field.id] = {
-            section_id: evalSectionId,
-            weight: field.settings.weight || 1,
-            scoring_type: field.settings.scoringType || field.type,
-          };
-        }
-      }
-
-      settings = {
-        evaluation: {
-          sections,
-          questions,
-        },
-      };
-    }
+    // Scoring is now embedded in the fields via settings.scored and settings.weight.
+    // No separate evaluation settings needed — the schema/uiSchema carries everything.
 
     // ── Determine form name ──
     const formName = name || parsed.suggestedName || 'Imported Form';
