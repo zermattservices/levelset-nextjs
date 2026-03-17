@@ -20,6 +20,7 @@ export const PERMISSION_MODULES = {
   DOCUMENTS: 'documents',
   ORG_CHART: 'org_chart',
   AI_ASSISTANT: 'ai_assistant',
+  EVALUATIONS: 'evaluations',
 } as const;
 
 // All permission keys as const for type safety
@@ -115,6 +116,11 @@ export const P = {
 
   // AI Assistant
   AI_USE: 'ai_assistant.use_ai_assistant',
+
+  // Evaluations
+  EVAL_VIEW_EVALUATIONS: 'evaluations.view_evaluations',
+  EVAL_MANAGE_EVALUATIONS: 'evaluations.manage_evaluations',
+  EVAL_CONDUCT_EVALUATIONS: 'evaluations.conduct_evaluations',
 } as const;
 
 // Type for any valid permission key
@@ -205,6 +211,11 @@ export const MODULE_METADATA: Record<string, ModuleMetadata> = {
     name: 'AI Assistant',
     description: 'Access to Levi AI assistant features',
     order: 15,
+  },
+  [PERMISSION_MODULES.EVALUATIONS]: {
+    name: 'Evaluations',
+    description: 'Performance evaluation scheduling and management',
+    order: 16,
   },
 };
 
@@ -620,6 +631,28 @@ export const SUB_ITEM_METADATA: Record<PermissionKey, SubItemMetadata> = {
     description: 'Access to chat with Levi AI assistant',
     order: 1,
     module: PERMISSION_MODULES.AI_ASSISTANT,
+  },
+
+  // Evaluations
+  [P.EVAL_VIEW_EVALUATIONS]: {
+    name: 'View Evaluations',
+    description: 'Access the evaluations page and view evaluations assigned to you',
+    order: 1,
+    module: PERMISSION_MODULES.EVALUATIONS,
+  },
+  [P.EVAL_MANAGE_EVALUATIONS]: {
+    name: 'Manage Evaluations',
+    description: 'View all evaluations across the organization, configure schedule rules, and manage overrides',
+    order: 2,
+    module: PERMISSION_MODULES.EVALUATIONS,
+    dependsOn: P.EVAL_VIEW_EVALUATIONS,
+  },
+  [P.EVAL_CONDUCT_EVALUATIONS]: {
+    name: 'Conduct Evaluations',
+    description: 'Start and submit evaluation reviews for employees',
+    order: 3,
+    module: PERMISSION_MODULES.EVALUATIONS,
+    dependsOn: P.EVAL_VIEW_EVALUATIONS,
   },
 };
 
