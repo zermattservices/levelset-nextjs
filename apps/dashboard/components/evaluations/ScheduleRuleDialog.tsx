@@ -45,6 +45,7 @@ export interface ScheduleRuleDialogProps {
   onSaved: () => void;
   orgId: string;
   rule?: ScheduleRule | null;
+  orgRoles?: OrgRole[];
 }
 
 const CADENCE_OPTIONS: { value: EvaluationCadence; label: string }[] = [
@@ -60,6 +61,7 @@ export function ScheduleRuleDialog({
   onSaved,
   orgId,
   rule,
+  orgRoles: passedRoles,
 }: ScheduleRuleDialogProps) {
   const isEdit = Boolean(rule);
 
@@ -85,29 +87,33 @@ export function ScheduleRuleDialog({
       setLoadingData(true);
       setError(null);
       try {
-        const supabase = createSupabaseClient();
-        const [templatesRes, rolesResult] = await Promise.all([
-          fetch(`/api/forms?org_id=${orgId}&form_type=evaluation`, { credentials: 'include' }),
-          supabase
-            .from('org_roles')
-            .select('*')
-            .eq('org_id', orgId)
-            .order('hierarchy_level', { ascending: true }),
-        ]);
+        // Fetch form templates via API (needs auth cookies)
+        const templatesRes = await fetch(
+          `/api/forms?org_id=${orgId}&form_type=evaluation`,
+          { credentials: 'include' }
+        );
 
         if (cancelled) return;
 
         if (!templatesRes.ok) throw new Error('Failed to load form templates');
         const templatesData = await templatesRes.json();
-        if (rolesResult.error) throw new Error('Failed to load roles');
 
-        // The API returns { templates: [...] }
         const allTemplates = templatesData.templates ?? [];
-        const evalTemplates = allTemplates.filter(
-          (t: any) => t.is_active
-        );
+        const evalTemplates = allTemplates.filter((t: any) => t.is_active);
         setFormTemplates(evalTemplates);
-        setRoles(rolesResult.data as OrgRole[] ?? []);
+
+        // Use passed roles if available, otherwise fetch
+        if (passedRoles && passedRoles.length > 0) {
+          setRoles(passedRoles);
+        } else {
+          const supabase = createSupabaseClient();
+          const { data } = await supabase
+            .from('org_roles')
+            .select('*')
+            .eq('org_id', orgId)
+            .order('hierarchy_level', { ascending: true });
+          if (!cancelled) setRoles((data as OrgRole[]) ?? []);
+        }
       } catch (err: any) {
         if (!cancelled) setError(err.message || 'Failed to load data');
       } finally {

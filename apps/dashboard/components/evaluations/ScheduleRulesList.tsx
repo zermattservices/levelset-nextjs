@@ -240,6 +240,7 @@ export function ScheduleRulesList({ orgId, getAccessToken }: ScheduleRulesListPr
           onSaved={handleSaved}
           orgId={orgId}
           rule={editingRule}
+          orgRoles={orgRoles}
         />
       )}
     </>
