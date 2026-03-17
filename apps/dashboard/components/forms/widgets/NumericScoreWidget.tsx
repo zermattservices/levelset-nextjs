@@ -6,15 +6,59 @@ const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Se
 
 /**
  * Numeric score widget for RJSF forms.
- * Renders as a number input with " / {maxValue}" suffix.
+ * Renders as a card with title + number input with " / {maxValue}" suffix.
  */
 export function NumericScoreWidget(props: WidgetProps) {
-  const { value, required, disabled, readonly, onChange, schema, rawErrors } = props;
+  const { value, required, disabled, readonly, onChange, label, schema, rawErrors } = props;
 
   const maxValue = schema.maximum ?? 10;
+  const description = schema.description || '';
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+    <Box
+      sx={{
+        backgroundColor: 'var(--ls-color-bg-container, #fff)',
+        borderRadius: '12px',
+        border: '1px solid var(--ls-color-muted-border)',
+        padding: '16px 20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        opacity: disabled || readonly ? 0.6 : 1,
+      }}
+    >
+      {/* Title + Description */}
+      {label && (
+        <Typography
+          sx={{
+            fontFamily,
+            fontSize: 16,
+            fontWeight: 600,
+            color: 'var(--ls-color-neutral-soft-foreground)',
+          }}
+        >
+          {label}
+          {required && (
+            <Box component="span" sx={{ color: '#dc2626', ml: 0.5 }}>*</Box>
+          )}
+        </Typography>
+      )}
+      {description && (
+        <Typography
+          sx={{
+            fontFamily,
+            fontSize: 13,
+            fontWeight: 500,
+            color: 'var(--ls-color-muted)',
+            lineHeight: 1.4,
+            mt: -1,
+          }}
+        >
+          {description}
+        </Typography>
+      )}
+
+      {/* Score input */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <TextField
           type="number"
@@ -24,7 +68,6 @@ export function NumericScoreWidget(props: WidgetProps) {
             onChange(val);
           }}
           size="small"
-          required={required}
           disabled={disabled || readonly}
           inputProps={{
             min: 0,

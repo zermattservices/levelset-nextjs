@@ -28,6 +28,8 @@ export interface ParsedFormField {
     sectionNameEs?: string;
     /** For select fields with predefined data sources */
     dataSource?: DataSource;
+    /** For employee selects: filter by role names */
+    roleFilter?: string[];
     /** For text_block: rich text HTML content */
     content?: string;
     contentEs?: string;
@@ -93,8 +95,9 @@ export function buildSystemPrompt(options: {
   sourceType: 'pdf' | 'url';
   formType: string;
   includeScoring: boolean;
+  orgRoles?: string[];
 }): string {
-  const { sourceType, formType, includeScoring } = options;
+  const { sourceType, formType, includeScoring, orgRoles } = options;
 
   let prompt = `You are an expert form parser for Levelset, a restaurant/hospitality employee management platform. Your job is to analyze ${sourceType === 'pdf' ? 'a PDF document containing a form' : 'the HTML of a web page containing a form'} and extract its structure into a precise list of form fields.
 
@@ -111,7 +114,47 @@ export function buildSystemPrompt(options: {
 9. **Use text_block for static content.** If you see instructions, disclaimers, or explanatory text blocks on the form (not field labels/descriptions), create a text_block field with settings.content containing the HTML-formatted content.
 10. **ALWAYS extract help text / descriptions.** If a field has descriptive text, instructions, or explanatory text below or next to its label, this MUST be captured in the description field (English) and descriptionEs field (Spanish). This is critical — do not skip help text. Common patterns: italic text under a question label, smaller text explaining what the field is about, bullet points describing criteria. For example, if a field says "Hospitality" with text below saying "Serving with warmth, care, and others first mindset", the description should be "Serving with warmth, care, and others first mindset".
 
-${FIELD_TYPE_DESCRIPTIONS}`;
+${FIELD_TYPE_DESCRIPTIONS}
+
+${orgRoles && orgRoles.length > 0 ? `### Role Filter for Employee Selects
+
+The organization has these employee roles: ${orgRoles.map((r: string) => `"${r}"`).join(', ')}
+
+When a field uses dataSource "employees", you should infer which role(s) to filter to based on the form's context. Set \`settings.roleFilter\` to an array of matching role names. Examples:
+- A form titled "Trainer Evaluation" with a "Name" field → roleFilter: ["Trainer"]
+- A form titled "Team Lead Review" with an "Employee" field → roleFilter: ["Team Lead"]
+- A generic "Employee Name" field on a general form → no roleFilter (show all employees)
+
+Only set roleFilter when you can confidently infer the role from the form title, section context, or field label. Use the exact role names from the list above.
+` : ''}
+
+## CRITICAL: Field Ordering and Section Structure
+
+The output field order MUST exactly match the order fields appear in the source document. This is the single most important structural requirement.
+
+### Ordering Rules
+
+1. **Top-level items** (sections, standalone text blocks, standalone fields) must appear in document order.
+2. **Section children** must appear immediately after their section header in the array, in the exact order they appear within that section in the document.
+3. **Text blocks inside sections** (like description text that appears right after a section header) are children of that section. They should have a sectionId pointing to their section and appear before the data fields in that section.
+4. **Text blocks outside sections** (like a strategy description between the employee info section and the first part) are top-level. They should NOT have a sectionId.
+
+### Complete Structural Example
+
+For a form with: Employee Info section (Name, Date), then a standalone description paragraph, then Part 1 section (description + 3 rated questions):
+
+\`\`\`
+1. { type: "section", label: "Employee Information", settings: { sectionName: "Employee Information" } }
+2. { type: "select", label: "Name", sectionId: "section_employee_information", settings: { dataSource: "employees" } }
+3. { type: "date", label: "Date", sectionId: "section_employee_information" }
+4. { type: "text_block", label: "Strategy Description", settings: { content: "<p>...</p>" } }  ← NO sectionId, top-level
+5. { type: "section", label: "Part 1 - Team Culture", settings: { sectionName: "Part 1 - Team Culture" } }
+6. { type: "text_block", label: "Part 1 Description", sectionId: "section_part_1_-_team_culture", settings: { content: "<p><em>...</em></p>" } }  ← child of Part 1
+7. { type: "rating_1_3", label: "Hospitality", sectionId: "section_part_1_-_team_culture", settings: { scored: true, weight: 3 } }
+8. { type: "rating_1_3", label: "Hustle", sectionId: "section_part_1_-_team_culture", settings: { scored: true, weight: 3 } }
+\`\`\`
+
+Notice: item 4 is between two sections and has no sectionId. Items 6-8 are children of item 5 and have its sectionId.`;
 
   if (includeScoring && formType === 'evaluation') {
     prompt += `
@@ -272,6 +315,11 @@ export const FORM_PARSER_TOOL = {
                   type: 'string',
                   enum: ['employees', 'positions', 'infractions', 'disc_actions'],
                   description: 'Data source for select fields that reference organizational data. Only set for select fields. Do not set for custom-option selects.',
+                },
+                roleFilter: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Array of role names to filter the employee list. Only set when dataSource is "employees" and you can infer the relevant role(s) from context.',
                 },
                 content: { type: 'string', description: 'HTML content for text_block fields (English)' },
                 contentEs: { type: 'string', description: 'HTML content for text_block fields (Spanish)' },

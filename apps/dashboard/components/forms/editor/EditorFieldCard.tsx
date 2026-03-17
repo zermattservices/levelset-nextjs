@@ -44,12 +44,7 @@ const TYPE_TAG_ICON_MAP: Record<string, React.ReactNode> = {
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
-const SCORING_TYPES: Record<string, { label: string; color: string }> = {
-  rating_1_3: { label: '1-3', color: 'var(--ls-color-brand)' },
-  rating_1_5: { label: '1-5', color: 'var(--ls-color-brand)' },
-  true_false: { label: 'T/F', color: '#6366F1' },
-  numeric_score: { label: '#', color: '#D97706' },
-};
+const SCORED_TAG = { label: 'Scored', color: 'var(--ls-color-brand)' };
 
 interface EditorFieldCardProps {
   field: FormField;
@@ -174,7 +169,7 @@ export function EditorFieldCard({
       {field.settings.scored && field.settings.weight != null && (
         <div className={sty.scoringControls}>
           <Chip
-            label={SCORING_TYPES[field.type]?.label || '?'}
+            label={SCORED_TAG.label}
             size="small"
             sx={{
               fontFamily,
@@ -183,7 +178,7 @@ export function EditorFieldCard({
               height: 20,
               minWidth: 32,
               borderRadius: '4px',
-              backgroundColor: SCORING_TYPES[field.type]?.color || 'var(--ls-color-brand)',
+              backgroundColor: SCORED_TAG.color,
               color: '#fff',
               '& .MuiChip-label': { padding: '0 5px' },
             }}

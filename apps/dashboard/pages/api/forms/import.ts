@@ -116,11 +116,21 @@ async function importHandler(
   }
 
   try {
+    // ── Fetch org roles for role filter inference ──
+    const { data: roleRows } = await supabase
+      .from('employees')
+      .select('role')
+      .eq('org_id', orgId)
+      .eq('active', true)
+      .not('role', 'is', null);
+    const orgRoles = Array.from(new Set((roleRows || []).map((r: any) => r.role).filter(Boolean))) as string[];
+
     // ── Build messages for OpenRouter ──
     const systemPrompt = buildSystemPrompt({
       sourceType: source_type,
       formType: form_type,
       includeScoring: source_type === 'pdf' && form_type === 'evaluation',
+      orgRoles,
     });
 
     const userContent: any[] = [];
@@ -210,7 +220,7 @@ async function importHandler(
       },
       body: JSON.stringify({
         model: 'anthropic/claude-sonnet-4.5',
-        max_tokens: 8192,
+        max_tokens: 16384,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userContent },
@@ -255,6 +265,28 @@ async function importHandler(
       });
     }
 
+    // ── Log AI usage (does not count against org Levi limits) ──
+    const usage = aiResult.usage;
+    if (usage) {
+      const inputTokens = usage.prompt_tokens || 0;
+      const outputTokens = usage.completion_tokens || 0;
+      // Estimate cost (Claude Sonnet 4.5: ~$3/M input, ~$15/M output via OpenRouter)
+      const costUsd = (inputTokens * 3 + outputTokens * 15) / 1_000_000;
+
+      await supabase.from('levi_usage_log').insert({
+        org_id: orgId,
+        user_id: userId,
+        model: 'anthropic/claude-sonnet-4.5',
+        tier: 'system',
+        task_type: 'form_import',
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        cost_usd: costUsd,
+      }).then(({ error: logErr }) => {
+        if (logErr) console.error('Failed to log form import usage:', logErr);
+      });
+    }
+
     // ── Convert parsed fields to FormField[] with generated IDs ──
     const sectionIdMap: Record<string, string> = {};
     const formFields: FormField[] = [];
@@ -296,6 +328,9 @@ async function importHandler(
       // Add data source for select fields with organizational data
       if (parsedField.type === 'select' && parsedField.settings?.dataSource) {
         field.settings.dataSource = parsedField.settings.dataSource;
+        if (parsedField.settings.roleFilter && Array.isArray(parsedField.settings.roleFilter)) {
+          field.settings.roleFilter = parsedField.settings.roleFilter;
+        }
       }
 
       // Add options for selection fields (only for custom-option selects, not data source selects)

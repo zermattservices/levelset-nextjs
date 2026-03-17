@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Autocomplete, TextField, Typography, FormControl, FormHelperText } from '@mui/material';
 import type { WidgetProps } from '@rjsf/utils';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -22,14 +23,22 @@ interface DataOption {
 export function DataSelectWidget(props: WidgetProps) {
   const { id, value, required, disabled, readonly, onChange, label, rawErrors, formContext } = props;
   const auth = useAuth();
-  const org_id = formContext?.orgId || auth.org_id;
-  const location_id = formContext?.locationId || auth.location_id;
+  const { selectedLocationId, selectedLocationOrgId } = useLocationContext();
+  const org_id = selectedLocationOrgId || formContext?.orgId || auth.org_id;
+  const location_id = selectedLocationId || formContext?.locationId || auth.location_id;
   const formType = formContext?.formType || 'custom';
 
   const meta = props.uiSchema?.['ui:fieldMeta'] || {};
   const dataSource = meta.dataSource || 'employees';
   const maxHierarchyLevel = meta.maxHierarchyLevel;
-  const roleFilter: string[] | undefined = meta.roleFilter;
+  const roleFilterRaw: string[] | undefined = meta.roleFilter;
+  // Stabilize roleFilter reference so useEffect doesn't re-fire on every render
+  const roleFilterKey = roleFilterRaw ? roleFilterRaw.join(',') : '';
+  const roleFilter = React.useMemo(
+    () => roleFilterRaw,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [roleFilterKey]
+  );
 
   const [options, setOptions] = React.useState<DataOption[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -39,7 +48,11 @@ export function DataSelectWidget(props: WidgetProps) {
   const storesName = dataSource === 'positions';
 
   React.useEffect(() => {
-    if (!org_id) return;
+    console.log('[DataSelectWidget] useEffect fired', { org_id, location_id, dataSource, roleFilter, id });
+    if (!org_id) {
+      console.log('[DataSelectWidget] Bailing: no org_id');
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setLoadError(null);
@@ -49,14 +62,24 @@ export function DataSelectWidget(props: WidgetProps) {
         let fetchedOptions: DataOption[] = [];
 
         if (dataSource === 'employees' || dataSource === 'leaders') {
-          if (!location_id) { setLoading(false); return; }
-          const res = await fetch(`/api/employees?location_id=${encodeURIComponent(location_id)}`);
+          if (!location_id) {
+            console.log('[DataSelectWidget] Bailing: no location_id');
+            setLoading(false);
+            return;
+          }
+          const url = `/api/employees?location_id=${encodeURIComponent(location_id)}`;
+          console.log('[DataSelectWidget] Fetching:', url);
+          const res = await fetch(url);
+          console.log('[DataSelectWidget] Response status:', res.status);
           const json = await res.json();
+          console.log('[DataSelectWidget] Response data:', { employeeCount: json.employees?.length, error: json.error, keys: Object.keys(json) });
           if (json.employees) {
             let employees = json.employees;
             // Apply role filter if configured
             if (roleFilter && roleFilter.length > 0) {
+              console.log('[DataSelectWidget] Applying roleFilter:', roleFilter, 'before:', employees.length);
               employees = employees.filter((e: any) => roleFilter.includes(e.role));
+              console.log('[DataSelectWidget] After roleFilter:', employees.length);
             }
             fetchedOptions = employees.map((e: any) => ({
               id: e.id,
@@ -64,6 +87,7 @@ export function DataSelectWidget(props: WidgetProps) {
               sublabel: e.role ?? undefined,
             }));
           }
+          console.log('[DataSelectWidget] Final options count:', fetchedOptions.length);
         } else if (dataSource === 'positions') {
           const res = await fetch(`/api/forms/widget-data?type=positions&org_id=${encodeURIComponent(org_id)}`);
           const json = await res.json();

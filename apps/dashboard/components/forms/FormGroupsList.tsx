@@ -11,6 +11,7 @@ import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
 import sty from './FormGroupsList.module.css';
 import { FormTemplateCard } from './FormTemplateCard';
 import type { FormGroup, FormTemplate } from '@/lib/forms/types';
@@ -54,16 +55,21 @@ export function FormGroupsList({
   const displayGroups = React.useMemo(() => groups.filter((g) => !LOCKED_SLUGS.includes(g.slug)), [groups]);
 
   const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(() => {
+    // Archive group ('__archive__') is NOT included — collapsed by default
     const ids = new Set(groups.map((g) => g.id));
     ids.add('__system__');
     return ids;
   });
 
-  // Expand all groups whenever groups list changes
+  // Expand all groups whenever groups list changes (except archive)
   React.useEffect(() => {
     const ids = new Set(groups.map((g) => g.id));
     ids.add('__system__');
-    setExpandedGroups(ids);
+    setExpandedGroups((prev) => {
+      // Preserve archive expanded state if user toggled it
+      if (prev.has('__archive__')) ids.add('__archive__');
+      return ids;
+    });
   }, [groups]);
 
   const handleToggle = (groupId: string) => {
@@ -78,18 +84,27 @@ export function FormGroupsList({
     });
   };
 
-  // Filter templates
-  const filteredTemplates = React.useMemo(() => {
-    return templates.filter((t) => {
-      if (typeFilter && t.form_type !== typeFilter) return false;
-      if (searchQuery) {
+  // Separate active vs archived templates, then filter
+  const { filteredTemplates, archivedTemplates } = React.useMemo(() => {
+    const active: FormTemplate[] = [];
+    const archived: FormTemplate[] = [];
+
+    for (const t of templates) {
+      const matchesType = !typeFilter || t.form_type === typeFilter;
+      const matchesSearch = !searchQuery || (() => {
         const q = searchQuery.toLowerCase();
-        const matchesName = t.name.toLowerCase().includes(q);
-        const matchesDesc = t.description?.toLowerCase().includes(q);
-        if (!matchesName && !matchesDesc) return false;
+        return t.name.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q);
+      })();
+      if (!matchesType || !matchesSearch) continue;
+
+      if (t.is_active === false) {
+        archived.push(t);
+      } else {
+        active.push(t);
       }
-      return true;
-    });
+    }
+
+    return { filteredTemplates: active, archivedTemplates: archived };
   }, [templates, typeFilter, searchQuery]);
 
   // Group templates by group_id
@@ -254,6 +269,16 @@ export function FormGroupsList({
           group.is_system,
         );
       })}
+
+      {/* Archive group — only shown when there are archived forms */}
+      {archivedTemplates.length > 0 && renderGroupAccordion(
+        '__archive__',
+        <ArchiveOutlinedIcon sx={{ fontSize: 20, color: 'var(--ls-color-muted)' }} />,
+        'Archive',
+        null,
+        archivedTemplates,
+        false,
+      )}
     </div>
   );
 }

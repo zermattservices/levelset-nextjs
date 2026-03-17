@@ -218,7 +218,7 @@ export function FieldConfigPanel({
       )}
 
       {/* Required toggle (not for sections) */}
-      {!isSection && (
+      {!isSection && !isTextBlock && (
         <>
           <Divider sx={{ margin: '8px 0' }} />
           <FormControlLabel

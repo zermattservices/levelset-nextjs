@@ -1,0 +1,249 @@
+{
+  "snapshot_date": "2026-03-17",
+  "snapshot_description": "Trainer Evaluation form for org 04066 — baseline for certified trainer form import testing",
+  "template": {
+    "id": "5db8b5b0-358e-4403-a668-ea304fa54f1e",
+    "name": "Trainer Evaluation",
+    "form_type": "evaluation",
+    "org_id": "54b9864f-9df9-4a15-a209-7b99e1c274f4",
+    "description": "Performance evaluation form for trainers at Chick-fil-A, assessing team culture values, training characteristics, and leadership capacity traits",
+    "settings": {},
+    "schema": {
+      "type": "object",
+      "required": [
+        "field_1773597746045_15x5l8",
+        "field_1773597746045_zrlmah",
+        "field_1773597746045_81csrz",
+        "field_1773597746045_b06z8e",
+        "field_1773597746045_vy0q4s",
+        "field_1773597746045_9aexjm",
+        "field_1773597746045_d626me",
+        "field_1773597746045_inam83",
+        "field_1773597746045_iuk12t",
+        "field_1773597746045_k5os2l",
+        "field_1773597746046_9v1vxx",
+        "field_1773597746046_b5gxbk",
+        "field_1773597746046_elkod0",
+        "field_1773597746046_fkhqcl",
+        "field_1773597746046_az4f76",
+        "field_1773597746046_mcfsna",
+        "field_1773597746046_p37fx4",
+        "field_1773597746046_yt4hhy",
+        "field_1773597746046_9fzl6c",
+        "field_1773597746046_9o7hru",
+        "field_1773597746046_bltzsx",
+        "field_1773597746046_551kcp"
+      ],
+      "properties": {
+        "field_1773597746044_6h5nx4": { "type": "null", "title": "Employee Information" },
+        "field_1773597746045_15x5l8": { "type": "string", "title": "Name" },
+        "field_1773597746045_zrlmah": { "type": "string", "title": "Date", "format": "date" },
+        "field_1773597746045_gwa5nk": { "type": "null", "title": "Core Strategy Description" },
+        "field_1773597746045_v96u6v": { "type": "null", "title": "Part 1 - Team Culture" },
+        "field_1773597746045_xr7wdz": { "type": "null", "title": "Part 1 Description" },
+        "field_1773597746045_81csrz": { "enum": [1, 2, 3], "type": "integer", "title": "Hospitality - Serving with warmth, care, and others first mindset - making everyone feel seen, valued, and welcomed", "maximum": 3, "minimum": 1 },
+        "field_1773597746045_b06z8e": { "enum": [1, 2, 3], "type": "integer", "title": "Hustle - Working with urgency, energy, and focus - moving fast without rushing, and striving for excellence", "maximum": 3, "minimum": 1 },
+        "field_1773597746045_vy0q4s": { "enum": [1, 2, 3], "type": "integer", "title": "Humility - Receptive and implements feedback, puts team-first, and eager to grow - choosing integrity and is ready serve", "maximum": 3, "minimum": 1 },
+        "field_1773597746045_aj7vam": { "type": "null", "title": "Part 2 - Characteristics" },
+        "field_1773597746045_v71kh4": { "type": "null", "title": "Part 2 Description" },
+        "field_1773597746045_9aexjm": { "enum": [1, 2, 3], "type": "integer", "title": "Celebrate & Challenge - Give Oreo Feedback — stretch learners with constructive coaching while celebrating wins that show growth, humility, and impact", "maximum": 3, "minimum": 1 },
+        "field_1773597746045_d626me": { "enum": [1, 2, 3], "type": "integer", "title": "Train with Clarity - Use the DIR Method (Demonstrate, Imitate, Repeat) to break down steps simply so team members can learn, practice, and master. Be committed to the ongoing development of the team", "maximum": 3, "minimum": 1 },
+        "field_1773597746045_inam83": { "enum": [1, 2, 3], "type": "integer", "title": "Model Excellence - Protect the culture through role-modeling our core values: Hospitality, Hustle, and Humility. Show the standard every time with consistency in alignment to Winning Hearts Every Day", "maximum": 3, "minimum": 1 },
+        "field_1773597746045_iuk12t": { "enum": [1, 2, 3], "type": "integer", "title": "Engage with Energy - Create a welcoming, intentional experience from day one by engaging trainees with excitement and positivity that makes the training process fun", "maximum": 3, "minimum": 1 },
+        "field_1773597746045_k5os2l": { "enum": [1, 2, 3], "type": "integer", "title": "Grow the Future - Mentor team members to not just succeed today but to carry the culture forward tomorrow — developing leaders who can one day train, coach, and lead", "maximum": 3, "minimum": 1 },
+        "field_1773597746045_3aqgj1": { "type": "null", "title": "Part 3 - What's Important Now" },
+        "field_1773597746046_vw8lpj": { "type": "null", "title": "Part 3 Description" },
+        "field_1773597746046_9v1vxx": { "enum": [1, 2, 3], "type": "integer", "title": "Develops Team vs \"I\" Mindset - The capacity to which the trainer maintains a professional & cohesive team environment amongst team members & leaders (we vs me mindset)", "maximum": 3, "minimum": 1 },
+        "field_1773597746046_b5gxbk": { "enum": [1, 2, 3], "type": "integer", "title": "Committed to Self-Development - The capacity to which the leader seeks out professional improvement & development", "maximum": 3, "minimum": 1 },
+        "field_1773597746046_elkod0": { "enum": [1, 2, 3], "type": "integer", "title": "Self-Aware & Seeks Out Feedback - The capacity to which the trainer is self-aware and seeks out feedback", "maximum": 3, "minimum": 1 },
+        "field_1773597746046_fkhqcl": { "enum": [1, 2, 3], "type": "integer", "title": "Conflict Capacity (Healthy Tensions) - The capacity to which the trainer can handle conflict in a healthy & non-distracting manner", "maximum": 3, "minimum": 1 },
+        "field_1773597746046_6xhqpc": { "type": "null", "title": "Verification of Review" },
+        "field_1773597746046_az4f76": { "type": "boolean", "title": "Completed Pathway Training Plan" },
+        "field_1773597746046_mcfsna": { "type": "boolean", "title": "Attended Monthly Trainers Meeting" },
+        "field_1773597746046_p37fx4": { "type": "boolean", "title": "Completed 24 PEAs" },
+        "field_1773597746046_yt4hhy": { "type": "boolean", "title": "Celebrated 24 Team Members through Cares Cash" },
+        "field_1773597746046_9fzl6c": { "type": "boolean", "title": "90% of New Hires got to \"On the Rise\" or \"Crushing It\" by 30 Day Evaluation" },
+        "field_1773597746046_9o7hru": { "type": "boolean", "title": "Recommend for Promotion", "description": "A score of 2 = good status, a score of 2.5 = certified. Must check Yes in all boxes above." },
+        "field_1773597746046_6okf2p": { "type": "string", "title": "3 Areas to Focus On for Improvement (Personal Development Plan)" },
+        "field_1773597746046_bltzsx": { "type": "string", "title": "Trainer Signature", "description": "By signing this form, you confirm that you have discussed this review in detail." },
+        "field_1773597746046_551kcp": { "type": "string", "title": "Signature Date", "format": "date" }
+      }
+    },
+    "ui_schema": {
+      "ui:order": [
+        "field_1773597746044_6h5nx4",
+        "field_1773597746045_15x5l8",
+        "field_1773597746045_zrlmah",
+        "field_1773597746045_gwa5nk",
+        "field_1773597746045_v96u6v",
+        "field_1773597746045_xr7wdz",
+        "field_1773597746045_81csrz",
+        "field_1773597746045_b06z8e",
+        "field_1773597746045_vy0q4s",
+        "field_1773597746045_aj7vam",
+        "field_1773597746045_v71kh4",
+        "field_1773597746045_9aexjm",
+        "field_1773597746045_d626me",
+        "field_1773597746045_inam83",
+        "field_1773597746045_iuk12t",
+        "field_1773597746045_k5os2l",
+        "field_1773597746045_3aqgj1",
+        "field_1773597746046_vw8lpj",
+        "field_1773597746046_9v1vxx",
+        "field_1773597746046_b5gxbk",
+        "field_1773597746046_elkod0",
+        "field_1773597746046_fkhqcl",
+        "field_1773597746046_6xhqpc",
+        "field_1773597746046_az4f76",
+        "field_1773597746046_mcfsna",
+        "field_1773597746046_p37fx4",
+        "field_1773597746046_yt4hhy",
+        "field_1773597746046_9fzl6c",
+        "field_1773597746046_9o7hru",
+        "field_1773597746046_6okf2p",
+        "field_1773597746046_bltzsx",
+        "field_1773597746046_551kcp"
+      ],
+      "field_1773597746044_6h5nx4": {
+        "ui:field": "section",
+        "ui:options": { "sectionName": "Employee Information", "sectionNameEs": "Información del Empleado" },
+        "ui:fieldMeta": { "labelEs": "", "children": ["field_1773597746045_15x5l8", "field_1773597746045_zrlmah"], "fieldType": "section" }
+      },
+      "field_1773597746045_15x5l8": {
+        "ui:widget": "data_select",
+        "ui:fieldMeta": { "labelEs": "Nombre", "fieldType": "select", "sectionId": "field_1773597746044_6h5nx4", "dataSource": "employees", "roleFilter": ["Trainer"] }
+      },
+      "field_1773597746045_zrlmah": {
+        "ui:fieldMeta": { "labelEs": "Fecha", "fieldType": "date", "sectionId": "field_1773597746044_6h5nx4" }
+      },
+      "field_1773597746045_gwa5nk": {
+        "ui:field": "textBlock",
+        "ui:options": {
+          "content": "<p>Our core strategy is centered on three audiences: <strong>GX, TX, LX</strong><br>Deliver a caring guest experience, strengthen the team member experience, & exercise our leadership experience. <em>As a leader here at Chick-fil-A, our guest is the center of everything we do. As a focus of serving our team members well, we as a team will serve our guests well. Below, we will discuss the desired qualities of a high performing leader to assess your ability to perform.</em></p>",
+          "contentEs": "<p>Nuestra estrategia central se centra en tres audiencias: <strong>GX, TX, LX</strong><br>Ofrecer una experiencia de servicio al cliente afectuosa, fortalecer la experiencia del miembro del equipo y ejercer nuestra experiencia de liderazgo. <em>Como líder aquí en Chick-fil-A, nuestro cliente es el centro de todo lo que hacemos. Como enfoque de servir bien a los miembros de nuestro equipo, como equipo serviremos bien a nuestros clientes. A continuación, discutiremos las cualidades deseadas de un líder de alto rendimiento para evaluar su capacidad de desempeño.</em></p>"
+        },
+        "ui:fieldMeta": { "labelEs": "Descripción de Estrategia Central", "fieldType": "text_block" }
+      },
+      "field_1773597746045_v96u6v": {
+        "ui:field": "section",
+        "ui:options": { "sectionName": "Part 1 - Team Culture", "sectionNameEs": "Parte 1 - Cultura del Equipo" },
+        "ui:fieldMeta": { "labelEs": "", "children": ["field_1773597746045_xr7wdz", "field_1773597746045_81csrz", "field_1773597746045_b06z8e", "field_1773597746045_vy0q4s"], "fieldType": "section" }
+      },
+      "field_1773597746045_xr7wdz": {
+        "ui:field": "textBlock",
+        "ui:options": {
+          "content": "<p><em>Leader embodies values & strengthens culture of the team by upholding these values</em></p>",
+          "contentEs": "<p><em>El líder encarna los valores y fortalece la cultura del equipo al defender estos valores</em></p>"
+        },
+        "ui:fieldMeta": { "labelEs": "Descripción de Parte 1", "fieldType": "text_block" }
+      },
+      "field_1773597746045_81csrz": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Hospitalidad - Servir con calidez, cuidado y mentalidad de los demás primero - haciendo que todos se sientan vistos, valorados y bienvenidos", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746045_b06z8e": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Empuje - Trabajar con urgencia, energía y enfoque - moverse rápido sin apresurarse, y esforzarse por la excelencia", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746045_vy0q4s": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Humildad - Receptivo e implementa retroalimentación, pone al equipo primero y ansioso por crecer - eligiendo integridad y listo para servir", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746045_aj7vam": {
+        "ui:field": "section",
+        "ui:options": { "sectionName": "Part 2 - Characteristics", "sectionNameEs": "Parte 2 - Características" },
+        "ui:fieldMeta": { "labelEs": "", "children": ["field_1773597746045_v71kh4", "field_1773597746045_9aexjm", "field_1773597746045_d626me", "field_1773597746045_inam83", "field_1773597746045_iuk12t", "field_1773597746045_k5os2l"], "fieldType": "section" }
+      },
+      "field_1773597746045_v71kh4": {
+        "ui:field": "textBlock",
+        "ui:options": {
+          "content": "<p><em>TRAINER EXECUTES PURPOSE: To maximize value by serving guests and fellow team members to create an environment of hospitality</em></p><p><strong>*20% weighted</strong></p>",
+          "contentEs": "<p><em>EL ENTRENADOR EJECUTA PROPÓSITO: Maximizar el valor sirviendo a los clientes y compañeros de equipo para crear un ambiente de hospitalidad</em></p><p><strong>*20% ponderado</strong></p>"
+        },
+        "ui:fieldMeta": { "labelEs": "Descripción de Parte 2", "fieldType": "text_block" }
+      },
+      "field_1773597746045_9aexjm": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Celebrar y Desafiar - Dar Retroalimentación Oreo — estirar a los aprendices con coaching constructivo mientras se celebran victorias que muestran crecimiento, humildad e impacto", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746045_d626me": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Entrenar con Claridad - Usar el Método DIR (Demostrar, Imitar, Repetir) para desglosar los pasos de manera simple para que los miembros del equipo puedan aprender, practicar y dominar. Estar comprometido con el desarrollo continuo del equipo", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746045_inam83": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Modelar Excelencia - Proteger la cultura a través de modelar nuestros valores fundamentales: Hospitalidad, Empuje y Humildad. Mostrar el estándar cada vez con consistencia en alineación con Ganar Corazones Cada Día", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746045_iuk12t": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Comprometerse con Energía - Crear una experiencia acogedora e intencional desde el primer día al involucrar a los aprendices con entusiasmo y positividad que hace que el proceso de capacitación sea divertido", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746045_k5os2l": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Hacer Crecer el Futuro - Mentorear a los miembros del equipo para no solo tener éxito hoy sino para llevar la cultura hacia adelante mañana — desarrollando líderes que algún día puedan entrenar, guiar y liderar", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746045_3aqgj1": {
+        "ui:field": "section",
+        "ui:options": { "sectionName": "Part 3 - What's Important Now", "sectionNameEs": "Parte 3 - Lo Que Es Importante Ahora" },
+        "ui:fieldMeta": { "labelEs": "", "children": ["field_1773597746046_vw8lpj", "field_1773597746046_9v1vxx", "field_1773597746046_b5gxbk", "field_1773597746046_elkod0", "field_1773597746046_fkhqcl"], "fieldType": "section" }
+      },
+      "field_1773597746046_vw8lpj": {
+        "ui:field": "textBlock",
+        "ui:options": {
+          "content": "<p><em>Self-Development of the leader is critical for sustained success to grow the business; leadership capacity determines our results</em></p><p><strong>LEADERSHIP CAPACITY TRAITS</strong></p>",
+          "contentEs": "<p><em>El autodesarrollo del líder es crítico para el éxito sostenido para hacer crecer el negocio; la capacidad de liderazgo determina nuestros resultados</em></p><p><strong>RASGOS DE CAPACIDAD DE LIDERAZGO</strong></p>"
+        },
+        "ui:fieldMeta": { "labelEs": "Descripción de Parte 3", "fieldType": "text_block" }
+      },
+      "field_1773597746046_9v1vxx": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Desarrolla Mentalidad de Equipo vs \"Yo\" - La capacidad con la que el entrenador mantiene un ambiente de equipo profesional y cohesivo entre los miembros del equipo y líderes (mentalidad de nosotros vs yo)", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746046_b5gxbk": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Comprometido con el Autodesarrollo - La capacidad con la que el líder busca mejora y desarrollo profesional", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746046_elkod0": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Autoconsciente y Busca Retroalimentación - La capacidad con la que el entrenador es autoconsciente y busca retroalimentación", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746046_fkhqcl": {
+        "ui:widget": "ratingScale",
+        "ui:options": { "label": false },
+        "ui:fieldMeta": { "scored": true, "weight": 3, "labelEs": "Capacidad de Conflicto (Tensiones Saludables) - La capacidad con la que el entrenador puede manejar conflictos de manera saludable y sin distracciones", "fieldType": "rating_1_3" }
+      },
+      "field_1773597746046_6xhqpc": {
+        "ui:field": "section",
+        "ui:options": { "sectionName": "Verification of Review", "sectionNameEs": "Verificación de Revisión" },
+        "ui:fieldMeta": { "labelEs": "", "children": ["field_1773597746046_az4f76", "field_1773597746046_mcfsna", "field_1773597746046_p37fx4", "field_1773597746046_yt4hhy", "field_1773597746046_9fzl6c", "field_1773597746046_9o7hru"], "fieldType": "section" }
+      },
+      "field_1773597746046_az4f76": { "ui:fieldMeta": { "labelEs": "Plan de Entrenamiento de Ruta Completado", "fieldType": "true_false", "sectionId": "field_1773597746046_6xhqpc" } },
+      "field_1773597746046_mcfsna": { "ui:fieldMeta": { "labelEs": "Asistió a la Reunión Mensual de Entrenadores", "fieldType": "true_false", "sectionId": "field_1773597746046_6xhqpc" } },
+      "field_1773597746046_p37fx4": { "ui:fieldMeta": { "labelEs": "Completó 24 PEAs", "fieldType": "true_false", "sectionId": "field_1773597746046_6xhqpc" } },
+      "field_1773597746046_yt4hhy": { "ui:fieldMeta": { "labelEs": "Celebró a 24 Miembros del Equipo a través de Cares Cash", "fieldType": "true_false", "sectionId": "field_1773597746046_6xhqpc" } },
+      "field_1773597746046_9fzl6c": { "ui:fieldMeta": { "labelEs": "90% de Nuevas Contrataciones llegaron a \"En Ascenso\" o \"Aplastándolo\" para la Evaluación de 30 Días", "fieldType": "true_false", "sectionId": "field_1773597746046_6xhqpc" } },
+      "field_1773597746046_9o7hru": { "ui:fieldMeta": { "labelEs": "Recomendar para Promoción", "fieldType": "true_false", "sectionId": "field_1773597746046_6xhqpc", "descriptionEs": "Una puntuación de 2 = buen estado, una puntuación de 2.5 = certificado. Debe marcar Sí en todas las casillas anteriores." } },
+      "field_1773597746046_6okf2p": {
+        "ui:widget": "textarea",
+        "ui:options": { "rows": 6 },
+        "ui:fieldMeta": { "labelEs": "3 Áreas en las que Enfocarse para Mejorar (Plan de Desarrollo Personal)", "fieldType": "textarea", "sectionId": "field_1773597746046_6xhqpc" }
+      },
+      "field_1773597746046_bltzsx": {
+        "ui:widget": "signature",
+        "ui:fieldMeta": { "labelEs": "Firma del Entrenador", "fieldType": "signature", "sectionId": "field_1773597746046_6xhqpc", "descriptionEs": "Al firmar este formulario, confirma que ha discutido esta revisión en detalle." }
+      },
+      "field_1773597746046_551kcp": { "ui:fieldMeta": { "labelEs": "Fecha de Firma", "fieldType": "date", "sectionId": "field_1773597746046_6xhqpc" } }
+    }
+  }
+}
