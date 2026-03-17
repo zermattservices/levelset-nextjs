@@ -404,13 +404,14 @@ export interface EvaluationItem {
   source: EvaluationSource;
   employee: {
     id: string;
-    full_name: string;
+    name: string;       // employees.full_name mapped to 'name' for API consistency
     role: string;
     location_id: string;
   };
   evaluation: {
     template_id: string;
     name: string;
+    is_active: boolean;  // form template active status — "Start Review" disabled when false
   };
   status: EvaluationStatus;
   last_completed_at: string | null;
@@ -421,6 +422,7 @@ export interface EvaluationItem {
   // For overrides (cadence-based only)
   rule_id?: string;
   period_start?: string;
+  defer_until?: string | null;
   // For event-triggered only
   request_id?: string;
 }
@@ -725,13 +727,14 @@ async function handler(
         source: 'scheduled',
         employee: {
           id: emp.id,
-          full_name: emp.full_name,
+          name: emp.full_name,
           role: emp.role,
           location_id: emp.location_id,
         },
         evaluation: {
           template_id: rule.form_template_id,
           name: rule.form_templates?.name ?? '',
+          is_active: rule.form_templates?.is_active ?? true,
         },
         status,
         last_completed_at: latest?.created_at ?? null,
@@ -741,6 +744,7 @@ async function handler(
         can_conduct: canConduct,
         rule_id: rule.id,
         period_start: periodStart,
+        defer_until: override?.defer_until ?? null,
       });
     }
   }
@@ -748,7 +752,7 @@ async function handler(
   // 7. Fetch event-triggered evaluation requests (pending only + recently completed within 30 days)
   let requestQuery = supabase
     .from('evaluation_requests')
-    .select('*, form_templates(id, name, name_es)')
+    .select('*, form_templates(id, name, name_es, is_active)')
     .eq('org_id', orgId);
 
   if (locationId) {
@@ -793,13 +797,14 @@ async function handler(
       source: request.trigger_source,
       employee: {
         id: emp.id,
-        full_name: emp.full_name,
+        name: emp.full_name,
         role: emp.role,
         location_id: emp.location_id,
       },
       evaluation: {
         template_id: request.form_template_id,
         name: request.form_templates?.name ?? '',
+        is_active: request.form_templates?.is_active ?? true,
       },
       status,
       last_completed_at: request.status === 'completed' ? request.updated_at : null,
@@ -1566,6 +1571,7 @@ This is a DataGrid Pro component following the pattern from `EvaluationsTable.ts
 - Reference `apps/dashboard/components/CodeComponents/EvaluationsTable.tsx` for DataGrid Pro styling patterns (column definitions, `sx` prop, font family)
 - Use `Chip` from MUI for status badges: overdue = `var(--ls-color-destructive-soft)`, due = `var(--ls-color-warning-soft)`, completed = `var(--ls-color-success-soft)`, not_yet_due/skipped = `var(--ls-color-muted-soft)`
 - **"Start Review"** opens an inline dialog/modal that renders the form via RJSF (using the form template's `schema` and `ui_schema`). The employee is shown as a read-only header (name + role). On submission, POST to `/api/forms/submissions` with `{ template_id, employee_id, form_type: 'evaluation', response_data, org_id, location_id }`. For event-triggered items, also PATCH `/api/evaluations/requests` to mark completed. After submission, call `onRefresh()`.
+- **"Start Review" must be disabled with a tooltip** when the linked form template has `is_active === false`. The `EvaluationItem` should carry `form_active` boolean from the API response for this check.
 - "View" button triggers `EvaluationScoreSummary` inline expand or popover
 - Import `OverrideMenu` for the row action menu on cadence-based items (only for `source === 'scheduled'`)
 - Pass `deferUntil` through to the status display — deferred items show the defer date
@@ -1921,6 +1927,36 @@ Note: This requires `certification_evaluation_rules` to be configured first (Tas
 git add scripts/migrate-legacy-evaluations.ts
 git commit -m "feat(evaluations): add script to migrate active legacy evaluations to evaluation_requests"
 ```
+
+### Task 7d: Create Certification Evaluation Form Templates for Reece Howard
+
+This is a manual/scripted step. Reece Howard needs evaluation form templates (type: 'evaluation') in `form_templates` that the certification rules modal can link to. Without these, the cert rules have nothing to reference.
+
+**Files:**
+- Create: `scripts/seed-certification-eval-templates.ts`
+
+- [ ] **Step 1: Write a seed script that creates evaluation form templates for Reece Howard**
+
+The script should:
+1. Look up the Reece Howard org_id (from Buda location)
+2. Look up the "evaluations" form group (system group, slug: 'evaluations')
+3. Create one or more evaluation form templates with `form_type: 'evaluation'` using sensible defaults for certification review sections (Leadership Culture, Execution of Core Strategy, What's Important Now, Business Results — matching the existing `DEFAULT_SECTIONS` in `EvaluationSettingsModal.tsx`)
+4. These are role-specific — create separate templates per role if needed, or a single template that works for all certification roles
+
+Run via: `npx tsx scripts/seed-certification-eval-templates.ts`
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add scripts/seed-certification-eval-templates.ts
+git commit -m "feat(evaluations): add script to seed certification evaluation form templates for Reece Howard"
+```
+
+---
+
+## Note: Mobile App Integration
+
+Mobile app integration (leaders seeing "My Evaluations" in the React Native app) is **out of scope for this plan**. It will be implemented as a separate task after the dashboard evaluations page is complete and stable. The API endpoints built here (`/api/evaluations/status`, etc.) will be reused by the mobile app — no separate mobile API is needed.
 
 ---
 
