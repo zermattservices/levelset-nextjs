@@ -87,7 +87,7 @@ export function ScheduleRuleDialog({
       try {
         const supabase = createSupabaseClient();
         const [templatesRes, rolesResult] = await Promise.all([
-          fetch(`/api/forms?org_id=${orgId}`).then((r) => r.json()),
+          fetch(`/api/forms?org_id=${orgId}&form_type=evaluation`, { credentials: 'include' }),
           supabase
             .from('org_roles')
             .select('*')
@@ -97,12 +97,14 @@ export function ScheduleRuleDialog({
 
         if (cancelled) return;
 
+        if (!templatesRes.ok) throw new Error('Failed to load form templates');
+        const templatesData = await templatesRes.json();
         if (rolesResult.error) throw new Error('Failed to load roles');
 
-        // Filter to active evaluation-type templates
-        const allTemplates = templatesRes.templates ?? templatesRes ?? [];
+        // The API returns { templates: [...] }
+        const allTemplates = templatesData.templates ?? [];
         const evalTemplates = allTemplates.filter(
-          (t: any) => t.form_type === 'evaluation' && t.is_active
+          (t: any) => t.is_active
         );
         setFormTemplates(evalTemplates);
         setRoles(rolesResult.data as OrgRole[] ?? []);

@@ -90,7 +90,7 @@ export function CertificationRulesModal({
           fetch(
             `/api/evaluations/certification-rules?org_id=${encodeURIComponent(orgId)}&location_id=${encodeURIComponent(locationId)}`
           ),
-          fetch(`/api/forms?org_id=${encodeURIComponent(orgId)}`).then((r) => r.json()),
+          fetch(`/api/forms?org_id=${encodeURIComponent(orgId)}&form_type=evaluation`, { credentials: 'include' }),
           supabase
             .from('org_roles')
             .select('*')
@@ -103,13 +103,17 @@ export function CertificationRulesModal({
         if (!rulesRes.ok) {
           throw new Error('Failed to load certification rules');
         }
+        if (!templatesJsonRes.ok) {
+          throw new Error('Failed to load form templates');
+        }
         const rulesData = await rulesRes.json();
+        const templatesData = await templatesJsonRes.json();
         if (rolesRes.error) throw new Error('Failed to load roles');
 
         // Filter to active evaluation-type templates
-        const allTemplates = templatesJsonRes.templates ?? templatesJsonRes ?? [];
+        const allTemplates = templatesData.templates ?? [];
         const evalTemplates = allTemplates.filter(
-          (t: any) => t.form_type === 'evaluation' && t.is_active
+          (t: any) => t.is_active
         );
 
         setRules(rulesData.rules ?? []);
