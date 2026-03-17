@@ -23,10 +23,10 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AddIcon from "@mui/icons-material/Add";
 import SyncIcon from "@mui/icons-material/Sync";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { EmployeeTableSkeleton } from "./Skeletons/EmployeeTableSkeleton";
-import { EvaluationsTable } from "./EvaluationsTable";
-import { PIPTable } from "./PIPTable";
 import { RolePill } from "./shared/RolePill";
+import { CertificationRulesModal } from "../evaluations/CertificationRulesModal";
 import { DataGridPro, GridColDef, gridClasses } from "@mui/x-data-grid-pro";
 import { Button } from "@mui/material";
 import { AddEmployeeModal } from "./AddEmployeeModal";
@@ -63,8 +63,8 @@ export function RosterTable(props: RosterTableProps) {
   const { locationId, currentUserRoleProp } = props;
   const { selectedLocationOrgId, userHierarchyLevel } = useLocationContext();
   const { has } = usePermissions();
-  const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations' | 'pip'>('employees');
-  const [hasPlannedEvaluations, setHasPlannedEvaluations] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState<'employees'>('employees');
+  const [certRulesModalOpen, setCertRulesModalOpen] = React.useState(false);
   const [addEmployeeModalOpen, setAddEmployeeModalOpen] = React.useState(false);
   const [syncEmployeesModalOpen, setSyncEmployeesModalOpen] = React.useState(false);
   const [syncHireDateModalOpen, setSyncHireDateModalOpen] = React.useState(false);
@@ -119,7 +119,7 @@ export function RosterTable(props: RosterTableProps) {
   }, [selectedLocationOrgId]);
 
   const handleTabChange = (_event: React.SyntheticEvent, value: string) => {
-    setActiveTab((value as 'employees' | 'evaluations' | 'pip') ?? 'employees');
+    setActiveTab('employees');
   };
 
   return (
@@ -127,32 +127,30 @@ export function RosterTable(props: RosterTableProps) {
       <TabContainer>
         <StyledTabs value={activeTab} onChange={handleTabChange} sx={{ flex: 1 }}>
           <StyledTab label="Employees" value="employees" />
-          {featureToggles.enable_evaluations && (
-            <StyledTab
-              value="evaluations"
-              label={
-                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
-                  <span>Pending Evaluations</span>
-                  {hasPlannedEvaluations && (
-                    <Box
-                      component="span"
-                      sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: '#facc15',
-                      }}
-                    />
-                  )}
-                </Box>
-              }
-            />
-          )}
-          {featureToggles.enable_pip_logic && (
-            <StyledTab label="PIP" value="pip" />
-          )}
         </StyledTabs>
         <ButtonContainer>
+          {featureToggles.enable_evaluations && selectedLocationOrgId && (
+            <Button
+              variant="outlined"
+              startIcon={<SettingsOutlinedIcon />}
+              onClick={() => setCertRulesModalOpen(true)}
+              sx={{
+                fontFamily,
+                fontSize: 14,
+                fontWeight: 500,
+                textTransform: 'none',
+                color: 'var(--ls-color-muted)',
+                borderColor: 'var(--ls-color-border)',
+                borderRadius: '8px',
+                '&:hover': {
+                  borderColor: 'var(--ls-color-disabled-text)',
+                  backgroundColor: 'var(--ls-color-neutral-foreground)',
+                },
+              }}
+            >
+              Cert Rules
+            </Button>
+          )}
           <Button
             variant="outlined"
             startIcon={<AddIcon />}
@@ -244,21 +242,7 @@ export function RosterTable(props: RosterTableProps) {
       </TabContainer>
 
       <Box sx={{ mt: 2 }}>
-        {activeTab === 'employees' ? (
-          <EmployeesTableView {...props} key={refreshKey} featureToggles={featureToggles} />
-        ) : activeTab === 'evaluations' ? (
-          <EvaluationsTable
-            locationId={locationId}
-            className={props.className}
-            onPlannedStatusChange={setHasPlannedEvaluations}
-            readOnly={!canEditFullRoster}
-          />
-        ) : (
-          <PIPTable
-            locationId={locationId}
-            className={props.className}
-          />
-        )}
+        <EmployeesTableView {...props} key={refreshKey} featureToggles={featureToggles} />
       </Box>
 
       <AddEmployeeModal
@@ -291,6 +275,15 @@ export function RosterTable(props: RosterTableProps) {
           setRefreshKey(prev => prev + 1);
         }}
       />
+
+      {featureToggles.enable_evaluations && selectedLocationOrgId && (
+        <CertificationRulesModal
+          open={certRulesModalOpen}
+          onClose={() => setCertRulesModalOpen(false)}
+          locationId={locationId}
+          orgId={selectedLocationOrgId}
+        />
+      )}
 
     </Box>
   );

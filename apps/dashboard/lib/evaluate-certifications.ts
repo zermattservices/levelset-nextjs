@@ -1,3 +1,11 @@
+// TODO: Certification module migration (see docs/superpowers/specs/2026-03-17-evaluations-page-design.md)
+// 1. Replace .from('evaluations').insert() with .from('evaluation_requests').insert()
+//    - Use certification_evaluation_rules to determine form_template_id
+//    - Set trigger_source based on transition type (certification_pending or certification_pip)
+// 2. Remove hardcoded .eq('role', 'Team Member') filter
+//    - Use certification_evaluation_rules.target_role_ids to determine eligible roles
+// 3. Bug: Status transitions not producing pending evaluations — needs investigation
+
 /**
  * Core certification evaluation logic
  * Implements state machine for certification status transitions
