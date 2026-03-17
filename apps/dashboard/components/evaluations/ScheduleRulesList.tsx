@@ -57,14 +57,14 @@ export function ScheduleRulesList({ orgId, getAccessToken }: ScheduleRulesListPr
 
       if (!rulesRes.ok) {
         const body = await rulesRes.json().catch(() => ({}));
-        throw new Error(body.error || 'Failed to load schedule rules');
+        throw new Error(body.error || 'Failed to load evaluation rules');
       }
 
       const data = await rulesRes.json();
       setRules(data.rules ?? data);
       if (rolesResult.data) setOrgRoles(rolesResult.data as OrgRole[]);
     } catch (err: any) {
-      setError(err.message || 'Failed to load schedule rules');
+      setError(err.message || 'Failed to load evaluation rules');
     } finally {
       setLoading(false);
     }
@@ -164,7 +164,7 @@ export function ScheduleRulesList({ orgId, getAccessToken }: ScheduleRulesListPr
       >
         <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)' }}>
           {rules.length === 0
-            ? 'No schedule rules configured'
+            ? 'No evaluation rules configured'
             : `${rules.length} rule${rules.length !== 1 ? 's' : ''}`}
         </Typography>
         {orgId && (
@@ -210,10 +210,10 @@ export function ScheduleRulesList({ orgId, getAccessToken }: ScheduleRulesListPr
         >
           <SettingsOutlinedIcon sx={{ fontSize: 40, color: 'var(--ls-color-muted)', opacity: 0.5 }} />
           <Typography sx={{ fontFamily, fontSize: 16, fontWeight: 600, color: 'var(--ls-color-text-primary)' }}>
-            No schedule rules configured
+            No evaluation rules configured
           </Typography>
           <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)' }}>
-            Schedule rules define when evaluations are automatically assigned to employees.
+            Evaluation rules define when evaluations are automatically assigned to employees.
           </Typography>
         </Box>
       ) : (

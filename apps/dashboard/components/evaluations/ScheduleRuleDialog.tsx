@@ -86,14 +86,8 @@ export function ScheduleRuleDialog({
       setError(null);
       try {
         const supabase = createSupabaseClient();
-        const [templatesResult, rolesResult] = await Promise.all([
-          supabase
-            .from('form_templates')
-            .select('id, name, is_active')
-            .eq('org_id', orgId)
-            .eq('form_type', 'evaluation')
-            .eq('is_active', true)
-            .order('name', { ascending: true }),
+        const [templatesRes, rolesResult] = await Promise.all([
+          fetch(`/api/forms?org_id=${orgId}`).then((r) => r.json()),
           supabase
             .from('org_roles')
             .select('*')
@@ -103,10 +97,14 @@ export function ScheduleRuleDialog({
 
         if (cancelled) return;
 
-        if (templatesResult.error) throw new Error('Failed to load form templates');
         if (rolesResult.error) throw new Error('Failed to load roles');
 
-        setFormTemplates(templatesResult.data ?? []);
+        // Filter to active evaluation-type templates
+        const allTemplates = templatesRes.templates ?? templatesRes ?? [];
+        const evalTemplates = allTemplates.filter(
+          (t: any) => t.form_type === 'evaluation' && t.is_active
+        );
+        setFormTemplates(evalTemplates);
         setRoles(rolesResult.data as OrgRole[] ?? []);
       } catch (err: any) {
         if (!cancelled) setError(err.message || 'Failed to load data');
@@ -183,13 +181,13 @@ export function ScheduleRuleDialog({
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || 'Failed to save schedule rule');
+        throw new Error(body.error || 'Failed to save evaluation rule');
       }
 
       onSaved();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Failed to save schedule rule');
+      setError(err.message || 'Failed to save evaluation rule');
     } finally {
       setSaving(false);
     }
@@ -204,7 +202,7 @@ export function ScheduleRuleDialog({
       PaperProps={{ sx: dialogPaperSx }}
     >
       <DialogTitle sx={dialogTitleSx}>
-        {isEdit ? 'Edit Schedule Rule' : 'Create Schedule Rule'}
+        {isEdit ? 'Edit Evaluation Rule' : 'Create Evaluation Rule'}
         <IconButton size="small" onClick={onClose} aria-label="Close dialog">
           <CloseIcon sx={{ fontSize: 18 }} />
         </IconButton>

@@ -86,17 +86,11 @@ export function CertificationRulesModal({
       try {
         const supabase = createSupabaseClient();
 
-        const [rulesRes, templatesRes, rolesRes] = await Promise.all([
+        const [rulesRes, templatesJsonRes, rolesRes] = await Promise.all([
           fetch(
             `/api/evaluations/certification-rules?org_id=${encodeURIComponent(orgId)}&location_id=${encodeURIComponent(locationId)}`
           ),
-          supabase
-            .from('form_templates')
-            .select('id, name, is_active')
-            .eq('org_id', orgId)
-            .eq('form_type', 'evaluation')
-            .eq('is_active', true)
-            .order('name', { ascending: true }),
+          fetch(`/api/forms?org_id=${encodeURIComponent(orgId)}`).then((r) => r.json()),
           supabase
             .from('org_roles')
             .select('*')
@@ -110,11 +104,16 @@ export function CertificationRulesModal({
           throw new Error('Failed to load certification rules');
         }
         const rulesData = await rulesRes.json();
-        if (templatesRes.error) throw new Error('Failed to load form templates');
         if (rolesRes.error) throw new Error('Failed to load roles');
 
+        // Filter to active evaluation-type templates
+        const allTemplates = templatesJsonRes.templates ?? templatesJsonRes ?? [];
+        const evalTemplates = allTemplates.filter(
+          (t: any) => t.form_type === 'evaluation' && t.is_active
+        );
+
         setRules(rulesData.rules ?? []);
-        setFormTemplates(templatesRes.data ?? []);
+        setFormTemplates(evalTemplates);
         setRoles((rolesRes.data as OrgRole[]) ?? []);
       } catch (err: any) {
         if (!cancelled) setError(err.message || 'Failed to load data');
