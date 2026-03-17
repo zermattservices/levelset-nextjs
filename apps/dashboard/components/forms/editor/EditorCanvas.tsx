@@ -1,17 +1,28 @@
 import * as React from 'react';
 import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { IconButton } from '@mui/material';
 import sty from './EditorCanvas.module.css';
 import { EditorFieldCard } from './EditorFieldCard';
 import type { FormField } from '@/lib/forms/schema-builder';
 
-/** Registers the section body (not header) as a droppable target. */
-function DroppableSectionBody({ sectionId, isEmpty, fieldIds, children }: { sectionId: string; isEmpty: boolean; fieldIds: string[]; children?: React.ReactNode }) {
+/**
+ * Droppable zone inside a section — detects when a field is dragged INTO a section.
+ * Does NOT wrap its own SortableContext (that's the critical constraint).
+ */
+function DroppableSectionBody({
+  sectionId,
+  children,
+}: {
+  sectionId: string;
+  children?: React.ReactNode;
+}) {
   const { setNodeRef, isOver } = useDroppable({
     id: `section-drop-${sectionId}`,
     data: { type: 'section', sectionId },
@@ -22,35 +33,98 @@ function DroppableSectionBody({ sectionId, isEmpty, fieldIds, children }: { sect
       ref={setNodeRef}
       className={sty.sectionBody}
       style={{
-        background: isOver ? 'var(--ls-color-brand-soft)' : 'transparent',
-        minHeight: isEmpty ? 48 : undefined,
+        background: isOver ? 'var(--ls-color-brand-soft)' : undefined,
       }}
     >
-      <SortableContext items={fieldIds} strategy={verticalListSortingStrategy}>
-        {children}
-      </SortableContext>
-      {isEmpty && !isOver && (
-        <span className={sty.sectionFieldsEmptyText}>Drag fields here</span>
-      )}
+      {children}
     </div>
   );
 }
 
-/** Thin droppable zone between section cards — dropping here removes section assignment. */
-function SectionGapDropzone({ gapId, afterSectionId }: { gapId: string; afterSectionId?: string }) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: gapId,
-    data: { type: 'section-gap', afterSectionId },
+/**
+ * Sortable wrapper for section containers — makes sections draggable/reorderable.
+ */
+function SortableSectionContainer({
+  field,
+  isCollapsed,
+  onToggle,
+  onSelectField,
+  onDeleteField,
+  stats,
+  children,
+}: {
+  field: FormField;
+  isCollapsed: boolean;
+  onToggle: () => void;
+  onSelectField: (id: string) => void;
+  onDeleteField: (id: string) => void;
+  stats: { fieldCount: number; totalWeight: number };
+  children: React.ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: field.id,
+    data: { type: 'canvas-field', fieldId: field.id },
   });
 
+  const style: React.CSSProperties = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+    opacity: isDragging ? 0.3 : 1,
+  };
+
   return (
-    <div
-      ref={setNodeRef}
-      className={`${sty.sectionGap} ${isOver ? sty.sectionGapOver : ''}`}
-    >
-      {isOver && (
-        <span className={sty.sectionGapLabel}>Drop between sections</span>
-      )}
+    <div ref={setNodeRef} style={style} className={sty.sectionContainer}>
+      <div
+        className={`${sty.sectionHeader} ${isCollapsed ? sty.sectionHeaderCollapsed : ''}`}
+        onClick={() => {
+          onToggle();
+          onSelectField(field.id);
+        }}
+      >
+        <div className={sty.sectionDragHandle} {...listeners} {...attributes}>
+          <DragIndicatorIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
+        </div>
+        {isCollapsed ? (
+          <KeyboardArrowRightIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
+        ) : (
+          <KeyboardArrowDownIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
+        )}
+        <span className={sty.sectionName}>
+          {field.settings.sectionName || field.label}
+        </span>
+        <div className={sty.sectionMeta}>
+          <span className={sty.sectionFieldCount}>
+            {stats.fieldCount} field{stats.fieldCount !== 1 ? 's' : ''}
+          </span>
+          {stats.totalWeight > 0 && (
+            <span className={sty.sectionWeight}>
+              {stats.totalWeight}pts
+            </span>
+          )}
+        </div>
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteField(field.id);
+          }}
+          sx={{
+            padding: '2px',
+            opacity: 0.4,
+            '&:hover': { opacity: 1, color: 'var(--ls-color-destructive)' },
+          }}
+        >
+          <DeleteOutlineIcon sx={{ fontSize: 14 }} />
+        </IconButton>
+      </div>
+      {!isCollapsed && children}
     </div>
   );
 }
@@ -88,51 +162,36 @@ export function EditorCanvas({
     });
   };
 
-  // Identify sections and build structure from the fields array
-  const sectionFields = React.useMemo(
-    () => fields.filter((f) => f.type === 'section'),
-    [fields]
-  );
-
-  const hasSections = sectionFields.length > 0;
-
-  // Build a set of all field IDs that are children of a section
+  // Build child-to-section mapping
   const childFieldIds = React.useMemo(() => {
     const set = new Set<string>();
-    for (const section of sectionFields) {
-      for (const childId of section.children || []) {
-        set.add(childId);
-      }
-    }
-    return set;
-  }, [sectionFields]);
-
-  // Build fieldIds in visual order for SortableContext
-  const fieldIds = React.useMemo(() => {
-    if (!hasSections) return fields.map((f) => f.id);
-
-    const ordered: string[] = [];
     for (const field of fields) {
       if (field.type === 'section') {
         for (const childId of field.children || []) {
-          ordered.push(childId);
+          set.add(childId);
         }
-      } else if (!childFieldIds.has(field.id)) {
-        ordered.push(field.id);
       }
     }
-    return ordered;
-  }, [fields, hasSections, childFieldIds]);
+    return set;
+  }, [fields]);
 
-  // Section stats: field count and total weight from scored children
+  // Top-level sortable IDs: sections + fields NOT inside any section.
+  // Section children get their own SortableContext inside each section body.
+  const topLevelIds = React.useMemo(
+    () => fields.filter((f) => !childFieldIds.has(f.id)).map((f) => f.id),
+    [fields, childFieldIds]
+  );
+
+  // Section stats
   const sectionStats = React.useMemo(() => {
     const stats = new Map<string, { fieldCount: number; totalWeight: number }>();
     const fieldMap = new Map(fields.map((f) => [f.id, f]));
 
-    for (const section of sectionFields) {
+    for (const field of fields) {
+      if (field.type !== 'section') continue;
       let fieldCount = 0;
       let totalWeight = 0;
-      for (const childId of section.children || []) {
+      for (const childId of field.children || []) {
         const child = fieldMap.get(childId);
         if (child) {
           fieldCount++;
@@ -141,12 +200,11 @@ export function EditorCanvas({
           }
         }
       }
-      stats.set(section.id, { fieldCount, totalWeight });
+      stats.set(field.id, { fieldCount, totalWeight });
     }
     return stats;
-  }, [fields, sectionFields]);
+  }, [fields]);
 
-  // Total weight across ALL scored fields (in sections + top-level)
   const totalWeight = React.useMemo(() => {
     return fields
       .filter((f) => f.settings.scored && f.settings.weight)
@@ -186,86 +244,48 @@ export function EditorCanvas({
           </span>
         </div>
       ) : (
-        <SortableContext items={fieldIds} strategy={verticalListSortingStrategy}>
+        <SortableContext items={topLevelIds} strategy={verticalListSortingStrategy}>
           <div className={sty.fieldList}>
             {fields.map((field) => {
+              // Section: render as a container with header + children inside
               if (field.type === 'section') {
-                const childFields = (field.children || [])
+                const childIds = field.children || [];
+                const childFields = childIds
                   .map((id) => fields.find((f) => f.id === id))
                   .filter(Boolean) as FormField[];
                 const stats = sectionStats.get(field.id) || { fieldCount: 0, totalWeight: 0 };
                 const isCollapsed = collapsedSections.has(field.id);
 
                 return (
-                  <React.Fragment key={`section-${field.id}`}>
-                    <div className={sty.sectionContainer}>
-                      <div
-                        className={`${sty.sectionHeader} ${isCollapsed ? sty.sectionHeaderCollapsed : ''}`}
-                        onClick={() => {
-                          toggleSection(field.id);
-                          onSelectField(field.id);
-                        }}
-                      >
-                        {isCollapsed ? (
-                          <KeyboardArrowRightIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
+                  <SortableSectionContainer
+                    key={`section-${field.id}`}
+                    field={field}
+                    isCollapsed={isCollapsed}
+                    onToggle={() => toggleSection(field.id)}
+                    onSelectField={onSelectField}
+                    onDeleteField={onDeleteField}
+                    stats={stats}
+                  >
+                    <DroppableSectionBody sectionId={field.id}>
+                      <SortableContext items={childIds} strategy={verticalListSortingStrategy}>
+                        {childFields.length === 0 ? (
+                          <span className={sty.sectionFieldsEmptyText}>Drag fields here</span>
                         ) : (
-                          <KeyboardArrowDownIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
+                          childFields.map((f) => renderFieldCard(f))
                         )}
-                        <span className={sty.sectionName}>
-                          {field.settings.sectionName || field.label}
-                        </span>
-                        <div className={sty.sectionMeta}>
-                          <span className={sty.sectionFieldCount}>
-                            {stats.fieldCount} field{stats.fieldCount !== 1 ? 's' : ''}
-                          </span>
-                          {stats.totalWeight > 0 && (
-                            <span className={sty.sectionWeight}>
-                              {stats.totalWeight}pts
-                            </span>
-                          )}
-                        </div>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteField(field.id);
-                          }}
-                          sx={{
-                            padding: '2px',
-                            opacity: 0.4,
-                            '&:hover': { opacity: 1, color: 'var(--ls-color-destructive)' },
-                          }}
-                        >
-                          <DeleteOutlineIcon sx={{ fontSize: 14 }} />
-                        </IconButton>
-                      </div>
-                      {!isCollapsed && (
-                        <DroppableSectionBody
-                          sectionId={field.id}
-                          isEmpty={childFields.length === 0}
-                          fieldIds={childFields.map((f) => f.id)}
-                        >
-                          {childFields.map((f) => renderFieldCard(f))}
-                        </DroppableSectionBody>
-                      )}
-                    </div>
-                    <SectionGapDropzone
-                      key={`gap-after-${field.id}`}
-                      gapId={`section-gap-after-${field.id}`}
-                      afterSectionId={field.id}
-                    />
-                  </React.Fragment>
+                      </SortableContext>
+                    </DroppableSectionBody>
+                  </SortableSectionContainer>
                 );
               }
 
-              // Skip fields that are children of a section (rendered inside their section above)
+              // Skip fields that belong to a section — rendered inside their section above
               if (childFieldIds.has(field.id)) return null;
 
               // Top-level field
               return renderFieldCard(field);
             })}
 
-            {/* Weight total bar — only show when there are scored fields */}
             {hasScoredFields && (
               <div className={sty.weightTotalBar}>
                 <span className={sty.weightTotalText}>

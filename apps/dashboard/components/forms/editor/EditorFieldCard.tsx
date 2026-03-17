@@ -90,7 +90,7 @@ export function EditorFieldCard({
   const style: React.CSSProperties = isOverlay
     ? {}
     : {
-        transform: disableSortTransform ? undefined : CSS.Transform.toString(transform),
+        transform: disableSortTransform ? undefined : CSS.Translate.toString(transform),
         transition: disableSortTransform ? undefined : transition,
         opacity: isDragging ? 0.3 : 1,
       };

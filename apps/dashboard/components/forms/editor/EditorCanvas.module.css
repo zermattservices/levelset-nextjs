@@ -15,7 +15,7 @@
 .fieldList {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 8px;
   max-width: 600px;
   margin: 0 auto;
 }
@@ -56,7 +56,6 @@
   flex-direction: column;
   border: 1px solid var(--ls-color-muted-border);
   border-radius: 10px;
-  overflow: hidden;
   background: var(--ls-color-bg-card);
   transition: border-color 200ms ease-out;
 }
@@ -72,6 +71,7 @@
   padding: 10px 14px;
   background: var(--ls-color-neutral-foreground);
   border-bottom: 1px solid var(--ls-color-muted-border);
+  border-radius: 10px 10px 0 0;
   cursor: pointer;
   user-select: none;
   transition: background-color 150ms ease-out;
@@ -83,6 +83,19 @@
 
 .sectionHeaderCollapsed {
   border-bottom: none;
+  border-radius: 10px;
+}
+
+.sectionDragHandle {
+  display: flex;
+  align-items: center;
+  cursor: grab;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.sectionDragHandle:active {
+  cursor: grabbing;
 }
 
 .sectionName {
@@ -116,27 +129,14 @@
   white-space: nowrap;
 }
 
-.sectionFields {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px;
-  min-height: 40px;
-}
-
-.sectionFieldsInline {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 0 12px;
-}
-
 .sectionBody {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 10px;
-  transition: background-color 150ms ease, border-color 150ms ease;
+  min-height: 40px;
+  border-radius: 0 0 10px 10px;
+  transition: background-color 150ms ease;
 }
 
 .sectionFieldsEmptyText {
@@ -150,52 +150,7 @@
   font-style: italic;
 }
 
-.sectionFieldsEmpty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 16px;
-  font-family: "Satoshi", sans-serif;
-  font-size: 12px;
-  color: var(--ls-color-muted);
-  font-style: italic;
-  border: 1px dashed var(--ls-color-muted-border);
-  border-radius: 6px;
-  margin: 8px;
-}
-
-/* ── Gap drop zones between sections ──────────────────────── */
-
-.sectionGap {
-  height: 8px;
-  border-radius: 8px;
-  border: 2px dashed transparent;
-  transition: height 150ms ease, background-color 150ms ease, border-color 150ms ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.sectionGapOver {
-  height: 56px;
-  background: var(--ls-color-brand-soft);
-  border-color: var(--ls-color-brand-base);
-}
-
-.sectionGapLabel {
-  font-family: "Satoshi", sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ls-color-brand-base);
-}
-
-.unsectionedArea {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 4px 0;
-}
+/* ── Weight total bar ─────────────────────────────────────── */
 
 .weightTotalBar {
   display: flex;
@@ -213,16 +168,7 @@
   color: var(--ls-color-text-primary);
 }
 
-/* Collapse/expand animation */
-.sectionFieldsCollapsible {
-  overflow: hidden;
-  transition: max-height 200ms ease-out, opacity 200ms ease-out;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .sectionFieldsCollapsible {
-    transition: none;
-  }
   .sectionHeader,
   .sectionContainer {
     transition: none;

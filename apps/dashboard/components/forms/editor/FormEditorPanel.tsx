@@ -2,8 +2,10 @@ import * as React from 'react';
 import {
   DndContext,
   DragOverlay,
+  closestCenter,
   pointerWithin,
   type DragStartEvent,
+  type DragOverEvent,
   type DragEndEvent,
   type CollisionDetection,
 } from '@dnd-kit/core';
@@ -46,31 +48,70 @@ export function FormEditorPanel({ template, onSave, readOnly }: FormEditorPanelP
   const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const fieldsInitialized = React.useRef(false);
 
-  // Collision detection for DnD — handles section bodies, gaps, and field reordering
+  // Collision detection: context-aware based on pointer position.
+  // When pointer is inside a section body → match section children or the section body droppable.
+  // When pointer is outside all section bodies → match only top-level items (sections + ungrouped fields).
   const collisionDetection = React.useMemo<CollisionDetection>(() => {
+    // Build child-to-section lookup from current fields
+    const childToSection = new Map<string, string>();
+    for (const f of fields) {
+      if (f.type === 'section') {
+        for (const childId of f.children || []) {
+          childToSection.set(childId, f.id);
+        }
+      }
+    }
+
     return (args) => {
-      const nonCanvas = args.droppableContainers.filter((c) => c.id !== 'editor-canvas');
+      // 1. Check if pointer is physically inside any section body
+      const sectionBodies = args.droppableContainers.filter((c) =>
+        String(c.id).startsWith('section-drop-')
+      );
+      const sectionHits = sectionBodies.length > 0
+        ? pointerWithin({ ...args, droppableContainers: sectionBodies })
+        : [];
 
-      if (nonCanvas.length > 0) {
-        const hits = pointerWithin({ ...args, droppableContainers: nonCanvas });
+      if (sectionHits.length > 0) {
+        // Pointer is inside a section body — try to match children for within-section reorder
+        const sectionDropId = String(sectionHits[0].id);
+        const sectionId = sectionDropId.replace('section-drop-', '');
 
-        if (hits.length > 0) {
-          // 1. Gap droppables — highest priority
-          const gapHit = hits.find((h) => String(h.id).startsWith('section-gap-'));
-          if (gapHit) return [gapHit];
+        const sectionChildContainers = args.droppableContainers.filter((c) =>
+          childToSection.get(String(c.id)) === sectionId
+        );
 
-          // 2. Section body droppable
-          const sectionHit = hits.find((h) => String(h.id).startsWith('section-drop-'));
-          if (sectionHit) return [sectionHit];
+        if (sectionChildContainers.length > 0) {
+          const childHits = closestCenter({ ...args, droppableContainers: sectionChildContainers });
+          if (childHits.length > 0) {
+            return childHits;
+          }
+        }
 
-          // 3. Field reorder
-          return [hits[0]];
+        // No close child — return section body droppable (triggers insert-into-section)
+        return [sectionHits[0]];
+      }
+
+      // 2. Pointer is outside all section bodies — match top-level items only
+      const topLevelContainers = args.droppableContainers.filter((c) => {
+        const id = String(c.id);
+        return !id.startsWith('section-drop-') && !childToSection.has(id);
+      });
+
+      if (topLevelContainers.length > 0) {
+        const topHits = closestCenter({ ...args, droppableContainers: topLevelContainers });
+        if (topHits.length > 0 && topHits[0].id !== 'editor-canvas') {
+          return topHits;
+        }
+        // Canvas-only match — still return it
+        if (topHits.length > 0) {
+          return topHits;
         }
       }
 
-      return pointerWithin(args);
+      // 3. Fallback
+      return closestCenter(args);
     };
-  }, []);
+  }, [fields]);
 
   // Initialize fields from template schema
   React.useEffect(() => {
@@ -165,8 +206,15 @@ export function FormEditorPanel({ template, onSave, readOnly }: FormEditorPanelP
     [updateFields]
   );
 
+  // Snapshot of fields before a drag starts — restored on cancel
+  const fieldsBeforeDragRef = React.useRef<FormField[] | null>(null);
+  // Ref for fast container-change detection in onDragOver (avoids stale closure)
+  const fieldsRef = React.useRef(fields);
+  fieldsRef.current = fields;
+
   // DnD handlers
   const handleDragStart = (event: DragStartEvent) => {
+    fieldsBeforeDragRef.current = fields;
     const { active } = event;
     const data = active.data.current;
 
@@ -179,20 +227,98 @@ export function FormEditorPanel({ template, onSave, readOnly }: FormEditorPanelP
     }
   };
 
+  /**
+   * onDragOver: moves items between SortableContexts in real-time so that
+   * sort transforms are calculated correctly within each container.
+   * Only fires state updates when the item crosses a container boundary.
+   */
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeData = active.data.current;
+    if (activeData?.type !== 'canvas-field') return;
+
+    const fieldId = active.id as string;
+    const overData = over.data.current;
+    const overId = over.id as string;
+
+    // Use ref for fast check before committing a state update
+    const current = fieldsRef.current;
+
+    // Don't move sections into other sections
+    const draggedF = current.find((f) => f.id === fieldId);
+    if (draggedF?.type === 'section') return;
+
+    // Determine which section the active item is currently in
+    const activeSection = current.find(
+      (f) => f.type === 'section' && f.children?.includes(fieldId)
+    );
+    const activeSectionId = activeSection?.id || null;
+
+    // Determine which section the over target belongs to
+    let overSectionId: string | null = null;
+    if (overData?.type === 'section') {
+      // Over a section body droppable
+      overSectionId = overData.sectionId as string;
+    } else if (overId !== 'editor-canvas') {
+      // Over a field — check if it's inside a section
+      const overSection = current.find(
+        (f) => f.type === 'section' && f.children?.includes(overId)
+      );
+      overSectionId = overSection?.id || null;
+    }
+
+    // No container change — SortableContext handles within-container transforms
+    if (activeSectionId === overSectionId) return;
+
+    // Container change: move item between containers via setFields (no auto-save)
+    setFields((prev) => {
+      // Remove from source section
+      let updated = activeSectionId
+        ? prev.map((f) =>
+            f.id === activeSectionId && f.children?.includes(fieldId)
+              ? { ...f, children: f.children.filter((id) => id !== fieldId) }
+              : f
+          )
+        : prev;
+
+      // Add to target section
+      if (overSectionId) {
+        updated = updated.map((f) => {
+          if (f.id === overSectionId && !f.children?.includes(fieldId)) {
+            const children = [...(f.children || [])];
+            // Insert near the over item if it's a child of this section
+            const overIdx = children.indexOf(overId);
+            if (overIdx >= 0) {
+              children.splice(overIdx, 0, fieldId);
+            } else {
+              children.push(fieldId);
+            }
+            return { ...f, children };
+          }
+          return f;
+        });
+      }
+
+      return updated;
+    });
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    fieldsBeforeDragRef.current = null;
     setDraggedField(null);
     if (!over) return;
 
     const activeData = active.data.current;
     const overData = over.data.current;
 
-    // Dropping from palette onto canvas
+    // ── Palette drops (unchanged) ──────────────────────────────
     if (activeData?.type === 'palette') {
       const newField = createFieldFromType(activeData.fieldType);
 
       if (overData?.type === 'section') {
-        // Dropped into a section — add to section's children
         const targetSectionId = overData.sectionId as string;
         updateFields((prev) => {
           const next = [...prev, newField];
@@ -203,7 +329,6 @@ export function FormEditorPanel({ template, onSave, readOnly }: FormEditorPanelP
           );
         });
       } else if (over.id !== 'editor-canvas') {
-        // Dropped over a field — insert after it
         updateFields((prev) => {
           const overIndex = prev.findIndex((f) => f.id === over.id);
           if (overIndex >= 0) {
@@ -214,7 +339,6 @@ export function FormEditorPanel({ template, onSave, readOnly }: FormEditorPanelP
           return [...prev, newField];
         });
       } else {
-        // Dropped on canvas background — append
         updateFields((prev) => [...prev, newField]);
       }
 
@@ -222,81 +346,73 @@ export function FormEditorPanel({ template, onSave, readOnly }: FormEditorPanelP
       return;
     }
 
-    // Dropping a field into a section
-    if (activeData?.type === 'canvas-field' && overData?.type === 'section') {
-      const fieldId = active.id as string;
-      const targetSectionId = overData.sectionId as string;
+    if (activeData?.type !== 'canvas-field') return;
 
-      updateFields((prev) =>
-        prev.map((f) => {
-          // Remove from any current section's children
-          if (f.type === 'section' && f.children?.includes(fieldId)) {
-            return { ...f, children: f.children.filter((id) => id !== fieldId) };
-          }
-          // Add to target section's children
-          if (f.id === targetSectionId) {
-            return { ...f, children: [...(f.children || []).filter((id) => id !== fieldId), fieldId] };
-          }
-          return f;
-        })
-      );
+    const fieldId = active.id as string;
+    const overId = over.id as string;
+
+    // ── Dropped on section body or canvas — onDragOver already handled the transfer ──
+    if (overData?.type === 'section' || overId === 'editor-canvas') {
+      // Just trigger a save of the current state
+      updateFields((prev) => prev);
       return;
     }
 
-    // Dropping a field into a gap (between sections) — remove from section
-    if (activeData?.type === 'canvas-field' && overData?.type === 'section-gap') {
-      const fieldId = active.id as string;
-      updateFields((prev) =>
-        prev.map((f) => {
-          if (f.type === 'section' && f.children?.includes(fieldId)) {
-            return { ...f, children: f.children.filter((id) => id !== fieldId) };
-          }
-          return f;
-        })
-      );
+    // ── Dropped on same item (no reorder needed but container may have changed) ──
+    if (fieldId === overId) {
+      updateFields((prev) => prev);
       return;
     }
 
-    // Dropping a field onto the canvas background — no-op
-    if (activeData?.type === 'canvas-field' && over.id === 'editor-canvas') {
-      return;
-    }
-
-    // Reordering within canvas (includes within-section reordering)
-    if (activeData?.type === 'canvas-field' && active.id !== over.id) {
-      const fieldId = active.id as string;
-      const overId = over.id as string;
-
+    // ── Section reordering (top-level only, no nesting) ──
+    const draggedF = fields.find((f) => f.id === fieldId);
+    if (draggedF?.type === 'section') {
       updateFields((prev) => {
-        // Check if both fields are in the same section — reorder children array
-        const parentSection = prev.find(
-          (f) => f.type === 'section' && f.children?.includes(fieldId) && f.children?.includes(overId)
-        );
-
-        if (parentSection && parentSection.children) {
-          const oldIdx = parentSection.children.indexOf(fieldId);
-          const newIdx = parentSection.children.indexOf(overId);
-          if (oldIdx >= 0 && newIdx >= 0) {
-            const newChildren = [...parentSection.children];
-            newChildren.splice(oldIdx, 1);
-            newChildren.splice(newIdx, 0, fieldId);
-            return prev.map((f) =>
-              f.id === parentSection.id ? { ...f, children: newChildren } : f
-            );
-          }
-        }
-
-        // Top-level reorder
-        const oldIndex = prev.findIndex((f) => f.id === active.id);
-        const newIndex = prev.findIndex((f) => f.id === over.id);
+        const oldIndex = prev.findIndex((f) => f.id === fieldId);
+        const newIndex = prev.findIndex((f) => f.id === overId);
         if (oldIndex < 0 || newIndex < 0) return prev;
         return arrayMove(prev, oldIndex, newIndex);
       });
+      return;
     }
+
+    // ── Field reordering (within-container — onDragOver already placed it in the right container) ──
+    updateFields((prev) => {
+      // Within-section reorder
+      const parentSection = prev.find(
+        (f) => f.type === 'section' && f.children?.includes(fieldId) && f.children?.includes(overId)
+      );
+
+      if (parentSection && parentSection.children) {
+        const oldIdx = parentSection.children.indexOf(fieldId);
+        const newIdx = parentSection.children.indexOf(overId);
+        if (oldIdx >= 0 && newIdx >= 0) {
+          return prev.map((f) =>
+            f.id === parentSection.id
+              ? { ...f, children: arrayMove(parentSection.children!, oldIdx, newIdx) }
+              : f
+          );
+        }
+      }
+
+      // Top-level reorder
+      const oldIndex = prev.findIndex((f) => f.id === fieldId);
+      const newIndex = prev.findIndex((f) => f.id === overId);
+      if (oldIndex >= 0 && newIndex >= 0) {
+        return arrayMove(prev, oldIndex, newIndex);
+      }
+
+      return prev;
+    });
   };
 
   const handleDragCancel = () => {
     setDraggedField(null);
+    // Restore fields to pre-drag state (onDragOver may have modified them)
+    if (fieldsBeforeDragRef.current) {
+      setFields(fieldsBeforeDragRef.current);
+      fieldsBeforeDragRef.current = null;
+    }
   };
 
   const selectedField = React.useMemo(
@@ -336,6 +452,7 @@ export function FormEditorPanel({ template, onSave, readOnly }: FormEditorPanelP
         <DndContext
           collisionDetection={collisionDetection}
           onDragStart={readOnly ? undefined : handleDragStart}
+          onDragOver={readOnly ? undefined : handleDragOver}
           onDragEnd={readOnly ? undefined : handleDragEnd}
           onDragCancel={readOnly ? undefined : handleDragCancel}
         >
@@ -353,14 +470,35 @@ export function FormEditorPanel({ template, onSave, readOnly }: FormEditorPanelP
           {!readOnly && (
             <DragOverlay dropAnimation={null}>
               {draggedField && (
-                <EditorFieldCard
-                  field={draggedField}
-                  isSelected={false}
-                  onSelect={() => {}}
-                  onDelete={() => {}}
-                  isOverlay
-                  formType={template.form_type}
-                />
+                draggedField.type === 'section' ? (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '10px 14px',
+                    background: 'var(--ls-color-neutral-foreground)',
+                    border: '1px solid var(--ls-color-brand)',
+                    borderRadius: 10,
+                    boxShadow: '0 4px 16px var(--ls-color-shadow-lg)',
+                    fontFamily: '"Satoshi", sans-serif',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: 'var(--ls-color-text-primary)',
+                    textTransform: 'uppercase' as const,
+                    letterSpacing: '0.3px',
+                  }}>
+                    {draggedField.settings.sectionName || draggedField.label}
+                  </div>
+                ) : (
+                  <EditorFieldCard
+                    field={draggedField}
+                    isSelected={false}
+                    onSelect={() => {}}
+                    onDelete={() => {}}
+                    isOverlay
+                    formType={template.form_type}
+                  />
+                )
               )}
             </DragOverlay>
           )}
