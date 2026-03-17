@@ -166,7 +166,6 @@ export function fieldsToJsonSchema(fields: FormField[]): {
         title: field.label,
       };
       uiSchema[field.id] = {
-        'ui:widget': 'hidden',
         'ui:field': 'section',
         'ui:options': {
           sectionName: field.settings.sectionName || field.label,
@@ -196,7 +195,6 @@ export function fieldsToJsonSchema(fields: FormField[]): {
         title: field.label,
       };
       uiSchema[field.id] = {
-        'ui:widget': 'hidden',
         'ui:field': 'textBlock',
         'ui:options': {
           content: field.settings.content || '',

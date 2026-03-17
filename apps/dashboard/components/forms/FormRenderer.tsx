@@ -13,6 +13,7 @@ import type { IChangeEvent } from '@rjsf/core';
 import type { RJSFSchema, UiSchema } from '@rjsf/utils';
 import { Button } from '@mui/material';
 import { getCustomWidgets, getCustomFields } from '@/components/forms/widgets';
+import { FormObjectFieldTemplate } from '@/components/forms/widgets/FormObjectFieldTemplate';
 import type { FormTemplate } from '@/lib/forms/types';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 
@@ -129,6 +130,7 @@ export function FormRenderer({
         validator={validator}
         widgets={widgets}
         fields={fields}
+        templates={{ ObjectFieldTemplate: FormObjectFieldTemplate }}
         formContext={{ orgId: template.org_id, locationId: selectedLocationId, formType: template.form_type }}
         onChange={handleChange}
         onSubmit={handleSubmit}
