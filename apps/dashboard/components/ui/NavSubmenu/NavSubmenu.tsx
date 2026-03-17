@@ -81,8 +81,9 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
     {
       label: 'Evaluations',
       description: 'Schedule performance reviews',
+      href: '/evaluations',
       icon: <CalendarCheck size={22} strokeWidth={1.5} />,
-      disabled: true,
+      requiredPermission: P.EVAL_VIEW_EVALUATIONS,
     },
     {
       label: 'Form Management',
