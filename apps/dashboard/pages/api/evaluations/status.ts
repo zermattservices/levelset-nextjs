@@ -145,7 +145,7 @@ async function handler(
 
   const activeRuleIds = (rules ?? []).map((r) => r.id);
   const allEmployeeIds = allEmployees.map((e) => e.id);
-  const allTemplateIds = [...new Set((rules ?? []).map((r) => r.form_template_id).filter(Boolean))];
+  const allTemplateIds = Array.from(new Set((rules ?? []).map((r) => r.form_template_id).filter(Boolean)));
 
   // Batch-fetch all overrides for active rule IDs
   // Key: `${rule_id}_${employee_id}_${period_start}`
