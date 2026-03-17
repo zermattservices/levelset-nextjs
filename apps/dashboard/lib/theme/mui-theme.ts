@@ -29,17 +29,28 @@ export function createLevelsetTheme(mode: 'light' | 'dark'): Theme {
         styleOverrides: {
           root: {
             borderRadius: 8,
+            fontSize: 14,
             '&:hover fieldset': { borderColor: 'var(--ls-color-brand)' },
             '&.Mui-focused fieldset': { borderColor: 'var(--ls-color-brand)' },
           },
-          notchedOutline: {
-            '& legend': { fontFamily: '"Satoshi", sans-serif' },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontFamily: '"Satoshi", sans-serif',
+            fontSize: '14px !important',
+            fontWeight: 500,
           },
         },
       },
       MuiFormLabel: {
         styleOverrides: {
-          root: { fontFamily: '"Satoshi", sans-serif', fontSize: 14, fontWeight: 500 },
+          root: {
+            fontFamily: '"Satoshi", sans-serif',
+            fontSize: '14px !important',
+            fontWeight: 500,
+          },
         },
       },
       MuiButton: {
