@@ -1,7 +1,9 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { CTA_MODE } from '@/lib/cta-config';
 import { TrialModal } from './TrialModal';
+import { DemoModal } from './DemoModal';
 
 interface TrialModalContextValue {
   openModal: () => void;
@@ -20,7 +22,11 @@ export function TrialModalProvider({ children }: { children: ReactNode }) {
   return (
     <TrialModalContext.Provider value={{ openModal, closeModal, isOpen }}>
       {children}
-      {isOpen && <TrialModal onClose={closeModal} />}
+      {isOpen && (
+        CTA_MODE === 'demo'
+          ? <DemoModal onClose={closeModal} />
+          : <TrialModal onClose={closeModal} />
+      )}
     </TrialModalContext.Provider>
   );
 }
