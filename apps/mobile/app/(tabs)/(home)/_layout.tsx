@@ -1,6 +1,10 @@
 import { Stack } from "expo-router/stack";
+import { useColorScheme } from "react-native";
 
 export default function HomeLayout() {
+  const scheme = useColorScheme();
+  const headerTint = scheme === "dark" ? "#ffffff" : "#000000";
+
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
@@ -46,7 +50,7 @@ export default function HomeLayout() {
           title: "Positional Excellence Rating",
           headerTransparent: true,
           headerBackButtonDisplayMode: "minimal",
-          headerTintColor: "#ffffff",
+          headerTintColor: headerTint,
         }}
       />
       <Stack.Screen
@@ -56,7 +60,7 @@ export default function HomeLayout() {
           title: "Infraction Details",
           headerTransparent: true,
           headerBackButtonDisplayMode: "minimal",
-          headerTintColor: "#ffffff",
+          headerTintColor: headerTint,
         }}
       />
       <Stack.Screen
@@ -66,7 +70,7 @@ export default function HomeLayout() {
           title: "",
           headerTransparent: true,
           headerBackButtonDisplayMode: "minimal",
-          headerTintColor: "#ffffff",
+          headerTintColor: headerTint,
         }}
       />
       <Stack.Screen
@@ -76,7 +80,7 @@ export default function HomeLayout() {
           title: "All Activity",
           headerTransparent: true,
           headerBackButtonDisplayMode: "minimal",
-          headerTintColor: "#ffffff",
+          headerTintColor: headerTint,
         }}
       />
       <Stack.Screen
