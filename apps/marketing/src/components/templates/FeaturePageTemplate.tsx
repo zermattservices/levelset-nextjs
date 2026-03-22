@@ -3,7 +3,7 @@ import { Icon } from '@/components/ui/Icon';
 import { BrowserMockup } from '@/components/ui/BrowserMockup';
 import { PhoneMockup } from '@/components/ui/PhoneMockup';
 import type { MarketingFeature, FeatureStatus } from '@/lib/features';
-import type { FeatureContent, FeatureScreenshot } from '@/lib/feature-content';
+import type { FeatureContent, FeatureScreenshot, TransformationShowcase, TransformationHighlight } from '@/lib/feature-content';
 import { FEATURES, getFeature } from '@/lib/features';
 import { FeaturePageCTA } from './FeaturePageCTA';
 
@@ -47,6 +47,118 @@ const TIER_CONFIG: Record<
 
 function getRelatedFeatures(currentSlug: string) {
   return FEATURES.filter((f) => f.slug !== currentSlug).slice(0, 3);
+}
+
+/* ─── Transformation Showcase ────────────────────────────────────── */
+
+function TransformationShowcaseSection({ showcase }: { showcase: TransformationShowcase }) {
+  return (
+    <>
+      {/* ─── From → To ─────────────────────────────────────────── */}
+      <section className="py-20 md:py-28 bg-neutral-50">
+        <div className="max-w-content mx-auto px-6">
+          <div className="mb-14">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-neutral-900 mb-3">
+              From paper to platform
+            </h2>
+            <div className="w-12 h-1 rounded-full bg-[#31664A]" />
+          </div>
+
+          {/* Before / After comparison */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+            {/* Before */}
+            <div>
+              <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-400 mb-4">
+                <span className="w-2 h-2 rounded-full bg-red-400" />
+                {showcase.before.label}
+              </span>
+              <div className="relative">
+                <img
+                  src={showcase.before.src}
+                  alt={showcase.before.alt}
+                  className="w-full h-auto rounded-xl shadow-lg shadow-black/8 border border-neutral-200/80"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+
+            {/* After */}
+            <div>
+              <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#31664A] mb-4">
+                <span className="w-2 h-2 rounded-full bg-[#31664A]" />
+                {showcase.after.label}
+              </span>
+              <div className="relative">
+                <img
+                  src={showcase.after.src}
+                  alt={showcase.after.alt}
+                  className="w-full h-auto rounded-xl shadow-lg shadow-black/8 border border-neutral-200/80"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Import description */}
+          <div className="mt-10 max-w-2xl mx-auto text-center">
+            <p className="text-lg text-neutral-600 leading-relaxed">
+              {showcase.importDescription}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Scored Result ──────────────────────────────────────── */}
+      <section className="py-20 md:py-28 bg-white">
+        <div className="max-w-content mx-auto px-6">
+          <div className="mb-14">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-neutral-900 mb-3">
+              The result
+            </h2>
+            <div className="w-12 h-1 rounded-full bg-[#31664A]" />
+          </div>
+
+          {/* Result screenshot — full width, no browser mockup */}
+          <div>
+            <img
+              src={showcase.result.src}
+              alt={showcase.result.alt}
+              className="w-full h-auto rounded-xl shadow-xl shadow-black/8 border border-neutral-200/80"
+              loading="lazy"
+            />
+            {showcase.result.caption && (
+              <p className="text-sm text-neutral-400 text-center mt-4 italic">
+                {showcase.result.caption}
+              </p>
+            )}
+          </div>
+
+          {/* Feature highlights */}
+          <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {showcase.highlights.map((highlight) => (
+              <div
+                key={highlight.text}
+                className="flex items-start gap-3.5 bg-neutral-50 rounded-xl p-5 border border-neutral-200/80"
+              >
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-[#31664A]/10 flex items-center justify-center">
+                  <Icon name={highlight.icon} size={16} className="text-[#31664A]" />
+                </div>
+                <p className="text-sm text-neutral-600 leading-relaxed pt-1.5">
+                  {highlight.link ? (
+                    <Link href={highlight.link} className="text-[#31664A] font-medium hover:underline">
+                      {highlight.text}
+                    </Link>
+                  ) : (
+                    highlight.text
+                  )}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
 }
 
 /* ─── Props ──────────────────────────────────────────────────────── */
@@ -129,29 +241,15 @@ export function FeaturePageTemplate({ feature, content }: FeaturePageTemplatePro
 
             {/* Right: Hero image or feature illustration */}
             <div>
-              {content.heroImage && content.heroVariant === 'mobile' ? (
-                <div className="relative flex justify-center">
-                  <div className="absolute -inset-4 bg-white/5 rounded-2xl blur-xl" />
-                  <PhoneMockup dark>
-                    <img
-                      src={content.heroImage}
-                      alt={`${feature.name} screenshot`}
-                      className="w-full h-full object-cover"
-                      loading="eager"
-                    />
-                  </PhoneMockup>
-                </div>
-              ) : content.heroImage ? (
+              {content.heroImage ? (
                 <div className="relative">
                   <div className="absolute -inset-4 bg-white/5 rounded-2xl blur-xl" />
-                  <BrowserMockup>
-                    <img
-                      src={content.heroImage}
-                      alt={`${feature.name} screenshot`}
-                      className="w-full h-auto"
-                      loading="eager"
-                    />
-                  </BrowserMockup>
+                  <img
+                    src={content.heroImage}
+                    alt={`${feature.name} screenshot`}
+                    className="w-full h-auto rounded-xl shadow-2xl"
+                    loading="eager"
+                  />
                 </div>
               ) : (
                 <div className="relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-10 md:p-14">
@@ -209,41 +307,45 @@ export function FeaturePageTemplate({ feature, content }: FeaturePageTemplatePro
       </section>
 
       {/* ─── 3. Capabilities ───────────────────────────────────────── */}
-      <section className="py-20 md:py-28 bg-neutral-50">
-        <div className="max-w-content mx-auto px-6">
-          <div className="mb-14">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-neutral-900 mb-3">
-              How it works
-            </h2>
-            <div className="w-12 h-1 rounded-full bg-[#31664A]" />
-          </div>
+      {content.transformationShowcase ? (
+        <TransformationShowcaseSection showcase={content.transformationShowcase} />
+      ) : (
+        <section className="py-20 md:py-28 bg-neutral-50">
+          <div className="max-w-content mx-auto px-6">
+            <div className="mb-14">
+              <h2 className="text-3xl md:text-4xl font-heading font-bold text-neutral-900 mb-3">
+                How it works
+              </h2>
+              <div className="w-12 h-1 rounded-full bg-[#31664A]" />
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            {content.capabilities.map((capability, index) => (
-              <div
-                key={capability.title}
-                className="group relative bg-white rounded-xl p-7 md:p-8 border border-neutral-200/80 hover:border-[#31664A]/20 hover:shadow-lg hover:shadow-[#31664A]/5 transition-all duration-300"
-              >
-                <div className="flex items-start gap-5">
-                  <div className="flex-shrink-0">
-                    <span className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#31664A] text-white text-sm font-bold">
-                      {index + 1}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-heading font-bold text-neutral-900 mb-2">
-                      {capability.title}
-                    </h3>
-                    <p className="text-neutral-500 leading-relaxed text-[15px]">
-                      {capability.description}
-                    </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              {content.capabilities.map((capability, index) => (
+                <div
+                  key={capability.title}
+                  className="group relative bg-white rounded-xl p-7 md:p-8 border border-neutral-200/80 hover:border-[#31664A]/20 hover:shadow-lg hover:shadow-[#31664A]/5 transition-all duration-300"
+                >
+                  <div className="flex items-start gap-5">
+                    <div className="flex-shrink-0">
+                      <span className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#31664A] text-white text-sm font-bold">
+                        {index + 1}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-heading font-bold text-neutral-900 mb-2">
+                        {capability.title}
+                      </h3>
+                      <p className="text-neutral-500 leading-relaxed text-[15px]">
+                        {capability.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─── 4. Works With ──────────────────────────────────────────── */}
       {content.worksWith && content.worksWith.length > 0 && (() => {
@@ -291,7 +393,7 @@ export function FeaturePageTemplate({ feature, content }: FeaturePageTemplatePro
       })()}
 
       {/* ─── 5. Screenshots Gallery ──────────────────────────────── */}
-      {content.screenshots.length > 0 && (() => {
+      {!content.transformationShowcase && content.screenshots.length > 0 && (() => {
         const desktopShots = content.screenshots.filter((s) => (s.variant ?? 'desktop') === 'desktop');
         const mobileShots = content.screenshots.filter((s) => s.variant === 'mobile');
 
