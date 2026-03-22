@@ -298,10 +298,10 @@ function LeadForm({ activeTimeslot }: { activeTimeslot: number | null }) {
           </svg>
         </div>
         <h3 className="text-xl font-heading font-bold text-text-primary mb-2">
-          You&apos;re in!
+          Thanks, {firstName}!
         </h3>
         <p className="text-text-secondary text-sm max-w-sm mx-auto">
-          Check your email for a confirmation from Andrew. We&apos;ll be in touch with your exclusive offer shortly.
+          We&apos;ll be in touch shortly to schedule your demo.
         </p>
       </div>
     );
@@ -460,7 +460,7 @@ function LeadForm({ activeTimeslot }: { activeTimeslot: number | null }) {
 
       {/* Submit */}
       <Button type="submit" size="lg" className="w-full !bg-[#31664A] hover:!bg-[#264D38]" disabled={status === 'loading'}>
-        {status === 'loading' ? 'Submitting...' : 'Claim Your Exclusive Offer'}
+        {status === 'loading' ? 'Submitting...' : 'Request a Demo'}
       </Button>
     </form>
   );
@@ -645,10 +645,10 @@ export function TheApproachPage() {
           <div className="max-w-lg mx-auto">
             <div className="text-center mb-8">
               <h2 className="text-2xl md:text-3xl font-heading font-bold text-text-primary mb-3">
-                Claim Your Exclusive Offer
+                Book a Demo
               </h2>
               <p className="text-text-secondary text-sm">
-                Leave your info and we&apos;ll send you everything you need to get started — exclusively for Approach attendees.
+                Leave your info and we&apos;ll reach out to schedule a time to show you Levelset.
               </p>
             </div>
             <LeadForm activeTimeslot={displaySlot.timeslot_number} />
