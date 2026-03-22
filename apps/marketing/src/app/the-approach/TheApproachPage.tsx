@@ -253,7 +253,7 @@ function LeadForm({ activeTimeslot }: { activeTimeslot: number | null }) {
       return;
     }
     if (isOperator === false && !role) {
-      setErrorMessage('Please select your role.');
+      setErrorMessage('Please enter your role.');
       setStatus('error');
       return;
     }
@@ -368,27 +368,15 @@ function LeadForm({ activeTimeslot }: { activeTimeslot: number | null }) {
         </div>
       </div>
 
-      {/* Role — only shown when not operator */}
+      {/* Role — text input, only shown when not operator */}
       {isOperator === false && (
-        <div>
-          <label className="block text-sm font-medium text-text-primary mb-1.5" htmlFor="role">
-            Your Role
-          </label>
-          <select
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-white border border-neutral-border text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
-            required
-          >
-            <option value="">Select your role</option>
-            <option value="Talent Director">Talent Director</option>
-            <option value="Director">Director</option>
-            <option value="Team Lead">Team Lead</option>
-            <option value="Manager">Manager</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
+        <Input
+          label="Your Role"
+          placeholder="e.g. Director"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          required
+        />
       )}
 
       {/* Multi-unit? */}
