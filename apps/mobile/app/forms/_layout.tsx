@@ -15,6 +15,8 @@ export default function FormsLayout() {
     >
       <Stack.Screen name="ratings" />
       <Stack.Screen name="infractions" />
+      <Stack.Screen name="evaluation-picker" />
+      <Stack.Screen name="evaluations/[templateId]" />
     </Stack>
   );
 }

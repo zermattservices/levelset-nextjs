@@ -1,9 +1,11 @@
+import { withAuth } from '@/lib/permissions/middleware';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { setCorsOrigin } from '@/lib/cors';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();
@@ -87,11 +89,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (intent === 'update') {
-      const { id, position_id, shift_date, end_date, start_time, end_time, break_minutes, notes, is_house_shift } = req.body;
+      const { id, position_id, shift_date, end_date, start_time, end_time, break_minutes, notes, is_house_shift, changed_by } = req.body;
 
       if (!id) {
         return res.status(400).json({ error: 'id is required' });
       }
+
+      // Fetch current state for audit log
+      const { data: oldShift } = await supabase
+        .from('shifts')
+        .select('shift_date, start_time, end_time, break_minutes, position_id, is_house_shift, notes, schedule_id, org_id')
+        .eq('id', id)
+        .single();
 
       const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
       if (position_id !== undefined) updateData.position_id = position_id || null;
@@ -140,6 +149,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .update({ projected_cost: newCost, updated_at: new Date().toISOString() })
             .eq('id', assign.id);
         }
+      }
+
+      // Audit log: record the change
+      if (oldShift && data) {
+        const newValues: Record<string, unknown> = {};
+        if (position_id !== undefined) newValues.position_id = position_id || null;
+        if (shift_date !== undefined) newValues.shift_date = shift_date;
+        if (start_time !== undefined) newValues.start_time = start_time;
+        if (end_time !== undefined) newValues.end_time = end_time;
+        if (break_minutes !== undefined) newValues.break_minutes = break_minutes;
+        if (notes !== undefined) newValues.notes = notes;
+        if (is_house_shift !== undefined) newValues.is_house_shift = is_house_shift;
+
+        await supabase.from('shift_audit_log').insert({
+          shift_id: id,
+          schedule_id: oldShift.schedule_id,
+          org_id: oldShift.org_id,
+          changed_by: changed_by || null,
+          change_type: 'updated',
+          old_values: {
+            shift_date: oldShift.shift_date,
+            start_time: oldShift.start_time,
+            end_time: oldShift.end_time,
+            break_minutes: oldShift.break_minutes,
+            position_id: oldShift.position_id,
+            is_house_shift: oldShift.is_house_shift,
+            notes: oldShift.notes,
+          },
+          new_values: newValues,
+        });
       }
 
       // Flatten assignment array
@@ -290,3 +329,5 @@ function parseTime(time: string): number {
   const parts = time.split(':');
   return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
 }
+
+export default withAuth(handler);

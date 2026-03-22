@@ -19,6 +19,10 @@ import type { Shift, LaborSummary, TimeViewMode, SalesForecast } from '@/lib/sch
 
 interface LaborSpreadTabProps {
   shifts: Shift[];
+  /** All shifts (unfiltered by zone) — used to show total "Scheduled All" line when zone-filtered */
+  allShifts?: Shift[];
+  /** Current zone filter ('all' | 'FOH' | 'BOH') */
+  zoneFilter?: string;
   laborSummary: LaborSummary;
   days: string[];
   canViewPay: boolean;
@@ -47,6 +51,8 @@ interface IntervalDataPoint {
   isDayBoundary: boolean;
   /** Minute-of-day this interval starts at (0-1410) */
   minuteOfDay: number;
+  /** Zone-filtered headcount (only set when zoneFilter !== 'all') */
+  filteredHeadcount?: number;
   /** Forecasted sales for this 15-min interval (dollars) */
   forecastSales?: number;
 }
@@ -205,10 +211,19 @@ function CustomTooltip({ active, payload }: any) {
         seenKeys.add(entry.dataKey);
 
         if (entry.dataKey === 'scheduledHeadcount') {
+          const hasFiltered = point.filteredHeadcount != null;
           return (
             <div key={i} className={sty.tooltipRow}>
               <span className={sty.tooltipDot} style={{ background: '#2c5f8a' }} />
-              <span>Scheduled: <strong>{Number(entry.value).toFixed(1)}</strong></span>
+              <span>{hasFiltered ? 'Scheduled All' : 'Scheduled'}: <strong>{Number(entry.value).toFixed(1)}</strong></span>
+            </div>
+          );
+        }
+        if (entry.dataKey === 'filteredHeadcount') {
+          return (
+            <div key={i} className={sty.tooltipRow}>
+              <span className={sty.tooltipDot} style={{ background: '#e97316' }} />
+              <span>Filtered: <strong>{Number(entry.value).toFixed(1)}</strong></span>
             </div>
           );
         }
@@ -288,13 +303,19 @@ function HourlyTick({ x, y, payload, data }: any) {
 /*  Legend items                                                        */
 /* ------------------------------------------------------------------ */
 
-function ChartLegend({ hasForecast }: { hasForecast: boolean }) {
+function ChartLegend({ hasForecast, isZoneFiltered, zoneFilter }: { hasForecast: boolean; isZoneFiltered: boolean; zoneFilter?: string }) {
   return (
     <div className={sty.legend}>
       <div className={sty.legendItem}>
         <span className={sty.legendSwatch} style={{ background: '#2c5f8a' }} />
-        <span>Scheduled</span>
+        <span>{isZoneFiltered ? 'Scheduled All' : 'Scheduled'}</span>
       </div>
+      {isZoneFiltered && (
+        <div className={sty.legendItem}>
+          <span className={sty.legendSwatch} style={{ background: '#e97316' }} />
+          <span>Scheduled {zoneFilter}</span>
+        </div>
+      )}
       {hasForecast && (
         <div className={sty.legendItem}>
           <span className={sty.legendSwatch} style={{ background: 'rgba(124, 58, 237, 0.2)' }} />
@@ -310,12 +331,13 @@ function ChartLegend({ hasForecast }: { hasForecast: boolean }) {
 /* ------------------------------------------------------------------ */
 
 export function LaborSpreadTab({
-  shifts, laborSummary, days, canViewPay,
+  shifts, allShifts, zoneFilter, laborSummary, days, canViewPay,
   timeViewMode, selectedDay,
   externalHoverMinute, onHoverMinuteChange,
   forecasts,
 }: LaborSpreadTabProps) {
   const isDayView = timeViewMode === 'day';
+  const isZoneFiltered = zoneFilter != null && zoneFilter !== 'all';
 
   // In day view, only build data for the selected day
   const chartDays = React.useMemo(
@@ -341,7 +363,18 @@ export function LaborSpreadTab({
   const hasForecast = forecastLookup.size > 0;
 
   const intervalData = React.useMemo(() => {
-    const data = buildIntervalData(shifts, chartDays, canViewPay);
+    // When zone-filtered, build from allShifts (total) and merge filtered headcount
+    const totalShifts = isZoneFiltered && allShifts ? allShifts : shifts;
+    const data = buildIntervalData(totalShifts, chartDays, canViewPay);
+
+    // If zone-filtered, also compute the filtered headcount from zone-filtered shifts
+    if (isZoneFiltered) {
+      const filteredData = buildIntervalData(shifts, chartDays, canViewPay);
+      for (let i = 0; i < data.length; i++) {
+        data[i].filteredHeadcount = filteredData[i]?.scheduledHeadcount ?? 0;
+      }
+    }
+
     if (!hasForecast) return data;
     // Merge forecast data into each interval
     for (const point of data) {
@@ -352,7 +385,7 @@ export function LaborSpreadTab({
       if (sales != null) point.forecastSales = sales;
     }
     return data;
-  }, [shifts, chartDays, canViewPay, forecastLookup, hasForecast]);
+  }, [shifts, allShifts, isZoneFiltered, chartDays, canViewPay, forecastLookup, hasForecast]);
 
   // Find the max headcount for Y-axis domain
   const maxHeadcount = React.useMemo(() => {
@@ -421,7 +454,7 @@ export function LaborSpreadTab({
       <div className={sty.chartRow}>
         {/* Legend sidebar */}
         <div className={sty.legendSidebar}>
-          <ChartLegend hasForecast={hasForecast} />
+          <ChartLegend hasForecast={hasForecast} isZoneFiltered={isZoneFiltered} zoneFilter={zoneFilter} />
         </div>
 
         {/* Chart */}
@@ -437,6 +470,10 @@ export function LaborSpreadTab({
                 <linearGradient id="scheduledGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#93c5fd" stopOpacity={0.5} />
                   <stop offset="100%" stopColor="#93c5fd" stopOpacity={0.15} />
+                </linearGradient>
+                <linearGradient id="filteredGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#e97316" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#e97316" stopOpacity={0.1} />
                 </linearGradient>
                 <linearGradient id="forecastGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#7c3aed" stopOpacity={0.2} />
@@ -565,6 +602,29 @@ export function LaborSpreadTab({
                 dot={false}
                 isAnimationActive={false}
               />
+
+              {/* Zone-filtered headcount area + line (orange, only when FOH/BOH selected) */}
+              {isZoneFiltered && (
+                <Area
+                  yAxisId="headcount"
+                  dataKey="filteredHeadcount"
+                  fill="url(#filteredGradient)"
+                  stroke="none"
+                  type="stepAfter"
+                  isAnimationActive={false}
+                />
+              )}
+              {isZoneFiltered && (
+                <Line
+                  yAxisId="headcount"
+                  dataKey="filteredHeadcount"
+                  stroke="#e97316"
+                  strokeWidth={1.5}
+                  type="stepAfter"
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              )}
 
             </ComposedChart>
           </ResponsiveContainer>

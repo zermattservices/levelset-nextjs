@@ -42,7 +42,11 @@ export function getCurrentPeriod(cadence: EvaluationCadence, referenceDate?: Dat
  */
 export function getPeriodStartISO(cadence: EvaluationCadence, referenceDate?: Date): string {
   const period = getCurrentPeriod(cadence, referenceDate);
-  return period.start.toISOString().split('T')[0];
+  const d = period.start;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 /**
@@ -82,8 +86,13 @@ export function computeStatus(
 
 /**
  * Get the due date (end of current period) for display.
+ * Returns YYYY-MM-DD in local time (not UTC) to avoid timezone shift.
  */
 export function getDueDate(cadence: EvaluationCadence, referenceDate?: Date): string {
   const period = getCurrentPeriod(cadence, referenceDate);
-  return period.end.toISOString().split('T')[0];
+  const d = period.end;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 }

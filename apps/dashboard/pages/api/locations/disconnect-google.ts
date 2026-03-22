@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { setCorsOrigin } from '@/lib/cors';
 
 /**
  * POST /api/locations/disconnect-google
@@ -10,7 +11,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();

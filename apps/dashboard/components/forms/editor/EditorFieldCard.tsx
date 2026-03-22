@@ -200,20 +200,22 @@ export function EditorFieldCard({
         </div>
       )}
 
-      <IconButton
-        size="small"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        sx={{
-          padding: '4px',
-          opacity: 0.5,
-          '&:hover': { opacity: 1, color: 'var(--ls-color-destructive)' },
-        }}
-      >
-        <DeleteOutlineIcon sx={{ fontSize: 16 }} />
-      </IconButton>
+      {!field.settings.isSystemField && (
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          sx={{
+            padding: '4px',
+            opacity: 0.5,
+            '&:hover': { opacity: 1, color: 'var(--ls-color-destructive)' },
+          }}
+        >
+          <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+        </IconButton>
+      )}
     </div>
   );
 }

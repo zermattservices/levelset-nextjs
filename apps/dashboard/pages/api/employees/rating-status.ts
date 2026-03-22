@@ -3,8 +3,9 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { allPositionsQualified } from '@/lib/certification-utils';
 import { getRatingThresholds } from '@/lib/rating-thresholds';
 import type { Employee, Rating } from '@/lib/supabase.types';
+import { withAuth } from '@/lib/permissions/middleware';
 
-export default async function handler(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -152,4 +153,6 @@ export default async function handler(
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+export default withAuth(handler);
 

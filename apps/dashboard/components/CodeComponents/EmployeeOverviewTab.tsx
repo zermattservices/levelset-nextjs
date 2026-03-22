@@ -6,6 +6,7 @@ import { format, parseISO } from "date-fns";
 import { createSupabaseClient } from "@/util/supabase/component";
 import { DashboardMetricCard } from "@/components/CodeComponents/DashboardMetricCard";
 import type { Employee } from "@/lib/supabase.types";
+import { useLocationContext } from "@/components/CodeComponents/LocationContext";
 import styles from "./EmployeeOverviewTab.module.css";
 
 // ------------------------------------------------------------------
@@ -122,35 +123,206 @@ function OverviewSkeleton() {
       </div>
 
       {/* Bottom section skeleton */}
-      <div className={styles.bottomSection}>
-        <div className={styles.bottomCard}>
-          <div className={styles.skeletonCard}>
-            <Skeleton variant="text" width={140} height={24} sx={{ mb: 1 }} />
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} variant="text" width="100%" height={32} sx={{ mb: 0.5 }} />
-            ))}
-          </div>
+      {/* Four-card grid skeleton */}
+      <div className={styles.fourCardGrid}>
+        <div className={styles.card}>
+          <Skeleton variant="text" width={140} height={24} sx={{ mb: 1 }} />
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} variant="text" width="100%" height={32} sx={{ mb: 0.5 }} />
+          ))}
         </div>
-        <div className={styles.bottomCard}>
-          <div className={styles.skeletonCard}>
-            <Skeleton variant="text" width={100} height={24} sx={{ mb: 1 }} />
-            <Skeleton variant="text" width={60} height={40} />
-            <Skeleton variant="rounded" width="100%" height={8} sx={{ mt: 2, borderRadius: '4px' }} />
-          </div>
+        <div className={styles.card}>
+          <Skeleton variant="text" width={100} height={24} sx={{ mb: 1 }} />
+          <Skeleton variant="text" width={60} height={40} />
+          <Skeleton variant="rounded" width="100%" height={8} sx={{ mt: 2, borderRadius: '4px' }} />
         </div>
+        <div className={styles.card}>
+          <Skeleton variant="text" width={120} height={24} sx={{ mb: 1 }} />
+          <Skeleton variant="text" width="60%" height={16} />
+          <Skeleton variant="rounded" width="100%" height={6} sx={{ mt: 1, borderRadius: '3px' }} />
+          <Skeleton variant="rounded" width="100%" height={6} sx={{ mt: 1, borderRadius: '3px' }} />
+          <Skeleton variant="rounded" width="100%" height={6} sx={{ mt: 1, borderRadius: '3px' }} />
+        </div>
+        <div className={styles.card}>
+          <Skeleton variant="text" width={80} height={24} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------
+// Evaluation Overview Card
+// ------------------------------------------------------------------
+
+function getScoreColor(pct: number): string {
+  if (pct >= 80) return '#16A34A';
+  if (pct >= 60) return '#FACC15';
+  return '#D23230';
+}
+
+function EvaluationOverviewCard({ employeeId, onViewMore }: { employeeId: string; onViewMore: () => void }) {
+  const { selectedLocationOrgId } = useLocationContext();
+  const [loading, setLoading] = React.useState(true);
+  const [hasTemplates, setHasTemplates] = React.useState<boolean | null>(null);
+  const [lastEval, setLastEval] = React.useState<{
+    template_name: string;
+    score: number | null;
+    submitted_by_name: string | null;
+    created_at: string;
+    sections: Array<{ name: string; percentage: number }>;
+  } | null>(null);
+
+  React.useEffect(() => {
+    if (!employeeId || !selectedLocationOrgId) return;
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      try {
+        const supabase = createSupabaseClient();
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        // Check if org has evaluation templates
+        const tmplRes = await fetch(
+          `/api/forms?org_id=${encodeURIComponent(selectedLocationOrgId)}&form_type=evaluation`,
+          { headers }
+        );
+        if (tmplRes.ok) {
+          const tmplData = await tmplRes.json();
+          const templates = Array.isArray(tmplData) ? tmplData : (tmplData.templates ?? []);
+          if (!cancelled) setHasTemplates(templates.length > 0);
+        }
+
+        const res = await fetch(
+          `/api/forms/submissions?org_id=${encodeURIComponent(selectedLocationOrgId)}&form_type=evaluation&employee_id=${encodeURIComponent(employeeId)}&limit=1`,
+          { headers }
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        const subs = Array.isArray(data) ? data : (data.submissions ?? []);
+        if (subs.length > 0 && !cancelled) {
+          const s = subs[0];
+          const rawSections = s.metadata?.section_scores ?? s.metadata?.sections ?? [];
+          setLastEval({
+            template_name: s.template?.name ?? 'Evaluation',
+            score: s.score,
+            submitted_by_name: s.submitted_by_name ?? null,
+            created_at: s.created_at,
+            sections: rawSections.map((sec: any) => ({
+              name: sec.sectionName ?? sec.name ?? '',
+              percentage: Math.round(sec.percentage ?? 0),
+            })),
+          });
+        }
+      } catch { /* silently fail */ }
+      finally { if (!cancelled) setLoading(false); }
+    }
+
+    load();
+    return () => { cancelled = true; };
+  }, [employeeId, selectedLocationOrgId]);
+
+  if (loading) {
+    return (
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>
+          <span className={styles.cardTitle}>Evaluations</span>
+        </div>
+        <Skeleton variant="text" width="60%" height={16} />
+        <Skeleton variant="rounded" width="100%" height={6} sx={{ borderRadius: '3px' }} />
+        <Skeleton variant="rounded" width="100%" height={6} sx={{ borderRadius: '3px' }} />
+        <Skeleton variant="rounded" width="100%" height={6} sx={{ borderRadius: '3px' }} />
+      </div>
+    );
+  }
+
+  if (hasTemplates === false) {
+    return (
+      <div className={styles.card} style={{ alignItems: 'center', justifyContent: 'center', gap: 8, textAlign: 'center' }}>
+        <span className={styles.cardTitle}>Evaluations</span>
+        <span style={{ fontFamily: '"Satoshi", sans-serif', fontSize: 13, color: 'var(--ls-color-muted)' }}>
+          No evaluation forms configured
+        </span>
+        <button
+          onClick={(e) => { e.stopPropagation(); window.location.href = '/evaluations'; }}
+          style={{
+            fontFamily: '"Satoshi", sans-serif', fontSize: 12, fontWeight: 600,
+            color: '#fff', backgroundColor: 'var(--ls-color-brand)',
+            border: 'none', borderRadius: 8, padding: '6px 16px', cursor: 'pointer',
+            marginTop: 4,
+          }}
+        >
+          Set Up Evaluations
+        </button>
+      </div>
+    );
+  }
+
+  if (!lastEval) {
+    return (
+      <div className={styles.card} style={{ cursor: 'pointer' }} onClick={onViewMore}>
+        <div className={styles.cardHeader}>
+          <span className={styles.cardTitle}>Evaluations</span>
+        </div>
+        <span style={{ fontFamily: '"Satoshi", sans-serif', fontSize: 13, color: 'var(--ls-color-muted)' }}>
+          No evaluations yet
+        </span>
+      </div>
+    );
+  }
+
+  const score = lastEval.score != null ? Math.round(lastEval.score) : null;
+  const scoreColor = score != null ? getScoreColor(score) : 'var(--ls-color-muted)';
+
+  return (
+    <div className={styles.card} style={{ gap: 8 }}>
+      <div className={styles.cardHeader}>
+        <span className={styles.cardTitleGroup}>
+          <span className={styles.cardTitle}>Evaluations</span>
+          <button className={styles.goButton} onClick={(e) => { e.stopPropagation(); onViewMore(); }} type="button">Go Now</button>
+        </span>
+        {score != null && (
+          <span style={{ fontFamily: '"Satoshi", sans-serif', fontSize: 20, fontWeight: 700, color: scoreColor, lineHeight: 1 }}>
+            {score}%
+          </span>
+        )}
+      </div>
+      <div style={{ fontFamily: '"Satoshi", sans-serif', fontSize: 13, color: 'var(--ls-color-muted)' }}>
+        {lastEval.template_name} · {format(new Date(lastEval.created_at), 'MMM d, yyyy')}
       </div>
 
-      {/* Stubs */}
-      <div className={styles.stubsRow}>
-        <div className={styles.stubCard}>
-          <span className={styles.stubTitle}>Evaluations</span>
-          <span className={styles.stubBadge}>Coming Soon</span>
+      {lastEval.sections.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+          {lastEval.sections.map((sec, i) => {
+            const c = getScoreColor(sec.percentage);
+            return (
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontFamily: '"Satoshi", sans-serif', fontSize: 13, fontWeight: 500, color: 'var(--ls-color-text-primary)' }}>
+                    {sec.name}
+                  </span>
+                  <span style={{ fontFamily: '"Satoshi", sans-serif', fontSize: 13, fontWeight: 700, color: c }}>
+                    {sec.percentage}%
+                  </span>
+                </div>
+                <div style={{ height: 4, borderRadius: 2, background: 'var(--ls-color-neutral-foreground)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min(100, sec.percentage)}%`, backgroundColor: c, borderRadius: 2 }} />
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <div className={styles.stubCard}>
-          <span className={styles.stubTitle}>Pathway</span>
-          <span className={styles.stubBadge}>Coming Soon</span>
+      )}
+
+      {lastEval.submitted_by_name && (
+        <div style={{ fontFamily: '"Satoshi", sans-serif', fontSize: 13, color: 'var(--ls-color-muted)' }}>
+          Rated by {lastEval.submitted_by_name}
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -473,15 +645,16 @@ export function EmployeeOverviewTab({ employee, locationId, onTabChange }: Emplo
       </div>
 
       {/* ============================================================
-          Bottom Section — Positional Ratings + Discipline side by side
-          Matches OE page bottomSection two-column layout
+          Four-card grid: PE Ratings, Discipline, Evaluations, Pathway
           ============================================================ */}
-      <div className={styles.bottomSection}>
-        {/* Positional Ratings — styled like OE improversCard */}
-        <div className={styles.bottomCard}>
-          <div className={styles.card}>
+      <div className={styles.fourCardGrid}>
+        {/* Positional Ratings */}
+        <div className={styles.card}>
             <div className={styles.cardHeader}>
-              <span className={styles.cardTitle}>Positional Ratings</span>
+              <span className={styles.cardTitleGroup}>
+                <span className={styles.cardTitle}>Positional Ratings</span>
+                <button className={styles.goButton} onClick={() => onTabChange?.('pe')} type="button">Go Now</button>
+              </span>
               <span className={styles.cardSubtitle}>Last 4 avg</span>
             </div>
             {positionAverages.length > 0 ? (
@@ -511,14 +684,15 @@ export function EmployeeOverviewTab({ employee, locationId, onTabChange }: Emplo
             ) : (
               <div className={styles.noData}>No ratings found</div>
             )}
-          </div>
         </div>
 
-        {/* Discipline — styled like OE chartCard */}
-        <div className={styles.bottomCard}>
-          <div className={styles.card}>
+        {/* Discipline */}
+        <div className={styles.card}>
             <div className={styles.cardHeader}>
-              <span className={styles.cardTitle}>Discipline</span>
+              <span className={styles.cardTitleGroup}>
+                <span className={styles.cardTitle}>Discipline</span>
+                <button className={styles.goButton} onClick={() => onTabChange?.('discipline')} type="button">Go Now</button>
+              </span>
               <span className={styles.cardSubtitle}>Last 90 days</span>
             </div>
             {disciplineData && (disciplineData.infractionCount > 0 || disciplineData.discActionCount > 0) ? (
@@ -578,21 +752,20 @@ export function EmployeeOverviewTab({ employee, locationId, onTabChange }: Emplo
             ) : (
               <div className={styles.noData}>No infractions in the last 90 days</div>
             )}
-          </div>
         </div>
-      </div>
 
-      {/* ============================================================
-          Stubs — Evaluations & Pathway inline cards
-          ============================================================ */}
-      <div className={styles.stubsRow}>
-        <div className={styles.stubCard}>
-          <span className={styles.stubTitle}>Evaluations</span>
-          <span className={styles.stubBadge}>Coming Soon</span>
-        </div>
-        <div className={styles.stubCard}>
-          <span className={styles.stubTitle}>Pathway</span>
-          <span className={styles.stubBadge}>Coming Soon</span>
+        {/* Evaluations */}
+        <EvaluationOverviewCard
+          employeeId={employee.id}
+          onViewMore={() => onTabChange?.('evaluations')}
+        />
+
+        {/* Pathway */}
+        <div className={styles.card} style={{ alignItems: 'flex-start' }}>
+          <div className={styles.cardHeader}>
+            <span className={styles.cardTitle}>Pathway</span>
+            <span className={styles.stubBadge}>Coming Soon</span>
+          </div>
         </div>
       </div>
     </div>

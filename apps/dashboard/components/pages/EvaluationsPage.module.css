@@ -29,7 +29,7 @@
   width: 100%;
   left: 0px;
   top: 0px;
-  z-index: 1;
+  z-index: 100;
   position: sticky;
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
@@ -54,7 +54,7 @@
   flex-direction: column;
   width: 100%;
   height: auto;
-  max-width: 1400px;
+  max-width: var(--ls-max-content-width);
   justify-content: flex-start;
   align-items: stretch;
   min-width: 0;

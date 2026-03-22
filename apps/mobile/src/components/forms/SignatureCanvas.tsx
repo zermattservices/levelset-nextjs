@@ -1,9 +1,13 @@
 /**
  * SignatureCanvas Component
- * Canvas-based signature capture using react-native-signature-canvas.
+ * Native SVG-based signature capture using react-native-gesture-handler + react-native-svg.
+ * No WebView — eliminates ScrollView touch conflicts entirely.
  *
- * Handles touch conflicts with parent ScrollView by temporarily disabling
- * scroll when the user is actively signing.
+ * Matches dashboard SignatureWidget behavior:
+ * - Draw with finger/stylus
+ * - Multi-stroke support
+ * - Clear button
+ * - Stores as SVG data URI string
  */
 
 import React, { useRef, useCallback, useState } from "react";
@@ -14,11 +18,16 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import SignatureScreen, {
-  SignatureViewRef,
-} from "react-native-signature-canvas";
+import {
+  GestureDetector,
+  Gesture,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
+import { runOnJS } from "react-native-reanimated";
+import Svg, { Path } from "react-native-svg";
 import { AppIcon } from "../ui";
 import { useColors } from "../../context/ThemeContext";
+import { useTheme } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
 
@@ -29,9 +38,7 @@ interface SignatureCanvasProps {
   onSignatureChange: (dataUrl: string) => void;
   disabled?: boolean;
   required?: boolean;
-  /** Callback to disable parent ScrollView while signing */
   onSigningStart?: () => void;
-  /** Callback to re-enable parent ScrollView after signing */
   onSigningEnd?: () => void;
 }
 
@@ -46,68 +53,85 @@ export function SignatureCanvas({
   onSigningEnd,
 }: SignatureCanvasProps) {
   const colors = useColors();
-  const signatureRef = useRef<SignatureViewRef>(null);
+  const { isDark } = useTheme();
   const { t } = useTranslation();
-  const [isSigning, setIsSigning] = useState(false);
 
-  const handleSignature = useCallback(
-    (signature: string) => {
-      onSignatureChange(signature);
-    },
-    [onSignatureChange]
-  );
+  const canvasBg = isDark ? "#21262d" : "#F9FAFB";
+  const penColor = isDark ? "#FFFFFF" : "#000000";
 
-  const handleEmpty = useCallback(() => {
-    onSignatureChange("");
-  }, [onSignatureChange]);
+  // Store all completed paths and the current in-progress path
+  const [paths, setPaths] = useState<string[]>([]);
+  const [currentPath, setCurrentPath] = useState<string>("");
+  const hasSignature = paths.length > 0 || currentPath.length > 0 || !!value;
 
   const handleClear = useCallback(() => {
     haptics.light();
-    signatureRef.current?.clearSignature();
+    setPaths([]);
+    setCurrentPath("");
     onSignatureChange("");
   }, [onSignatureChange]);
 
-  const handleBegin = useCallback(() => {
-    setIsSigning(true);
+  // Build SVG data URI from paths for storage
+  const buildSvgDataUri = useCallback((allPaths: string[]) => {
+    if (allPaths.length === 0) {
+      onSignatureChange("");
+      return;
+    }
+    const pathsStr = allPaths
+      .map((d) => `<path d="${d}" stroke="${penColor}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`)
+      .join("");
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="160" viewBox="0 0 500 160">${pathsStr}</svg>`;
+    const encoded = `data:image/svg+xml;base64,${btoa(svg)}`;
+    onSignatureChange(encoded);
+  }, [penColor, onSignatureChange]);
+
+  // JS-thread callbacks for gesture handler (must use runOnJS from worklet)
+  const onGestureBegin = useCallback((x: number, y: number) => {
     onSigningStart?.();
+    setCurrentPath(`M${x.toFixed(1)},${y.toFixed(1)}`);
   }, [onSigningStart]);
 
-  const handleEnd = useCallback(() => {
-    setIsSigning(false);
-    onSigningEnd?.();
-    // Auto-save on end of stroke
-    signatureRef.current?.readSignature();
-  }, [onSigningEnd]);
+  const onGestureUpdate = useCallback((x: number, y: number) => {
+    setCurrentPath((prev) => `${prev} L${x.toFixed(1)},${y.toFixed(1)}`);
+  }, []);
 
-  const webStyle = `
-    .m-signature-pad {
-      box-shadow: none;
-      border: none;
-      margin: 0;
-      width: 100%;
-      height: 100%;
-    }
-    .m-signature-pad--body {
-      border: none;
-      width: 100%;
-      height: 100%;
-    }
-    .m-signature-pad--footer {
-      display: none;
-    }
-    body, html {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      background-color: ${colors.surfaceVariant};
-    }
-    canvas {
-      width: 100% !important;
-      height: 100% !important;
-      touch-action: none;
-    }
-  `;
+  const onGestureEnd = useCallback(() => {
+    setCurrentPath((prev) => {
+      if (prev) {
+        setPaths((existing) => {
+          const updated = [...existing, prev];
+          setTimeout(() => buildSvgDataUri(updated), 0);
+          return updated;
+        });
+      }
+      return "";
+    });
+    onSigningEnd?.();
+  }, [onSigningEnd, buildSvgDataUri]);
+
+  // Gesture handler for drawing — uses runOnJS for all JS-thread calls
+  const panGesture = Gesture.Pan()
+    .enabled(!disabled)
+    .shouldCancelWhenOutside(false)
+    .minDistance(0)
+    .activeOffsetX([-0, 0])
+    .activeOffsetY([-0, 0])
+    .onBegin((e) => {
+      "worklet";
+      runOnJS(onGestureBegin)(e.x, e.y);
+    })
+    .onUpdate((e) => {
+      "worklet";
+      runOnJS(onGestureUpdate)(e.x, e.y);
+    })
+    .onEnd(() => {
+      "worklet";
+      runOnJS(onGestureEnd)();
+    })
+    .onFinalize(() => {
+      "worklet";
+      runOnJS(onGestureEnd)();
+    });
 
   return (
     <View style={[styles.container, disabled && styles.containerDisabled]}>
@@ -116,7 +140,7 @@ export function SignatureCanvas({
           {label}
           {required && <Text style={{ color: colors.error }}> *</Text>}
         </Text>
-        {value && !disabled && (
+        {hasSignature && !disabled && (
           <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
             <AppIcon name="arrow.counterclockwise" size={16} tintColor={colors.primary} />
             <Text style={[styles.clearButtonText, { color: colors.primary }]}>{t("common.clear")}</Text>
@@ -126,48 +150,52 @@ export function SignatureCanvas({
 
       {helperText && <Text style={[styles.helperText, { color: colors.onSurfaceVariant }]}>{helperText}</Text>}
 
-      <View
-        style={[
-          styles.canvasContainer,
-          { backgroundColor: colors.surfaceVariant, borderColor: colors.outline },
-          disabled && { backgroundColor: colors.surfaceDisabled },
-          isSigning && { borderColor: colors.primary, borderWidth: 2 },
-        ]}
-      >
-        {disabled ? (
-          <View style={styles.disabledOverlay}>
-            <Text style={[styles.disabledText, { color: colors.onSurfaceDisabled }]}>{t("common.signHere")}</Text>
-          </View>
-        ) : (
-          <SignatureScreen
-            ref={signatureRef}
-            onOK={handleSignature}
-            onEmpty={handleEmpty}
-            onBegin={handleBegin}
-            onEnd={handleEnd}
-            autoClear={false}
-            descriptionText=""
-            clearText=""
-            confirmText=""
-            webStyle={webStyle}
-            backgroundColor={colors.surfaceVariant}
-            penColor={colors.onSurface}
-            minWidth={1.5}
-            maxWidth={3}
-            style={styles.signature}
-            androidLayerType="software"
-            scrollable={false}
-          />
-        )}
+      <GestureHandlerRootView style={{ overflow: "hidden", borderRadius: borderRadius.md }}>
+        <GestureDetector gesture={panGesture}>
+          <View
+            style={[
+              styles.canvasContainer,
+              { backgroundColor: canvasBg, borderColor: colors.outline },
+              disabled && { backgroundColor: colors.surfaceDisabled },
+            ]}
+          >
+            <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
+              {/* Completed strokes */}
+              {paths.map((d, i) => (
+                <Path
+                  key={i}
+                  d={d}
+                  stroke={penColor}
+                  strokeWidth={2}
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              ))}
+              {/* Current in-progress stroke */}
+              {currentPath ? (
+                <Path
+                  d={currentPath}
+                  stroke={penColor}
+                  strokeWidth={2}
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              ) : null}
+            </Svg>
 
-        {!value && !disabled && !isSigning && (
-          <View style={styles.placeholder} pointerEvents="none">
-            <Text style={[styles.placeholderText, { color: colors.onSurfaceDisabled }]}>{t("common.signHere")}</Text>
+            {/* Placeholder */}
+            {!hasSignature && !disabled && (
+              <View style={styles.placeholder} pointerEvents="none">
+                <Text style={[styles.placeholderText, { color: colors.onSurfaceDisabled }]}>{t("common.signHere")}</Text>
+              </View>
+            )}
           </View>
-        )}
-      </View>
+        </GestureDetector>
+      </GestureHandlerRootView>
 
-      {value && (
+      {hasSignature && !disabled && (
         <View style={styles.signedIndicator}>
           <AppIcon name="checkmark.circle.fill" size={16} tintColor={colors.success} />
           <Text style={[styles.signedText, { color: colors.success }]}>{t("common.signed")}</Text>
@@ -215,25 +243,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
   },
-  signature: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
   placeholder: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
     alignItems: "center",
   },
   placeholderText: {
-    ...typography.bodyMedium,
-  },
-  disabledOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  disabledText: {
     ...typography.bodyMedium,
   },
   signedIndicator: {

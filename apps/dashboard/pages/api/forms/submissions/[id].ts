@@ -35,10 +35,12 @@ async function handler(
     if (submission.submitted_by) {
       const { data: submitter } = await supabase
         .from('app_users')
-        .select('full_name')
+        .select('first_name, last_name')
         .eq('id', submission.submitted_by)
         .single();
-      submittedByName = submitter?.full_name || null;
+      if (submitter) {
+        submittedByName = [submitter.first_name, submitter.last_name].filter(Boolean).join(' ') || null;
+      }
     }
 
     if (submission.employee_id) {
@@ -111,6 +113,27 @@ async function handler(
     }
 
     return res.status(200).json(updated);
+  }
+
+  if (req.method === 'DELETE') {
+    if (!context.isAdmin) {
+      const hasManage = await checkPermission(supabase, userId, orgId, P.FM_MANAGE_SUBMISSIONS);
+      if (!hasManage) {
+        return res.status(403).json({ error: 'Permission denied' });
+      }
+    }
+
+    const { error } = await supabase
+      .from('form_submissions')
+      .delete()
+      .eq('id', id)
+      .eq('org_id', orgId);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.status(200).json({ success: true });
   }
 
   return res.status(405).json({ error: 'Method not allowed' });

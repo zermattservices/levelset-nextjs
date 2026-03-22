@@ -150,6 +150,24 @@ async function handler(
       return res.status(403).json({ error: 'System templates cannot be deleted' });
     }
 
+    const permanent = req.query.permanent === 'true' || req.body?.permanent === true;
+
+    if (permanent) {
+      // Hard delete — CASCADE will also delete all form_submissions
+      const { error } = await supabase
+        .from('form_templates')
+        .delete()
+        .eq(lookupField, id)
+        .eq('org_id', orgId);
+
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+
+      return res.status(200).json({ success: true, permanent: true });
+    }
+
+    // Soft delete (archive)
     const { error } = await supabase
       .from('form_templates')
       .update({ is_active: false, updated_at: new Date().toISOString() })

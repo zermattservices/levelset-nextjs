@@ -1,6 +1,8 @@
+import { withAuth } from '@/lib/permissions/middleware';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { HotSchedulesShift, HotSchedulesJob, HotSchedulesRole } from '@/lib/hotschedules.types';
+import { setCorsOrigin } from '@/lib/cors';
 
 export const config = {
   api: {
@@ -26,9 +28,9 @@ interface SyncConfirmRequest {
   position_mappings: PositionMappingInput[];
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();
@@ -140,13 +142,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       positionMap,
     );
 
-    // Step 5: Mark notification as processed
+    // Step 5: Mark notification as viewed so it doesn't trigger the import modal again
     await supabase
       .from('hs_sync_notifications')
-      .update({
-        status: 'schedule_synced',
-        updated_at: new Date().toISOString(),
-      })
+      .update({ viewed: true })
       .eq('id', notification_id);
 
     return res.status(200).json({
@@ -479,3 +478,5 @@ function parseTime(time: string): number {
   const parts = time.split(':');
   return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
 }
+
+export default withAuth(handler);

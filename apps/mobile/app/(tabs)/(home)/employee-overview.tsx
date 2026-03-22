@@ -15,7 +15,7 @@ import { fetchEmployeeProfileAuth } from '../../../src/lib/api';
 import type { EmployeeProfileResponse } from '../../../src/lib/api';
 import { GlassCard } from '../../../src/components/glass';
 import { AppIcon } from '../../../src/components/ui';
-import { TabBar, SummarySection, StubTab, OverviewTab, PETab, DisciplineTab } from '../../../src/components/employee-overview';
+import { TabBar, SummarySection, StubTab, OverviewTab, PETab, DisciplineTab, EvaluationsTab } from '../../../src/components/employee-overview';
 
 export default function EmployeeOverviewScreen() {
   const { employeeId, locationId } = useLocalSearchParams<{
@@ -180,7 +180,9 @@ export default function EmployeeOverviewScreen() {
               )}
               {activeTab === 'schedule' && <StubTab icon="calendar" title="Schedule" />}
               {activeTab === 'pathway' && <StubTab icon="map" title="Pathway" />}
-              {activeTab === 'reviews' && <StubTab icon="star.bubble" title="Reviews" />}
+              {activeTab === 'evaluations' && employeeId && locationId && (
+                <EvaluationsTab employeeId={employeeId} locationId={locationId} />
+              )}
             </>
           )}
         </View>

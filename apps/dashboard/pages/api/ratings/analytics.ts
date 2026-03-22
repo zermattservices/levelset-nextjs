@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import { withAuth } from '@/lib/permissions/middleware';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -32,7 +33,7 @@ const BOH_POSITIONS = [
   'Leadership'
 ];
 
-export default async function handler(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -377,4 +378,6 @@ export default async function handler(
     });
   }
 }
+
+export default withAuth(handler);
 

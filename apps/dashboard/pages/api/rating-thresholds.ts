@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getRatingThresholds } from '@/lib/rating-thresholds';
+import { withAuth } from '@/lib/permissions/middleware';
 
-export default async function handler(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -23,4 +24,6 @@ export default async function handler(
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+export default withAuth(handler);
 

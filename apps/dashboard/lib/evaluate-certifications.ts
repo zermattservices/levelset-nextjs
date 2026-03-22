@@ -1,14 +1,10 @@
-// TODO: Certification module migration (see docs/superpowers/specs/2026-03-17-evaluations-page-design.md)
-// 1. Replace .from('evaluations').insert() with .from('evaluation_requests').insert()
-//    - Use certification_evaluation_rules to determine form_template_id
-//    - Set trigger_source based on transition type (certification_pending or certification_pip)
-// 2. Remove hardcoded .eq('role', 'Team Member') filter
-//    - Use certification_evaluation_rules.target_role_ids to determine eligible roles
-// 3. Bug: Status transitions not producing pending evaluations — needs investigation
-
 /**
  * Core certification evaluation logic
- * Implements state machine for certification status transitions
+ * Implements state machine for certification status transitions.
+ *
+ * Status transitions create evaluation_requests rows (instead of the legacy
+ * "evaluations" table) using certification_evaluation_rules to determine which
+ * form template and trigger source to use.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -30,6 +26,19 @@ import {
 
 type AuditRunType = 'FOURTH_THURSDAY' | 'THIRD_FRIDAY';
 
+/** A certification_evaluation_rule row with the role names resolved. */
+interface CertRule {
+  id: string;
+  org_id: string;
+  location_id: string;
+  form_template_id: string;
+  target_role_ids: string[];
+  trigger_on: string[]; // e.g. ['certification_pending', 'certification_pip']
+  is_active: boolean;
+  /** Resolved role names for target_role_ids */
+  target_role_names: string[];
+}
+
 interface EvaluationResult {
   employeeId: string;
   employeeName: string;
@@ -40,7 +49,6 @@ interface EvaluationResult {
   notes?: string;
 }
 
-const ACTIVE_EVALUATION_STATUSES = ['Planned', 'Scheduled'];
 
 /**
  * Evaluate certifications for all employees in a location.
@@ -65,11 +73,17 @@ export async function evaluateCertifications(
     },
   });
 
-  if (runType === 'THIRD_FRIDAY') {
-    return evaluateThirdFridayPendingCheck(locationId, referenceDate, supabase);
+  // Load active certification_evaluation_rules for this location
+  const certRules = await fetchCertRules(supabase, locationId);
+  if (certRules.length === 0) {
+    console.log(`No active certification evaluation rules for location ${locationId}`);
   }
 
-  return evaluateFourthThursdayAudit(locationId, referenceDate, supabase);
+  if (runType === 'THIRD_FRIDAY') {
+    return evaluateThirdFridayPendingCheck(locationId, referenceDate, supabase, certRules);
+  }
+
+  return evaluateFourthThursdayAudit(locationId, referenceDate, supabase, certRules);
 }
 
 /**
@@ -214,9 +228,10 @@ export async function runMonthlyEvaluation(
 async function evaluateFourthThursdayAudit(
   locationId: string,
   auditDate: Date,
-  supabase: any
+  supabase: any,
+  certRules: CertRule[]
 ): Promise<EvaluationResult[]> {
-  const employees = await fetchTeamMembers(supabase, locationId);
+  const employees = await fetchCertEligibleEmployees(supabase, locationId, certRules);
   if (employees.length === 0) {
     return [];
   }
@@ -241,20 +256,19 @@ async function evaluateFourthThursdayAudit(
       if (allQualified) {
         newStatus = 'Pending';
         notes = 'Qualified for evaluation; moved to Pending.';
-        await createPendingEvaluationRecord(supabase, employee, auditDate, true);
+        await createEvaluationRequests(supabase, employee, certRules, 'certification_pending');
       }
     } else if (currentStatus === 'Pending') {
       if (!allQualified) {
         newStatus = 'Not Certified';
         notes = 'Lost qualification during evaluation week; evaluation cancelled.';
-        await cancelActiveEvaluationRecord(supabase, employee.id, 'Not Certified');
-      } else {
-        await updatePendingEvaluationRatingStatus(supabase, employee.id, true);
+        await cancelActiveEvaluationRequests(supabase, employee.id);
       }
     } else if (currentStatus === 'Certified') {
       if (!allQualified) {
         newStatus = 'PIP';
         notes = 'Ratings below 2.75; moved to PIP.';
+        await createEvaluationRequests(supabase, employee, certRules, 'certification_pip');
       }
     } else if (currentStatus === 'PIP') {
       if (allQualified) {
@@ -288,9 +302,10 @@ async function evaluateFourthThursdayAudit(
 async function evaluateThirdFridayPendingCheck(
   locationId: string,
   checkDate: Date,
-  supabase: any
+  supabase: any,
+  certRules: CertRule[]
 ): Promise<EvaluationResult[]> {
-  const employees = await fetchTeamMembers(supabase, locationId, ['Pending']);
+  const employees = await fetchCertEligibleEmployees(supabase, locationId, certRules, ['Pending']);
   if (employees.length === 0) {
     return [];
   }
@@ -308,11 +323,10 @@ async function evaluateThirdFridayPendingCheck(
     const allQualified = hasPositions && allPositionsQualified(positions, certificationThreshold);
 
     if (allQualified) {
-      await updatePendingEvaluationRatingStatus(supabase, employee.id, true);
       continue;
     }
 
-    await cancelActiveEvaluationRecord(supabase, employee.id, 'Not Certified');
+    await cancelActiveEvaluationRequests(supabase, employee.id);
 
     const result: EvaluationResult = {
       employeeId: employee.id,
@@ -331,17 +345,36 @@ async function evaluateThirdFridayPendingCheck(
   return results;
 }
 
-async function fetchTeamMembers(
+/**
+ * Fetch employees eligible for certification evaluation.
+ * Uses certification_evaluation_rules.target_role_ids (resolved to role names)
+ * to determine which employees to evaluate, instead of hardcoded 'Team Member'.
+ */
+async function fetchCertEligibleEmployees(
   supabase: any,
   locationId: string,
+  certRules: CertRule[],
   statuses?: CertificationStatus[]
 ): Promise<Employee[]> {
+  // Collect all target role names from rules
+  const targetRoleNames = new Set<string>();
+  for (const rule of certRules) {
+    for (const name of rule.target_role_names) {
+      targetRoleNames.add(name);
+    }
+  }
+
+  if (targetRoleNames.size === 0) {
+    console.log(`No target roles defined in certification rules for location ${locationId}`);
+    return [];
+  }
+
   let query = supabase
     .from('employees')
     .select('*')
     .eq('location_id', locationId)
     .eq('active', true)
-    .eq('role', 'Team Member');
+    .in('role', Array.from(targetRoleNames));
 
   if (statuses && statuses.length > 0) {
     query = query.in('certified_status', statuses);
@@ -405,113 +438,134 @@ async function buildPositionAverageMap(
   return map;
 }
 
-function addMonths(date: Date, months: number): Date {
-  const clone = new Date(date);
-  clone.setMonth(clone.getMonth() + months);
-  return clone;
-}
 
-function formatMonthLabel(date: Date): string {
-  return date.toLocaleString('en-US', { month: 'long' });
-}
-
-async function createPendingEvaluationRecord(
+/**
+ * Create evaluation_requests for an employee based on matching certification rules.
+ * Finds rules whose trigger_on includes the given triggerSource and whose
+ * target roles include the employee's role.
+ */
+async function createEvaluationRequests(
   supabase: any,
   employee: Employee,
-  auditDate: Date,
-  ratingStatus: boolean
+  certRules: CertRule[],
+  triggerSource: 'certification_pending' | 'certification_pip'
 ): Promise<void> {
-  try {
-    const evaluationMonthDate = addMonths(auditDate, 1);
-    const monthLabel = formatMonthLabel(evaluationMonthDate);
+  const matchingRules = certRules.filter(
+    (rule) =>
+      rule.trigger_on.includes(triggerSource) &&
+      rule.target_role_names.includes(employee.role)
+  );
 
-    const { error } = await supabase.from('evaluations').insert({
-      employee_id: employee.id,
-      employee_name: employee.full_name,
-      location_id: employee.location_id,
-      org_id: employee.org_id,
-      leader_id: null,
-      leader_name: null,
-      evaluation_date: null,
-      month: monthLabel,
-      role: employee.role,
-      status: 'Planned',
-      rating_status: ratingStatus,
-      state_before: 'Pending',
-      state_after: null,
-      notes: null,
-    });
+  if (matchingRules.length === 0) {
+    console.log(
+      `No certification rules match trigger=${triggerSource} role=${employee.role} for employee ${employee.full_name}`
+    );
+    return;
+  }
 
-    if (error) {
-      console.error(`Error creating evaluation for ${employee.full_name}:`, error);
+  for (const rule of matchingRules) {
+    try {
+      // Check for existing pending request to avoid duplicates
+      const { data: existing } = await supabase
+        .from('evaluation_requests')
+        .select('id')
+        .eq('employee_id', employee.id)
+        .eq('form_template_id', rule.form_template_id)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (existing) {
+        console.log(
+          `Skipping duplicate evaluation request for ${employee.full_name} (form ${rule.form_template_id})`
+        );
+        continue;
+      }
+
+      const { error } = await supabase.from('evaluation_requests').insert({
+        org_id: employee.org_id,
+        location_id: employee.location_id,
+        employee_id: employee.id,
+        form_template_id: rule.form_template_id,
+        trigger_source: triggerSource,
+        status: 'pending',
+      });
+
+      if (error) {
+        console.error(
+          `Error creating evaluation request for ${employee.full_name}:`,
+          error
+        );
+      } else {
+        console.log(
+          `Created evaluation request: ${employee.full_name} (${triggerSource}, form ${rule.form_template_id})`
+        );
+      }
+    } catch (error) {
+      console.error('Unexpected error creating evaluation request:', error);
     }
-  } catch (error) {
-    console.error('Unexpected error creating evaluation record:', error);
   }
 }
 
-async function updatePendingEvaluationRatingStatus(
-  supabase: any,
-  employeeId: string,
-  ratingStatus: boolean
-): Promise<void> {
-  const evaluation = await findActiveEvaluationRecord(supabase, employeeId);
-  if (!evaluation) {
-    return;
-  }
-
-  await updateEvaluationRecord(supabase, evaluation.id, { rating_status: ratingStatus });
-}
-
-async function cancelActiveEvaluationRecord(
-  supabase: any,
-  employeeId: string,
-  stateAfter: CertificationStatus
-): Promise<void> {
-  const evaluation = await findActiveEvaluationRecord(supabase, employeeId);
-  if (!evaluation) {
-    return;
-  }
-
-  await updateEvaluationRecord(supabase, evaluation.id, {
-    status: 'Cancelled',
-    rating_status: false,
-    state_after: stateAfter,
-  });
-}
-
-async function findActiveEvaluationRecord(
+/**
+ * Cancel all pending evaluation_requests for an employee.
+ */
+async function cancelActiveEvaluationRequests(
   supabase: any,
   employeeId: string
-): Promise<{ id: string } | null> {
-  const { data, error } = await supabase
-    .from('evaluations')
-    .select('id')
-    .eq('employee_id', employeeId)
-    .in('status', ACTIVE_EVALUATION_STATUSES)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    console.error('Error fetching active evaluation:', error);
-    return null;
-  }
-
-  return data ?? null;
-}
-
-async function updateEvaluationRecord(
-  supabase: any,
-  evaluationId: string,
-  updates: Record<string, any>
 ): Promise<void> {
   const { error } = await supabase
-    .from('evaluations')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', evaluationId);
+    .from('evaluation_requests')
+    .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+    .eq('employee_id', employeeId)
+    .eq('status', 'pending');
 
   if (error) {
-    console.error('Error updating evaluation record:', error);
+    console.error('Error cancelling evaluation requests:', error);
   }
+}
+
+/**
+ * Fetch and resolve certification_evaluation_rules for a location.
+ * Joins org_roles to map target_role_ids → role names.
+ */
+async function fetchCertRules(
+  supabase: any,
+  locationId: string
+): Promise<CertRule[]> {
+  const { data: rules, error } = await supabase
+    .from('certification_evaluation_rules')
+    .select('id, org_id, location_id, form_template_id, target_role_ids, trigger_on, is_active')
+    .eq('location_id', locationId)
+    .eq('is_active', true);
+
+  if (error || !rules || rules.length === 0) {
+    if (error) console.error('Error fetching certification rules:', error);
+    return [];
+  }
+
+  // Collect all role IDs across rules
+  const allRoleIds = new Set<string>();
+  for (const rule of rules) {
+    for (const id of rule.target_role_ids ?? []) allRoleIds.add(id);
+  }
+
+  // Resolve role IDs → names
+  const roleIdToName = new Map<string, string>();
+  if (allRoleIds.size > 0) {
+    const { data: roles } = await supabase
+      .from('org_roles')
+      .select('id, role_name')
+      .in('id', Array.from(allRoleIds));
+
+    for (const r of roles ?? []) {
+      roleIdToName.set(r.id, r.role_name);
+    }
+  }
+
+  return rules.map((rule: any) => ({
+    ...rule,
+    target_role_names: (rule.target_role_ids ?? [])
+      .map((id: string) => roleIdToName.get(id))
+      .filter(Boolean) as string[],
+  }));
 }

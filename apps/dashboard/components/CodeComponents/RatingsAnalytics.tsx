@@ -14,6 +14,8 @@ interface RatingsAnalyticsProps {
   searchText: string;
   filterModel: GridFilterModel | undefined;
   loading: boolean;
+  /** Bumped by realtime subscription to force prior-period re-fetch */
+  realtimeTick?: number;
   onMetricsCalculated?: (metrics: {
     current: { count: number; avgRating: number; ratingsPerDay: number; days: number };
     prior: { count: number; avgRating: number; ratingsPerDay: number } | null;
@@ -58,6 +60,7 @@ export function RatingsAnalytics({
   startDate,
   endDate,
   showFOH,
+  realtimeTick,
   showBOH,
   searchText,
   filterModel,
@@ -152,7 +155,7 @@ export function RatingsAnalytics({
     }
 
     fetchPriorPeriod();
-  }, [locationId, startDate, endDate, showFOH, showBOH, searchText, filterModel]);
+  }, [locationId, startDate, endDate, showFOH, showBOH, searchText, filterModel, realtimeTick]);
 
   const periodText = getPeriodText(currentMetrics.days || 30);
   const priorMetrics = analyticsData?.prior;

@@ -130,6 +130,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
     icon: 'ToggleOnOutlined',
     category: 'selection',
     schema: { type: 'boolean' },
+    uiWidget: 'yesNoSwitch',
   },
   rating_1_3: {
     type: 'rating_1_3',

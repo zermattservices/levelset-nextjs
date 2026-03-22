@@ -22,7 +22,7 @@ import { AppIcon } from "./AppIcon";
 const MENU_WIDTH = 220;
 
 export interface ActionMenuItem {
-  icon: string;
+  icon: string | React.ReactNode;
   label: string;
   onPress?: () => void;
   disabled?: boolean;
@@ -93,11 +93,15 @@ export function ActionMenu({ visible, onClose, items }: ActionMenuProps) {
           ]}
         >
           {!item.disabled && (
-            <AppIcon
-              name={item.icon}
-              size={20}
-              tintColor={colors.primary}
-            />
+            typeof item.icon === "string" ? (
+              <AppIcon
+                name={item.icon}
+                size={20}
+                tintColor={colors.primary}
+              />
+            ) : (
+              item.icon
+            )
           )}
           <View style={styles.menuItemTextContainer}>
             <Text

@@ -14,6 +14,8 @@ import type {
   HotSchedulesAvailability,
   SchedulingSyncAnalysis,
 } from '@/lib/hotschedules.types';
+import { withAuth } from '@/lib/permissions/middleware';
+import { setCorsOrigin } from '@/lib/cors';
 
 // Increase body size limit for large HS payloads (900+ shifts)
 export const config = {
@@ -58,22 +60,22 @@ function decodeDate(timestamp?: number): string | null {
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   // Set CORS headers for POST requests
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  setCorsOrigin(req, res);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -935,4 +937,6 @@ async function updateActualPayRates(
 
   console.log(`[Sync] Updated actual pay rates for ${updated} employees`);
 }
+
+export default withAuth(handler);
 

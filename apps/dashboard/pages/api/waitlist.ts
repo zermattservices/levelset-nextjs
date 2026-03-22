@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { setCorsOrigin } from '@/lib/cors';
 
 interface WaitlistResponse {
   success: boolean;
@@ -13,14 +14,14 @@ export default async function handler(
 ) {
   // Handle CORS preflight for Framer
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
   }
 
   // Set CORS headers for all responses
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  setCorsOrigin(req, res);
   res.setHeader('Content-Type', 'application/json');
 
   if (req.method !== 'POST') {

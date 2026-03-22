@@ -79,7 +79,7 @@ async function addRole(
 }
 
 // ---------------------------------------------------------------------------
-// Reorder roles atomically using temp offset to avoid unique constraint
+// Reorder roles using parameterized queries (temp offset avoids unique constraint)
 // ---------------------------------------------------------------------------
 async function reorderRoles(
   res: NextApiResponse,
@@ -93,71 +93,20 @@ async function reorderRoles(
     return res.status(400).json({ error: 'role_ids array is required' });
   }
 
-  // Build SQL that moves all to temp values first, then sets final values
-  // This avoids UNIQUE (org_id, hierarchy_level) conflicts
-  const tempOffset = 1000;
-  const statements: string[] = [];
+  // Validate all role_ids are UUID format to prevent misuse
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!role_ids.every((id: string) => uuidRegex.test(id))) {
+    return res.status(400).json({ error: 'Invalid role_id format' });
+  }
 
-  // Phase 1: move all to temp high values
-  role_ids.forEach((id: string, index: number) => {
-    statements.push(
-      `UPDATE org_roles SET hierarchy_level = ${tempOffset + index}, updated_at = NOW() WHERE id = '${id}' AND org_id = '${orgId}';`
-    );
-  });
-
-  // Phase 2: set correct values
-  role_ids.forEach((id: string, index: number) => {
-    statements.push(
-      `UPDATE org_roles SET hierarchy_level = ${index} WHERE id = '${id}' AND org_id = '${orgId}';`
-    );
-  });
-
-  // Also update permission_profiles to keep hierarchy_level in sync
-  // First get current role data to map role_name -> new level
+  // Fetch role data for permission_profiles sync
   const { data: roles } = await supabase
     .from('org_roles')
     .select('id, role_name')
     .eq('org_id', orgId)
     .in('id', role_ids);
 
-  if (roles) {
-    const roleMap = new Map<string, string>(roles.map((r: any) => [r.id, r.role_name]));
-
-    // Move profiles to temp values first
-    role_ids.forEach((id: string, index: number) => {
-      const roleName = roleMap.get(id);
-      if (roleName) {
-        statements.push(
-          `UPDATE permission_profiles SET hierarchy_level = ${tempOffset + index}, updated_at = NOW() WHERE org_id = '${orgId}' AND linked_role_name = '${roleName.replace(/'/g, "''")}' AND is_system_default = true;`
-        );
-      }
-    });
-
-    // Set final values
-    role_ids.forEach((id: string, index: number) => {
-      const roleName = roleMap.get(id);
-      if (roleName) {
-        statements.push(
-          `UPDATE permission_profiles SET hierarchy_level = ${index} WHERE org_id = '${orgId}' AND linked_role_name = '${roleName.replace(/'/g, "''")}' AND is_system_default = true;`
-        );
-      }
-    });
-  }
-
-  // Execute all in a single transaction via rpc or raw SQL
-  const sql = `BEGIN;\n${statements.join('\n')}\nCOMMIT;`;
-
-  const { error } = await supabase.rpc('exec_sql', { sql_text: sql });
-
-  if (error) {
-    // Fallback: try sequential updates with temp offset if rpc doesn't exist
-    if (error.message?.includes('function') || error.code === '42883') {
-      return await reorderRolesFallback(res, supabase, orgId, role_ids, roles);
-    }
-    return res.status(500).json({ error: error.message });
-  }
-
-  return res.status(200).json({ success: true });
+  return await reorderRolesFallback(res, supabase, orgId, role_ids, roles);
 }
 
 // Fallback: sequential updates using temp offset (no raw SQL rpc needed)

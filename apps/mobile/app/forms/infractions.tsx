@@ -1,11 +1,11 @@
 import React from "react";
-import { View, ScrollView, Pressable, Text, StyleSheet } from "react-native";
+import { View, Pressable, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "../../src/context/ThemeContext";
 import { useGlass, isGlassAvailable } from "../../src/hooks/useGlass";
 import { AppIcon } from "../../src/components/ui/AppIcon";
-import { DisciplineInfractionForm } from "../../src/components/forms";
+import { InfractionsFormScreen } from "../../src/components/forms/InfractionsFormScreen";
 import { typography, fontWeights } from "../../src/lib/fonts";
 import { spacing, haptics } from "../../src/lib/theme";
 
@@ -30,11 +30,7 @@ export default function InfractionsFormSheet() {
   );
 
   return (
-    <ScrollView
-      contentContainerStyle={{ flexGrow: 1 }}
-      keyboardDismissMode="on-drag"
-      style={{ backgroundColor: colors.background }}
-    >
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[styles.header, { paddingTop: insets.top + spacing[1] }]}>
         {glassAvail && GlassView ? (
           <GlassView isInteractive style={styles.button}>
@@ -48,8 +44,8 @@ export default function InfractionsFormSheet() {
         <Text style={[styles.title, { color: colors.onSurface }]}>Discipline Infraction</Text>
         <View style={styles.spacer} />
       </View>
-      <DisciplineInfractionForm />
-    </ScrollView>
+      <InfractionsFormScreen />
+    </View>
   );
 }
 

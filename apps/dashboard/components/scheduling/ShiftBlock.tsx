@@ -91,6 +91,19 @@ export function ShiftBlock({
 
   /* ---- Event handlers ---- */
 
+  const handleDragStart = (e: React.DragEvent) => {
+    if (!assignment?.employee_id) return; // don't drag open shifts
+    e.stopPropagation();
+    e.dataTransfer.setData('application/x-shift-reassign', JSON.stringify({
+      shiftId: shift.id,
+      employeeId: assignment.employee_id,
+      positionName: position?.name || '',
+      startTime: shift.start_time,
+      endTime: shift.end_time,
+    }));
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onClick(shift);
@@ -135,6 +148,8 @@ export function ShiftBlock({
       style={blockStyle}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      draggable={!!assignment?.employee_id && !isPendingDelete}
+      onDragStart={handleDragStart}
       role="button"
       tabIndex={0}
       aria-label={

@@ -192,6 +192,13 @@ export function FormManagementPage() {
     }
   };
 
+  const handleDeleteTemplate = () => {
+    // The delete is handled by FormTemplateCard's dialog + API call.
+    // We just need to refresh the list after it completes.
+    setSnackbar({ open: true, message: 'Form permanently deleted', severity: 'success' });
+    fetchData();
+  };
+
   // Show loading screen while auth is loading or redirecting
   if (!auth.isLoaded || !auth.authUser) {
     return <AuthLoadingScreen />;
@@ -313,6 +320,7 @@ export function FormManagementPage() {
                           typeFilter={typeFilter}
                           onDuplicateTemplate={handleDuplicateTemplate}
                           onArchiveTemplate={handleArchiveTemplate}
+                          onDeleteTemplate={handleDeleteTemplate}
                         />
                       )}
                     </>

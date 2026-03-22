@@ -29,6 +29,7 @@ import { DismissConfirmationModal } from "./DismissConfirmationModal";
 import { PositionalRatings } from "./PositionalRatings";
 import { RolePill } from "./shared/RolePill";
 import { EmployeeOverviewTab } from "./EmployeeOverviewTab";
+import { EmployeeEvaluationsTab } from "../evaluations/EmployeeEvaluationsTab";
 
 export interface EmployeeModalProps {
   open: boolean;
@@ -1012,12 +1013,9 @@ export function EmployeeModal({
   };
 
   const renderEvaluationsTab = () => {
+    if (!employee) return null;
     return (
-      <Box sx={{ p: 3, textAlign: "center" }}>
-        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "var(--ls-color-text-caption)" }}>
-          Coming soon!
-        </Typography>
-      </Box>
+      <EmployeeEvaluationsTab employeeId={employee.id} locationId={locationId} />
     );
   };
 

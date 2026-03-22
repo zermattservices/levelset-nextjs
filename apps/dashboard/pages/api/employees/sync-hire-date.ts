@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx';
 import type { Employee } from '@/lib/supabase.types';
 import { parseEmployeeName } from '@/lib/utils/name-parser';
 import { matchEmployee } from '@/lib/utils/employee-matcher';
+import { withAuth } from '@/lib/permissions/middleware';
 
 interface SpreadsheetRow {
   'Employee Name': string;
@@ -31,7 +32,7 @@ function parseDate(dateStr: string): string | null {
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -264,4 +265,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+export default withAuth(handler);
 

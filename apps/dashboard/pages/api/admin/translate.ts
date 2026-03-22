@@ -1,13 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { withAdminAuth } from '@/lib/permissions/middleware';
 
 /**
  * Translation API endpoint using DeepL
- * 
+ *
  * POST /api/admin/translate
  * Body: { texts: string[], targetLang: 'ES' | 'EN' }
  * Returns: { translations: string[] }
  */
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
@@ -91,3 +92,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: error.message || 'Translation failed' });
   }
 }
+
+export default withAdminAuth(handler);

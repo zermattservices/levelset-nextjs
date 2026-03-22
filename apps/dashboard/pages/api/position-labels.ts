@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { fetchBig5Labels, fetchPositionsList, FOH_POSITIONS, BOH_POSITIONS } from '@/lib/ratings-data';
+import { withAuth } from '@/lib/permissions/middleware';
 
 async function getOrgIdForLocation(supabase: ReturnType<typeof createServerSupabaseClient>, locationId: string) {
   const { data, error } = await supabase
@@ -21,7 +22,7 @@ async function getOrgIdForLocation(supabase: ReturnType<typeof createServerSupab
   return data.org_id as string;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const supabase = createServerSupabaseClient();
 
   if (req.method === 'GET') {
@@ -146,4 +147,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
+export default withAuth(handler);
 

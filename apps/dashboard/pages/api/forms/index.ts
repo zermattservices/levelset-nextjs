@@ -4,6 +4,8 @@ import { generateUniqueSlug } from '@/lib/forms/slugify';
 import { withPermissionAndContext, type AuthenticatedRequest } from '@/lib/permissions/middleware';
 import { P } from '@/lib/permissions/constants';
 import { checkPermission } from '@/lib/permissions/service';
+import { fieldsToJsonSchema, generateFieldId } from '@/lib/forms/schema-builder';
+import type { FormField } from '@/lib/forms/schema-builder';
 
 async function handler(
   req: AuthenticatedRequest,
@@ -115,6 +117,39 @@ async function handler(
         .eq('org_id', orgId)
         .maybeSingle();
 
+      // For evaluation forms, seed with required system fields (Employee Name + Date)
+      let initialSchema: Record<string, any> = {};
+      let initialUiSchema: Record<string, any> = {};
+      if (form_type === 'evaluation') {
+        const systemFields: FormField[] = [
+          {
+            id: generateFieldId(),
+            type: 'select',
+            label: 'Employee Name',
+            labelEs: 'Nombre del Empleado',
+            required: true,
+            settings: {
+              dataSource: 'employees',
+              isSystemField: true,
+            },
+          },
+          {
+            id: generateFieldId(),
+            type: 'date',
+            label: 'Date',
+            labelEs: 'Fecha',
+            required: true,
+            settings: {
+              defaultToCurrentDate: true,
+              isSystemField: true,
+            },
+          },
+        ];
+        const built = fieldsToJsonSchema(systemFields);
+        initialSchema = built.schema;
+        initialUiSchema = built.uiSchema;
+      }
+
       const { data: template, error } = await supabase
         .from('form_templates')
         .insert({
@@ -126,8 +161,8 @@ async function handler(
           description: description || null,
           description_es: description_es || null,
           form_type,
-          schema: {},
-          ui_schema: {},
+          schema: initialSchema,
+          ui_schema: initialUiSchema,
           settings: {},
           is_active: true,
           is_system: false,

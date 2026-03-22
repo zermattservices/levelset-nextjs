@@ -19,24 +19,11 @@ import { useColors } from '../../context/ThemeContext';
 import { typography, fontWeights } from '../../lib/fonts';
 import { spacing, borderRadius, haptics } from '../../lib/theme';
 import { AppIcon } from '../ui';
+import { DraggableEmployee } from './DraggableEmployee';
 import type { SetupEmployee, SetupAssignment } from '../../lib/api';
 
 const FOH_COLOR = '#006391';
 const BOH_COLOR = '#ffcc5b';
-
-function formatTime12Short(time24: string): string {
-  const [h, m] = time24.split(':').map(Number);
-  const period = h >= 12 ? 'p' : 'a';
-  const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-  if (m === 0) return `${hour12}${period}`;
-  return `${hour12}:${String(m).padStart(2, '0')}${period}`;
-}
-
-function formatName(fullName: string): string {
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length <= 1) return fullName;
-  return `${parts[0]} ${parts[parts.length - 1][0]}.`;
-}
 
 function parseTime(t: string): number {
   const [h, m] = t.split(':').map(Number);
@@ -48,13 +35,15 @@ interface SetupEmployeePanelProps {
   assignments: SetupAssignment[];
   zone: 'FOH' | 'BOH';
   onZoneChange: (zone: 'FOH' | 'BOH') => void;
+  onAssign: (employeeId: string, shiftId: string, positionId: string) => void;
+  onDragStart?: () => void;
   activeBlockStart?: string;
   activeBlockEnd?: string;
 }
 
 export function SetupEmployeePanel({
   employees, assignments,
-  zone, onZoneChange,
+  zone, onZoneChange, onAssign, onDragStart,
   activeBlockStart, activeBlockEnd,
 }: SetupEmployeePanelProps) {
   const { t } = useTranslation();
@@ -177,18 +166,18 @@ export function SetupEmployeePanel({
         contentContainerStyle={{ paddingBottom: spacing[10] + insets.bottom }}
         renderItem={({ item }) => {
           const isAssigned = assignedIds.has(item.id);
-          const name = formatName(item.full_name);
-          const shiftTime = `${formatTime12Short(item.shift.start_time)} – ${formatTime12Short(item.shift.end_time)}`;
 
           return (
-            <View style={[styles.employeeCard, isAssigned && { opacity: 0.4 }]}>
-              <Text style={[styles.empName, { color: colors.onSurface }]} numberOfLines={1}>
-                {name}
-              </Text>
-              <Text style={[styles.empShift, { color: colors.onSurfaceVariant }]}>
-                {shiftTime}
-              </Text>
-            </View>
+            <DraggableEmployee
+              employee={item}
+              isAssigned={isAssigned}
+              onDragStart={onDragStart}
+              onDragEnd={(dropZone) => {
+                if (dropZone && !isAssigned) {
+                  onAssign(item.id, item.shift.id, dropZone.positionId);
+                }
+              }}
+            />
           );
         }}
         ListEmptyComponent={
@@ -249,20 +238,6 @@ const styles = StyleSheet.create({
     flex: 1,
     ...typography.bodySmall,
     padding: 0,
-  },
-  employeeCard: {
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[3],
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(128,128,128,0.15)',
-  },
-  empName: {
-    ...typography.bodySmall,
-    fontWeight: fontWeights.medium,
-  },
-  empShift: {
-    fontSize: 11,
-    marginTop: 1,
   },
   emptyText: {
     ...typography.bodySmall,

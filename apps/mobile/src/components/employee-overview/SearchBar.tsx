@@ -61,36 +61,6 @@ export function SearchBar({
     </View>
   );
 
-  const filterButtonContent = (
-    <View
-      style={{
-        width: 40,
-        height: 40,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <AppIcon
-        name="line.3.horizontal.decrease.circle"
-        size={20}
-        tintColor={colors.onSurfaceVariant}
-      />
-      {filterActive && (
-        <View
-          style={{
-            position: "absolute",
-            top: 4,
-            right: 4,
-            width: 8,
-            height: 8,
-            borderRadius: 4,
-            backgroundColor: colors.primary,
-          }}
-        />
-      )}
-    </View>
-  );
-
   return (
     <View
       style={{
@@ -125,18 +95,53 @@ export function SearchBar({
         </View>
       )}
 
-      {/* Filter Button */}
-      {GlassView ? (
-        <GlassView
-          isInteractive
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            borderCurve: "continuous",
-            overflow: "hidden",
-          }}
-        >
+      {/* Filter Button — wrap in a View so the active dot isn't clipped by overflow:hidden */}
+      <View style={{ width: 40, height: 40 }}>
+        {filterActive && (
+          <View
+            style={{
+              position: "absolute",
+              top: 2,
+              right: 2,
+              width: 10,
+              height: 10,
+              borderRadius: 5,
+              backgroundColor: colors.primary,
+              zIndex: 1,
+            }}
+          />
+        )}
+        {GlassView ? (
+          <GlassView
+            isInteractive
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              borderCurve: "continuous",
+              overflow: "hidden",
+            }}
+          >
+            <Pressable
+              onPress={() => {
+                haptics.light();
+                onFilterPress();
+              }}
+              style={{
+                width: 40,
+                height: 40,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <AppIcon
+                name="line.3.horizontal.decrease.circle"
+                size={20}
+                tintColor={colors.onSurfaceVariant}
+              />
+            </Pressable>
+          </GlassView>
+        ) : (
           <Pressable
             onPress={() => {
               haptics.light();
@@ -145,35 +150,23 @@ export function SearchBar({
             style={{
               width: 40,
               height: 40,
+              borderRadius: 20,
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.outline,
               alignItems: "center",
               justifyContent: "center",
+              borderCurve: "continuous",
             }}
           >
-            {filterButtonContent}
+            <AppIcon
+              name="line.3.horizontal.decrease.circle"
+              size={20}
+              tintColor={colors.onSurfaceVariant}
+            />
           </Pressable>
-        </GlassView>
-      ) : (
-        <Pressable
-          onPress={() => {
-            haptics.light();
-            onFilterPress();
-          }}
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: colors.surface,
-            borderWidth: 1,
-            borderColor: colors.outline,
-            alignItems: "center",
-            justifyContent: "center",
-            borderCurve: "continuous",
-            overflow: "hidden",
-          }}
-        >
-          {filterButtonContent}
-        </Pressable>
-      )}
+        )}
+      </View>
     </View>
   );
 }

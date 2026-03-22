@@ -1,3 +1,4 @@
+import { withAuth } from '@/lib/permissions/middleware';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
@@ -6,10 +7,11 @@ import {
   type OvertimeRule,
   type ShiftForOT,
 } from '@/lib/scheduling/overtime';
+import { setCorsOrigin } from '@/lib/cors';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();
@@ -63,16 +65,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Flatten the nested assignment array (each shift has at most one assignment in MVP)
-      const flattenedShifts = (shifts || []).map((shift: any) => ({
-        ...shift,
-        position: shift.position || null,
-        assignment: shift.assignment && shift.assignment.length > 0
-          ? {
-              ...shift.assignment[0],
-              employee: shift.assignment[0].employee || null,
+      // Recalculate projected_cost on the fly from current pay rates
+      const flattenedShifts = (shifts || []).map((shift: any) => {
+        const assignment = shift.assignment && shift.assignment.length > 0
+          ? shift.assignment[0]
+          : null;
+
+        let projectedCost = assignment?.projected_cost ?? null;
+
+        // Recalculate from current pay rate if employee has hourly pay
+        if (assignment?.employee) {
+          const emp = assignment.employee;
+          if (emp.actual_pay_type !== 'salary') {
+            const rate = emp.actual_pay ?? emp.calculated_pay;
+            if (rate) {
+              const [sh, sm] = shift.start_time.split(':').map(Number);
+              const [eh, em] = shift.end_time.split(':').map(Number);
+              let endMin = eh * 60 + em;
+              const startMin = sh * 60 + sm;
+              if (endMin <= startMin) endMin += 1440;
+              const netHours = Math.max(0, (endMin - startMin - (shift.break_minutes || 0)) / 60);
+              projectedCost = Math.round(rate * netHours * 100) / 100;
             }
-          : null,
-      }));
+          }
+        }
+
+        return {
+          ...shift,
+          position: shift.position || null,
+          assignment: assignment
+            ? {
+                ...assignment,
+                projected_cost: projectedCost,
+                employee: assignment.employee || null,
+              }
+            : null,
+        };
+      });
 
       res.setHeader('Cache-Control', 'private, no-store');
 
@@ -144,6 +173,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (hardDeleteError) {
           console.error('Error hard-deleting pending shifts:', hardDeleteError);
           return res.status(500).json({ error: 'Failed to delete pending shifts' });
+        }
+
+        // Snapshot current state for all shifts before marking as published.
+        // This captures what the employee/mobile app should see as "published".
+        const { data: shiftsPre } = await supabase
+          .from('shifts')
+          .select('id, shift_date, start_time, end_time, break_minutes, position_id, is_house_shift, notes, org_id, shift_assignments(employee_id)')
+          .eq('schedule_id', id);
+
+        if (shiftsPre) {
+          for (const s of shiftsPre as any[]) {
+            const empId = s.shift_assignments?.[0]?.employee_id ?? null;
+            const snapshot = {
+              shift_date: s.shift_date,
+              start_time: s.start_time,
+              end_time: s.end_time,
+              break_minutes: s.break_minutes,
+              position_id: s.position_id,
+              is_house_shift: s.is_house_shift,
+              notes: s.notes,
+              employee_id: empId,
+            };
+            await supabase
+              .from('shifts')
+              .update({ published_snapshot: snapshot })
+              .eq('id', s.id);
+
+            // Audit log entry for each published shift
+            await supabase
+              .from('shift_audit_log')
+              .insert({
+                shift_id: s.id,
+                schedule_id: id,
+                org_id: s.org_id,
+                changed_by: publishedBy,
+                change_type: 'published',
+                new_values: snapshot,
+              });
+          }
         }
 
         // Mark all remaining shifts as published (idempotent — safe to re-stamp already-published shifts)
@@ -284,3 +352,5 @@ function parseTime(time: string): number {
   const parts = time.split(':');
   return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
 }
+
+export default withAuth(handler);

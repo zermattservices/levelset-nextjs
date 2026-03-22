@@ -1,3 +1,4 @@
+import { withAuth } from '@/lib/permissions/middleware';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -7,7 +8,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
  * Returns the applicable overtime rules for a location based on its state.
  * Falls back to federal FLSA defaults if no state is set or no state-specific rules exist.
  */
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Allow', 'GET, OPTIONS');
     return res.status(204).end();
@@ -78,3 +79,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+export default withAuth(handler);

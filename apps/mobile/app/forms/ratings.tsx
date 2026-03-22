@@ -1,11 +1,11 @@
 import React from "react";
-import { View, ScrollView, Pressable, Text, StyleSheet } from "react-native";
+import { View, Pressable, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "../../src/context/ThemeContext";
 import { useGlass, isGlassAvailable } from "../../src/hooks/useGlass";
 import { AppIcon } from "../../src/components/ui/AppIcon";
-import { PositionalRatingsForm } from "../../src/components/forms";
+import { RatingsFormScreen } from "../../src/components/forms/RatingsFormScreen";
 import { typography, fontWeights } from "../../src/lib/fonts";
 import { spacing, haptics } from "../../src/lib/theme";
 
@@ -30,11 +30,7 @@ export default function RatingsFormSheet() {
   );
 
   return (
-    <ScrollView
-      contentContainerStyle={{ flexGrow: 1 }}
-      keyboardDismissMode="on-drag"
-      style={{ backgroundColor: colors.background }}
-    >
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[styles.header, { paddingTop: insets.top + spacing[1] }]}>
         {glassAvail && GlassView ? (
           <GlassView isInteractive style={styles.button}>
@@ -48,8 +44,8 @@ export default function RatingsFormSheet() {
         <Text style={[styles.title, { color: colors.onSurface }]}>Positional Ratings</Text>
         <View style={styles.spacer} />
       </View>
-      <PositionalRatingsForm />
-    </ScrollView>
+      <RatingsFormScreen />
+    </View>
   );
 }
 

@@ -8,6 +8,7 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -226,6 +227,7 @@ export function FieldConfigPanel({
               <Switch
                 checked={field.required}
                 onChange={(e) => handleRequiredChange(e.target.checked)}
+                disabled={!!field.settings.isSystemField}
                 size="small"
                 sx={{
                   '& .MuiSwitch-switchBase.Mui-checked': {
@@ -246,7 +248,7 @@ export function FieldConfigPanel({
         </>
       )}
 
-      {/* Data Source selector (for select fields) */}
+      {/* Data Source selector (for select fields) — dropdown locked for system fields, role filter still editable */}
       {fieldDef?.hasDataSource && (
         <>
           <Divider sx={{ margin: '8px 0' }} />
@@ -255,6 +257,7 @@ export function FieldConfigPanel({
             <FormControl fullWidth size="small">
               <InputLabel sx={inputLabelSx}>Source</InputLabel>
               <StyledSelect
+                disabled={!!field.settings.isSystemField}
                 value={
                   field.settings.dataSource === 'leaders' ? 'employees' : (field.settings.dataSource || 'custom')
                 }
@@ -470,6 +473,31 @@ export function FieldConfigPanel({
               onChange={(e) => handleSettingsChange('rows', Math.max(1, Math.min(10, Number(e.target.value))))}
               size="small"
               slotProps={{ htmlInput: { min: 1, max: 10 } }}
+            />
+          </div>
+        </>
+      )}
+
+      {/* Date field settings */}
+      {field.type === 'date' && (
+        <>
+          <Divider sx={{ margin: '8px 0' }} />
+          <div className={sty.configSection}>
+            <span className={sty.sectionLabel}>Defaults</span>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={!!field.settings.defaultToCurrentDate}
+                  onChange={(e) => handleSettingsChange('defaultToCurrentDate', e.target.checked)}
+                  size="small"
+                  sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: 'var(--ls-color-brand)' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: 'var(--ls-color-brand)' } }}
+                />
+              }
+              label={
+                <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-neutral-soft-foreground)' }}>
+                  Default to current date
+                </Typography>
+              }
             />
           </div>
         </>

@@ -4,7 +4,7 @@ export type EvaluationStatus = 'due' | 'overdue' | 'completed' | 'not_yet_due' |
 export type OverrideType = 'skip' | 'defer' | 'include';
 export type RequestStatus = 'pending' | 'completed' | 'cancelled';
 
-export interface ScheduleRule {
+export interface EvaluationRule {
   id: string;
   org_id: string;
   form_template_id: string;
@@ -23,7 +23,7 @@ export interface ScheduleRule {
   };
 }
 
-export interface ScheduleOverride {
+export interface EvaluationOverride {
   id: string;
   org_id: string;
   rule_id: string;
@@ -82,6 +82,7 @@ export interface EvaluationItem {
     id: string;
     name: string;
     role: string;
+    role_color?: string | null;
     location_id: string;
   };
   evaluation: {
@@ -89,6 +90,7 @@ export interface EvaluationItem {
     name: string;
     is_active: boolean;
   };
+  cadence: EvaluationCadence | null;
   status: EvaluationStatus;
   last_completed_at: string | null;
   last_submission_id: string | null;

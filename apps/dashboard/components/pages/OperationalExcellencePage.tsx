@@ -292,6 +292,7 @@ export function OperationalExcellencePage() {
   // Data
   const [data, setData] = React.useState<OEData | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [realtimeTick, setRealtimeTick] = React.useState(0);
   const [error, setError] = React.useState<string | null>(null);
 
   // Employee modal
@@ -401,7 +402,49 @@ export function OperationalExcellencePage() {
 
     fetchData();
     return () => { cancelled = true; };
-  }, [selectedLocationId, startDate, endDate, showFOH, showBOH]);
+  }, [selectedLocationId, startDate, endDate, showFOH, showBOH, realtimeTick]);
+
+  // Real-time subscription: OE data is derived from ratings, so subscribe to ratings changes
+  React.useEffect(() => {
+    if (!selectedLocationId) return;
+
+    let channel: any = null;
+
+    try {
+      channel = supabase
+        .channel(`oe-ratings-changes-${selectedLocationId}`)
+        .on('postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'ratings',
+            filter: `location_id=eq.${selectedLocationId}`
+          },
+          () => {
+            setRealtimeTick(prev => prev + 1);
+          }
+        )
+        .subscribe((status: string) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('OE page: subscribed to ratings changes');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.warn('OE page: failed to subscribe to ratings changes');
+          }
+        });
+    } catch (error) {
+      console.warn('OE page: error setting up real-time subscription:', error);
+    }
+
+    return () => {
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch (error) {
+          console.warn('OE page: error removing channel:', error);
+        }
+      }
+    };
+  }, [selectedLocationId, supabase]);
 
   // Date range handlers
   const handleDatePreset = (preset: DateRange) => {
@@ -797,6 +840,35 @@ export function OperationalExcellencePage() {
     ? pillars.find((p) => p.id === selectedPillarId)?.name || 'Pillar'
     : 'Overall';
 
+  // Compute card scores from 7-day moving average (last point in chartData) to align with trend graph
+  const maCardScores = React.useMemo(() => {
+    if (chartData.length === 0 || pillars.length === 0) return null;
+
+    const lastPoint = chartData[chartData.length - 1];
+
+    // Compare against the first data point in the range (start of selected period)
+    const priorPoint = chartData[0];
+
+    const pillarScores: Record<string, { score: number; change: number; percentChange: number }> = {};
+    for (const p of pillars) {
+      const current = lastPoint[`ma_${p.id}`] ?? 0;
+      const prior = priorPoint[`ma_${p.id}`] ?? current;
+      const change = current - prior;
+      const pctChange = prior > 0 ? Math.round((change / prior) * 100) : 0;
+      pillarScores[p.id] = { score: current, change, percentChange: pctChange };
+    }
+
+    const oeScore = lastPoint.ma_oe ?? 0;
+    const priorOe = priorPoint.ma_oe ?? oeScore;
+    const oeChange = oeScore - priorOe;
+    const oePctChange = priorOe > 0 ? Math.round((oeChange / priorOe) * 100) : 0;
+
+    return {
+      overall: { score: oeScore, change: oeChange, percentChange: oePctChange },
+      pillarScores,
+    };
+  }, [chartData, pillars]);
+
   // Helper to build customMetric prop for DashboardMetricCard
   const buildCustomMetric = (title: string, score: number, change: number, percentChange: number) => ({
     title,
@@ -971,9 +1043,9 @@ export function OperationalExcellencePage() {
                           onClick={() => setSelectedPillarId(null)}
                           customMetric={buildCustomMetric(
                             'Operational Excellence',
-                            data?.overall.score ?? 0,
-                            data?.overall.change ?? 0,
-                            data?.overall.percentChange ?? 0,
+                            maCardScores?.overall.score ?? data?.overall.score ?? 0,
+                            maCardScores?.overall.change ?? data?.overall.change ?? 0,
+                            maCardScores?.overall.percentChange ?? data?.overall.percentChange ?? 0,
                           )}
                         />
                       </div>
@@ -985,7 +1057,12 @@ export function OperationalExcellencePage() {
                           titleBadge={`${p.weight}%`}
                           selected={selectedPillarId === p.id}
                           onClick={() => setSelectedPillarId(selectedPillarId === p.id ? null : p.id)}
-                          customMetric={buildCustomMetric(p.name, p.score, p.change, p.percentChange)}
+                          customMetric={buildCustomMetric(
+                            p.name,
+                            maCardScores?.pillarScores[p.id]?.score ?? p.score,
+                            maCardScores?.pillarScores[p.id]?.change ?? p.change,
+                            maCardScores?.pillarScores[p.id]?.percentChange ?? p.percentChange,
+                          )}
                         />
                       ))}
                       <button

@@ -78,7 +78,7 @@ async function handler(
     }
   }
 
-  // Fetch active schedule rules (LEFT join form_templates to include inactive templates)
+  // Fetch active evaluation rules (LEFT join form_templates to include inactive templates)
   const { data: rules, error: rulesError } = await supabase
     .from('evaluation_schedule_rules')
     .select(`
@@ -100,7 +100,7 @@ async function handler(
 
   if (rulesError) {
     console.error('[evaluations/status] Failed to fetch schedule rules:', rulesError);
-    return res.status(500).json({ error: 'Failed to fetch evaluation schedule rules' });
+    return res.status(500).json({ error: 'Failed to fetch evaluation rules' });
   }
 
   // Fetch all active employees for the org (optionally filtered by location)
@@ -131,15 +131,31 @@ async function handler(
   }
 
   const roleIdToName = new Map<string, string>();
+  const roleNameToColor = new Map<string, string>();
   if (allRuleRoleIds.size > 0) {
     const { data: orgRoles } = await supabase
       .from('org_roles')
-      .select('id, role_name')
+      .select('id, role_name, color')
       .eq('org_id', orgId)
       .in('id', Array.from(allRuleRoleIds));
 
     for (const r of orgRoles ?? []) {
       roleIdToName.set(r.id, r.role_name);
+      if (r.color) roleNameToColor.set(r.role_name, r.color);
+    }
+  }
+
+  // Also fetch colors for roles not covered by rule role IDs (employee roles)
+  const employeeRoleNames = new Set(allEmployees.map((e) => e.role).filter(Boolean));
+  const missingRoleNames = Array.from(employeeRoleNames).filter((n) => !roleNameToColor.has(n));
+  if (missingRoleNames.length > 0) {
+    const { data: extraRoles } = await supabase
+      .from('org_roles')
+      .select('role_name, color')
+      .eq('org_id', orgId)
+      .in('role_name', missingRoleNames);
+    for (const r of extraRoles ?? []) {
+      if (r.color) roleNameToColor.set(r.role_name, r.color);
     }
   }
 
@@ -169,14 +185,14 @@ async function handler(
   if (allEmployeeIds.length > 0 && allTemplateIds.length > 0) {
     const { data: submissions } = await supabase
       .from('form_submissions')
-      .select('id, employee_id, form_template_id, created_at, response_data')
+      .select('id, employee_id, template_id, created_at, response_data')
       .eq('org_id', orgId)
       .in('employee_id', allEmployeeIds)
-      .in('form_template_id', allTemplateIds)
+      .in('template_id', allTemplateIds)
       .order('created_at', { ascending: false });
 
     for (const sub of submissions ?? []) {
-      const key = `${sub.employee_id}_${sub.form_template_id}`;
+      const key = `${sub.employee_id}_${sub.template_id}`;
       if (!submissionMap.has(key)) {
         // First encountered is the most recent (ordered desc)
         submissionMap.set(key, {
@@ -232,6 +248,7 @@ async function handler(
           id: emp.id,
           name: emp.full_name,
           role: emp.role,
+          role_color: roleNameToColor.get(emp.role) ?? null,
           location_id: emp.location_id,
         },
         evaluation: {
@@ -239,6 +256,7 @@ async function handler(
           name: template?.name ?? '',
           is_active: template?.is_active ?? false,
         },
+        cadence,
         status,
         last_completed_at: lastSub?.created_at ?? null,
         last_submission_id: lastSub?.id ?? null,
@@ -327,6 +345,7 @@ async function handler(
         id: emp.id,
         name: emp.full_name,
         role: emp.role,
+        role_color: roleNameToColor.get(emp.role) ?? null,
         location_id: emp.location_id,
       },
       evaluation: {
@@ -334,6 +353,7 @@ async function handler(
         name: template?.name ?? '',
         is_active: template?.is_active ?? false,
       },
+      cadence: null,
       status: reqStatus,
       last_completed_at: lastSub?.created_at ?? null,
       last_submission_id: lastSub?.id ?? null,
@@ -344,12 +364,11 @@ async function handler(
     });
   }
 
-  // Sort by status priority
+  // Sort by due date first, then alphabetically by employee name
   items.sort((a, b) => {
-    const pa = STATUS_PRIORITY[a.status] ?? 99;
-    const pb = STATUS_PRIORITY[b.status] ?? 99;
-    if (pa !== pb) return pa - pb;
-    // Secondary: employee name
+    const dateA = a.due_date || '';
+    const dateB = b.due_date || '';
+    if (dateA !== dateB) return dateA.localeCompare(dateB);
     return a.employee.name.localeCompare(b.employee.name);
   });
 

@@ -1,3 +1,4 @@
+import { withAuth } from '@/lib/permissions/middleware';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import formidable from 'formidable';
@@ -26,7 +27,7 @@ function sanitizeFilename(name: string): string {
   return name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 100);
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const idParam = req.query.id;
   const infractionId = Array.isArray(idParam) ? idParam[0] : idParam;
 
@@ -243,3 +244,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.setHeader('Allow', 'GET, POST, DELETE');
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
+export default withAuth(handler);

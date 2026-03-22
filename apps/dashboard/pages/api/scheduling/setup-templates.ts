@@ -1,5 +1,7 @@
+import { withAuth } from '@/lib/permissions/middleware';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { setCorsOrigin } from '@/lib/cors';
 
 // ── Block derivation helpers ──────────────────────────────────────────
 
@@ -135,9 +137,9 @@ async function computeAndSaveBlocks(
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();
@@ -465,3 +467,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+export default withAuth(handler);

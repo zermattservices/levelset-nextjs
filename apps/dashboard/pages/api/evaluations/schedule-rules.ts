@@ -1,8 +1,8 @@
 /**
- * Evaluation Schedule Rules API
+ * Evaluation Rules API
  * GET/POST/PATCH/DELETE /api/evaluations/schedule-rules
  *
- * CRUD for cadence-based evaluation schedule rules.
+ * CRUD for cadence-based evaluation rules.
  *
  * Query/body params:
  *  - org_id (required — resolved by middleware)
@@ -13,6 +13,32 @@ import type { NextApiResponse } from 'next';
 import { withPermissionAndContext, AuthenticatedRequest } from '@/lib/permissions/middleware';
 import { P } from '@/lib/permissions/constants';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+
+const RULE_SELECT = `
+  id,
+  org_id,
+  form_template_id,
+  target_role_ids,
+  reviewer_role_ids,
+  cadence,
+  is_active,
+  created_by,
+  created_at,
+  updated_at,
+  form_templates!evaluation_schedule_rules_form_template_id_fkey (
+    id,
+    name,
+    name_es,
+    is_active
+  )
+`;
+
+/** Remap Supabase join key `form_templates` → `form_template` (singular) */
+function normalizeRule(row: any) {
+  if (!row) return row;
+  const { form_templates, ...rest } = row;
+  return { ...rest, form_template: form_templates ?? null };
+}
 
 async function handler(
   req: AuthenticatedRequest,
@@ -26,33 +52,16 @@ async function handler(
   if (req.method === 'GET') {
     const { data, error } = await supabase
       .from('evaluation_schedule_rules')
-      .select(`
-        id,
-        org_id,
-        form_template_id,
-        target_role_ids,
-        reviewer_role_ids,
-        cadence,
-        is_active,
-        created_by,
-        created_at,
-        updated_at,
-        form_templates!evaluation_schedule_rules_form_template_id_fkey (
-          id,
-          name,
-          name_es,
-          is_active
-        )
-      `)
+      .select(RULE_SELECT)
       .eq('org_id', orgId)
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('[schedule-rules] GET error:', error);
-      return res.status(500).json({ error: 'Failed to fetch schedule rules' });
+      console.error('[evaluation-rules] GET error:', error);
+      return res.status(500).json({ error: 'Failed to fetch evaluation rules' });
     }
 
-    return res.status(200).json({ rules: data ?? [] });
+    return res.status(200).json({ rules: (data ?? []).map(normalizeRule) });
   }
 
   // POST — create a new rule
@@ -72,6 +81,27 @@ async function handler(
       return res.status(400).json({ error: 'cadence is required' });
     }
 
+    // Look up the app_user id — created_by FK references app_users.id, not auth user id.
+    // Try org-scoped first, then fall back to any app_user for this auth user (e.g. Levelset Admin).
+    let appUser: { id: string } | null = null;
+    const { data: orgScopedUser } = await supabase
+      .from('app_users')
+      .select('id')
+      .eq('auth_user_id', userId)
+      .eq('org_id', orgId)
+      .maybeSingle();
+    appUser = orgScopedUser;
+
+    if (!appUser) {
+      const { data: anyUser } = await supabase
+        .from('app_users')
+        .select('id')
+        .eq('auth_user_id', userId)
+        .limit(1)
+        .maybeSingle();
+      appUser = anyUser;
+    }
+
     const { data, error } = await supabase
       .from('evaluation_schedule_rules')
       .insert({
@@ -80,34 +110,17 @@ async function handler(
         target_role_ids,
         reviewer_role_ids,
         cadence,
-        created_by: userId,
+        created_by: appUser?.id || null,
       })
-      .select(`
-        id,
-        org_id,
-        form_template_id,
-        target_role_ids,
-        reviewer_role_ids,
-        cadence,
-        is_active,
-        created_by,
-        created_at,
-        updated_at,
-        form_templates!evaluation_schedule_rules_form_template_id_fkey (
-          id,
-          name,
-          name_es,
-          is_active
-        )
-      `)
+      .select(RULE_SELECT)
       .single();
 
     if (error) {
-      console.error('[schedule-rules] POST error:', error);
-      return res.status(500).json({ error: 'Failed to create schedule rule' });
+      console.error('[evaluation-rules] POST error:', error);
+      return res.status(500).json({ error: 'Failed to create evaluation rule' });
     }
 
-    return res.status(201).json({ rule: data });
+    return res.status(201).json({ rule: normalizeRule(data) });
   }
 
   // PATCH — update an existing rule
@@ -135,36 +148,19 @@ async function handler(
       .update(updates)
       .eq('id', id)
       .eq('org_id', orgId)
-      .select(`
-        id,
-        org_id,
-        form_template_id,
-        target_role_ids,
-        reviewer_role_ids,
-        cadence,
-        is_active,
-        created_by,
-        created_at,
-        updated_at,
-        form_templates!evaluation_schedule_rules_form_template_id_fkey (
-          id,
-          name,
-          name_es,
-          is_active
-        )
-      `)
+      .select(RULE_SELECT)
       .maybeSingle();
 
     if (error) {
-      console.error('[schedule-rules] PATCH error:', error);
-      return res.status(500).json({ error: 'Failed to update schedule rule' });
+      console.error('[evaluation-rules] PATCH error:', error);
+      return res.status(500).json({ error: 'Failed to update evaluation rule' });
     }
 
     if (!data) {
       return res.status(404).json({ error: 'Rule not found' });
     }
 
-    return res.status(200).json({ rule: data });
+    return res.status(200).json({ rule: normalizeRule(data) });
   }
 
   // DELETE — remove a rule
@@ -182,8 +178,8 @@ async function handler(
       .eq('org_id', orgId);
 
     if (error) {
-      console.error('[schedule-rules] DELETE error:', error);
-      return res.status(500).json({ error: 'Failed to delete schedule rule' });
+      console.error('[evaluation-rules] DELETE error:', error);
+      return res.status(500).json({ error: 'Failed to delete evaluation rule' });
     }
 
     return res.status(200).json({ success: true });

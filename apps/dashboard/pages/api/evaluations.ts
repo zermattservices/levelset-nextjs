@@ -1,11 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { withAuth } from '@/lib/permissions/middleware';
 
 const ALLOWED_STATUSES = ['Planned', 'Scheduled', 'Completed', 'Cancelled'] as const;
 
 type AllowedStatus = (typeof ALLOWED_STATUSES)[number];
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const supabase = createServerSupabaseClient();
 
   try {
@@ -124,4 +125,6 @@ async function handlePatch(req: NextApiRequest, res: NextApiResponse, supabase: 
 
   return res.status(200).json({ evaluation: data });
 }
+
+export default withAuth(handler);
 

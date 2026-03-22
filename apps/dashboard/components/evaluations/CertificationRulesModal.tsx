@@ -47,6 +47,7 @@ export interface CertificationRulesModalProps {
   onClose: () => void;
   locationId: string;
   orgId: string;
+  getAccessToken?: () => Promise<string | null>;
 }
 
 const TRIGGER_OPTIONS = [
@@ -59,12 +60,25 @@ export function CertificationRulesModal({
   onClose,
   locationId,
   orgId,
+  getAccessToken,
 }: CertificationRulesModalProps) {
   const [rules, setRules] = React.useState<CertificationEvaluationRule[]>([]);
   const [formTemplates, setFormTemplates] = React.useState<FormTemplate[]>([]);
   const [roles, setRoles] = React.useState<OrgRole[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  // Get access token — use prop if provided, otherwise fetch inline
+  const resolveToken = React.useCallback(async (): Promise<string | null> => {
+    if (getAccessToken) return getAccessToken();
+    try {
+      const supabase = createSupabaseClient();
+      const { data } = await supabase.auth.getSession();
+      return data.session?.access_token || null;
+    } catch {
+      return null;
+    }
+  }, [getAccessToken]);
 
   // Create-form state
   const [showCreateForm, setShowCreateForm] = React.useState(false);
@@ -86,11 +100,17 @@ export function CertificationRulesModal({
       try {
         const supabase = createSupabaseClient();
 
+        // Build auth headers
+        const headers: Record<string, string> = {};
+        const token = await resolveToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         const [rulesRes, templatesJsonRes, rolesRes] = await Promise.all([
           fetch(
-            `/api/evaluations/certification-rules?org_id=${encodeURIComponent(orgId)}&location_id=${encodeURIComponent(locationId)}`
+            `/api/evaluations/certification-rules?org_id=${encodeURIComponent(orgId)}&location_id=${encodeURIComponent(locationId)}`,
+            { headers }
           ),
-          fetch(`/api/forms?org_id=${encodeURIComponent(orgId)}&form_type=evaluation`, { credentials: 'include' }),
+          fetch(`/api/forms?org_id=${encodeURIComponent(orgId)}&form_type=evaluation`, { headers }),
           supabase
             .from('org_roles')
             .select('*')
@@ -110,8 +130,8 @@ export function CertificationRulesModal({
         const templatesData = await templatesJsonRes.json();
         if (rolesRes.error) throw new Error('Failed to load roles');
 
-        // Filter to active evaluation-type templates
-        const allTemplates = templatesData.templates ?? [];
+        // API returns array directly, not { templates: [...] }
+        const allTemplates = Array.isArray(templatesData) ? templatesData : (templatesData.templates ?? []);
         const evalTemplates = allTemplates.filter(
           (t: any) => t.is_active
         );
@@ -188,10 +208,15 @@ export function CertificationRulesModal({
 
     setSaving(true);
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const token = await resolveToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/evaluations/certification-rules', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
+          org_id: orgId,
           location_id: locationId,
           form_template_id: formTemplateId,
           target_role_ids: targetRoleIds,
@@ -224,10 +249,14 @@ export function CertificationRulesModal({
     );
 
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const token = await resolveToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/evaluations/certification-rules', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: rule.id, is_active: newActive }),
+        headers,
+        body: JSON.stringify({ id: rule.id, org_id: orgId, is_active: newActive }),
       });
 
       if (!res.ok) {
@@ -248,10 +277,14 @@ export function CertificationRulesModal({
     setRules((r) => r.filter((item) => item.id !== ruleId));
 
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const token = await resolveToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/evaluations/certification-rules', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: ruleId }),
+        headers,
+        body: JSON.stringify({ id: ruleId, org_id: orgId }),
       });
 
       if (!res.ok) {

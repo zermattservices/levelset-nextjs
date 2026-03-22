@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { calculateEvaluationScore, calculateEvaluationScoreLegacy } from '@/lib/forms/scoring';
 import { jsonSchemaToFields } from '@/lib/forms/schema-builder';
 import { resolveConnectedQuestions } from '@/lib/forms/connectors-resolver';
+import { generateEvalSummary } from '@/lib/forms/generate-eval-summary';
 import { checkPermission } from '@/lib/permissions/service';
 import { P } from '@/lib/permissions/constants';
 import { validateLocationAccess } from '@/lib/native-auth';
@@ -18,7 +19,7 @@ async function handler(
 
   if (req.method === 'GET') {
     // List submissions with filters
-    const { template_id, form_type, status, limit, offset } = req.query;
+    const { template_id, form_type, status, employee_id, limit, offset } = req.query;
 
     let query = supabase
       .from('form_submissions')
@@ -34,6 +35,9 @@ async function handler(
     }
     if (status) {
       query = query.eq('status', status as string);
+    }
+    if (employee_id) {
+      query = query.eq('employee_id', employee_id as string);
     }
 
     // Pagination
@@ -57,10 +61,12 @@ async function handler(
     if (submitterIds.length > 0) {
       const { data: submitters } = await supabase
         .from('app_users')
-        .select('id, full_name')
+        .select('id, first_name, last_name')
         .in('id', submitterIds);
       if (submitters) {
-        submitterMap = Object.fromEntries(submitters.map((u: any) => [u.id, u.full_name || 'Unknown']));
+        submitterMap = Object.fromEntries(
+          submitters.map((u: any) => [u.id, [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Unknown'])
+        );
       }
     }
 
@@ -108,13 +114,25 @@ async function handler(
       return res.status(400).json({ error: 'template_id and response_data are required' });
     }
 
-    // Look up the app_user for submitted_by and role check
-    const { data: appUser } = await supabase
+    // Look up the app_user for submitted_by — try org-scoped first, then any org (Levelset Admin)
+    let appUser: { id: string; role: string } | null = null;
+    const { data: orgScopedUser } = await supabase
       .from('app_users')
       .select('id, role')
       .eq('auth_user_id', userId)
       .eq('org_id', orgId)
       .maybeSingle();
+    appUser = orgScopedUser;
+
+    if (!appUser) {
+      const { data: anyUser } = await supabase
+        .from('app_users')
+        .select('id, role')
+        .eq('auth_user_id', userId)
+        .limit(1)
+        .maybeSingle();
+      appUser = anyUser;
+    }
 
     // Fetch the template for schema snapshot and form_type
     const { data: template, error: templateError } = await supabase
@@ -240,6 +258,39 @@ async function handler(
           max: s.maxPoints,
           percentage: s.percentage,
         }));
+      }
+    }
+
+    // Generate AI summary for evaluation submissions (best-effort, non-blocking)
+    if (template.form_type === 'evaluation' && score != null) {
+      try {
+        const fields = jsonSchemaToFields(template.schema, template.ui_schema);
+
+        // Fetch employee name for prompt context
+        let employeeName: string | null = null;
+        if (employee_id) {
+          const { data: emp } = await supabase
+            .from('employees')
+            .select('full_name')
+            .eq('id', employee_id)
+            .maybeSingle();
+          employeeName = emp?.full_name || null;
+        }
+
+        const summary = await generateEvalSummary({
+          employeeName,
+          formName: template.name,
+          overallScore: score,
+          sectionScores: metadata.section_scores || [],
+          fields,
+          responseData: response_data,
+        });
+
+        if (summary) {
+          metadata.ai_summary = summary;
+        }
+      } catch (summaryErr) {
+        console.error('[submissions] AI summary generation failed:', summaryErr);
       }
     }
 

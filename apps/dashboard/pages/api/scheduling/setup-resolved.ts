@@ -1,5 +1,7 @@
+import { withAuth } from '@/lib/permissions/middleware';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { setCorsOrigin } from '@/lib/cors';
 
 /**
  * Derive block boundaries from template slots on the fly.
@@ -103,9 +105,9 @@ interface ResolvedBlock {
   positions: Record<string, ResolvedPosition>;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();
@@ -342,3 +344,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+export default withAuth(handler);

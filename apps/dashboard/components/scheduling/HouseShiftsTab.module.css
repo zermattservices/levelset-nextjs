@@ -87,6 +87,184 @@
   margin-top: 2px;
 }
 
+.dayHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.createBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  background: none;
+  border: 1px solid var(--ls-color-brand-border);
+  border-radius: var(--ls-radius-md);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.createBtn:hover {
+  background: var(--ls-color-brand);
+  color: var(--ls-color-bg-container);
+}
+
+/* ── Modal ── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: var(--ls-color-bg-container);
+  border-radius: var(--ls-radius-lg);
+  box-shadow: 0 8px 32px var(--ls-color-shadow-lg);
+  width: 700px;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+}
+
+.modalTitle {
+  font-family: var(--ls-font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ls-color-neutral-soft-foreground);
+  margin: 0;
+}
+
+.modalBody {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.rowHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 8px 0;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  margin-bottom: 8px;
+}
+
+.colLabel {
+  font-family: var(--ls-font-heading);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ls-color-disabled-text);
+}
+
+.rowList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shiftRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  color: var(--ls-color-neutral-soft-foreground);
+  background: var(--ls-color-bg-container);
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: var(--ls-radius-sm);
+  padding: 6px 8px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.input:focus {
+  border-color: var(--ls-color-brand);
+}
+
+.addRowBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ls-color-brand);
+  background: none;
+  border: none;
+  padding: 8px 0;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.addRowBtn:hover {
+  text-decoration: underline;
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--ls-color-muted-border);
+}
+
+.cancelBtn {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  background: none;
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: var(--ls-radius-md);
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.cancelBtn:hover {
+  background: var(--ls-color-muted-soft);
+}
+
+.saveBtn {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  background: var(--ls-color-brand);
+  border: none;
+  border-radius: var(--ls-radius-md);
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.saveBtn:hover {
+  background: var(--ls-color-brand-hover);
+}
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ── Empty state (re-use from BottomPanel) ── */
 .emptyState {
   display: flex;

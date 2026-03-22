@@ -13,6 +13,7 @@ import { DataSelectWidget } from './DataSelectWidget';
 import { FileUploadWidget } from './FileUploadWidget';
 import { NumericScoreWidget } from './NumericScoreWidget';
 import { DatePickerWidget } from './DatePickerWidget';
+import { YesNoSwitchWidget } from './YesNoSwitchWidget';
 import { TextBlockField } from './TextBlockField';
 import { SectionField } from './SectionField';
 
@@ -23,6 +24,7 @@ export const customWidgets: RegistryWidgetsType = {
   file: FileUploadWidget,
   numeric_score: NumericScoreWidget,
   date: DatePickerWidget,
+  yesNoSwitch: YesNoSwitchWidget,
 };
 
 export const customFields: RegistryFieldsType = {

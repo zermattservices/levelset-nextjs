@@ -238,16 +238,24 @@ export function RecordActionModal({
               setNeedsLeaderPicker(true);
 
               if (resolvedOrgId) {
-                const { data: leaders } = await supabase
-                  .from('employees')
-                  .select('id, full_name, first_name, last_name, role, org_id, location_id, active, is_leader')
-                  .eq('org_id', resolvedOrgId)
-                  .eq('location_id', locationId)
-                  .eq('active', true)
-                  .eq('is_leader', true)
-                  .order('full_name');
-
-                setLocationLeaders(leaders || []);
+                try {
+                  const res = await fetch(
+                    `/api/forms/widget-data?type=leaders&org_id=${resolvedOrgId}&location_id=${locationId}&form_type=discipline`
+                  );
+                  if (res.ok) {
+                    const { data: leaders } = await res.json();
+                    setLocationLeaders((leaders || []).map((l: any) => ({
+                      id: l.id,
+                      full_name: l.full_name,
+                      role: l.role,
+                      org_id: resolvedOrgId,
+                      location_id: locationId,
+                      active: true,
+                    } as Employee)));
+                  }
+                } catch (err) {
+                  console.error('[RecordActionModal] Error fetching leaders via API:', err);
+                }
               }
             }
           } catch (err) {
@@ -275,9 +283,9 @@ export function RecordActionModal({
     fetchData();
   }, [open, locationId, currentUser, currentUserId, supabase]);
 
-  // Reset form when modal opens
+  // Reset form when modal closes
   React.useEffect(() => {
-    if (open) {
+    if (!open) {
       setActionDate(new Date());
       setNotes("");
       setActingLeader(null);

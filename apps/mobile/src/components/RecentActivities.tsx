@@ -5,7 +5,8 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
+import { useRouter } from "expo-router";
 import Animated, {
   FadeIn,
   useSharedValue,
@@ -17,7 +18,7 @@ import Animated, {
 import { useTranslation } from "react-i18next";
 import { useColors } from "../context/ThemeContext";
 import { typography, fontWeights } from "../lib/fonts";
-import { spacing, borderRadius } from "../lib/theme";
+import { spacing, borderRadius, haptics } from "../lib/theme";
 import { GlassCard } from "./glass";
 import { AppIcon } from "./ui";
 import { ActivityCard } from "./ActivityCard";
@@ -40,6 +41,7 @@ export function RecentActivities({
 }: RecentActivitiesProps) {
   const colors = useColors();
   const { t } = useTranslation();
+  const router = useRouter();
   const [activities, setActivities] = useState<RecentActivity[]>([]);
   const [thresholds, setThresholds] = useState<RatingThresholds>(DEFAULT_THRESHOLDS);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -66,7 +68,8 @@ export function RecentActivities({
         employeeId,
         { skipCache }
       );
-      setActivities(data.activities);
+      // Show only the first 5 on the home page; full dataset is cached for All Activities
+      setActivities(data.activities.slice(0, 5));
       if (data.thresholds) setThresholds(data.thresholds);
       hasLoaded.current = true;
     } catch (err: any) {
@@ -97,14 +100,33 @@ export function RecentActivities({
   return (
     <View style={{ gap: spacing[3] }}>
       {/* Section header */}
-      <Text
-        style={{
-          ...typography.h4,
-          color: colors.onSurface,
-        }}
-      >
-        {t("home.recentActivities")}
-      </Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <Text
+          style={{
+            ...typography.h4,
+            color: colors.onSurface,
+          }}
+        >
+          {t("home.recentActivities")}
+        </Text>
+        {activities.length > 0 && (
+          <Pressable
+            onPress={() => {
+              haptics.light();
+              router.push("/(tabs)/(home)/all-activities");
+            }}
+          >
+            <Text
+              style={{
+                ...typography.labelMedium,
+                color: colors.primary,
+              }}
+            >
+              See All
+            </Text>
+          </Pressable>
+        )}
+      </View>
 
       {/* Loading state */}
       {showSkeleton && <SkeletonCards colors={colors} />}

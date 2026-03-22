@@ -1,6 +1,6 @@
 /**
- * DraggableEmployee — wraps employee card in gesture handler
- * Long-press to initiate drag, pan to move, release to drop.
+ * DraggableEmployee — wraps employee card in gesture handler.
+ * Pan horizontally to initiate drag, move to a slot, release to drop.
  */
 
 import React from 'react';
@@ -42,7 +42,7 @@ export function DraggableEmployee({ employee, isAssigned, onDragStart, onDragEnd
   const colors = useColors();
   const { setActiveDrag, dragX, dragY, hitTest, setHoveredZoneKey } = useDrag();
 
-  const startDrag = () => {
+  const startDrag = (x: number, y: number) => {
     haptics.medium();
     const item: DragItem = {
       employeeId: employee.id,
@@ -72,19 +72,14 @@ export function DraggableEmployee({ employee, isAssigned, onDragStart, onDragEnd
     }
   };
 
-  const longPress = Gesture.LongPress()
-    .minDuration(300)
+  const pan = Gesture.Pan()
+    .activeOffsetX(-15)
+    .failOffsetY([-20, 20])
     .onStart((e) => {
       'worklet';
       dragX.value = e.absoluteX;
       dragY.value = e.absoluteY;
-      runOnJS(startDrag)();
-    });
-
-  const pan = Gesture.Pan()
-    .manualActivation(true)
-    .onTouchesMove((_e, state) => {
-      state.activate();
+      runOnJS(startDrag)(e.absoluteX, e.absoluteY);
     })
     .onUpdate((e) => {
       'worklet';
@@ -97,13 +92,11 @@ export function DraggableEmployee({ employee, isAssigned, onDragStart, onDragEnd
       runOnJS(endDrag)(e.absoluteX, e.absoluteY);
     });
 
-  const composed = Gesture.Simultaneous(longPress, pan);
-
   const name = formatName(employee.full_name);
   const shiftTime = `${formatTime12Short(employee.shift.start_time)} – ${formatTime12Short(employee.shift.end_time)}`;
 
   return (
-    <GestureDetector gesture={composed}>
+    <GestureDetector gesture={pan}>
       <View style={[styles.card, isAssigned && { opacity: 0.4 }]}>
         <Text style={[styles.name, { color: colors.onSurface }]} numberOfLines={1}>
           {name}

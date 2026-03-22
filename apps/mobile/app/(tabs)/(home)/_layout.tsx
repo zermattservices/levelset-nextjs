@@ -60,7 +60,7 @@ export default function HomeLayout() {
         }}
       />
       <Stack.Screen
-        name="review-detail"
+        name="employee-overview"
         options={{
           headerShown: true,
           title: "",
@@ -70,10 +70,10 @@ export default function HomeLayout() {
         }}
       />
       <Stack.Screen
-        name="employee-overview"
+        name="all-activities"
         options={{
           headerShown: true,
-          title: "",
+          title: "All Activity",
           headerTransparent: true,
           headerBackButtonDisplayMode: "minimal",
           headerTintColor: "#ffffff",

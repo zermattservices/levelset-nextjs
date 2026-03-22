@@ -33,7 +33,7 @@ interface SetupSlotProps {
 
 export function SetupSlot({ positionId, slotIndex, isRequired, assignment }: SetupSlotProps) {
   const colors = useColors();
-  const { registerDropZone, unregisterDropZone, hoveredZoneKey } = useDrag();
+  const { registerDropZone, unregisterDropZone, registerDropZoneView, unregisterDropZoneView, hoveredZoneKey } = useDrag();
   const viewRef = useRef<View>(null);
   const zoneKey = `slot-${positionId}-${slotIndex}`;
   const isHovered = hoveredZoneKey === zoneKey;
@@ -47,8 +47,12 @@ export function SetupSlot({ positionId, slotIndex, isRequired, assignment }: Set
   }, [positionId, slotIndex, zoneKey, registerDropZone]);
 
   React.useEffect(() => {
-    return () => unregisterDropZone(zoneKey);
-  }, [zoneKey, unregisterDropZone]);
+    registerDropZoneView(zoneKey, { positionId, slotIndex, viewRef });
+    return () => {
+      unregisterDropZone(zoneKey);
+      unregisterDropZoneView(zoneKey);
+    };
+  }, [zoneKey, positionId, slotIndex, registerDropZoneView, unregisterDropZone, unregisterDropZoneView]);
 
   const borderColor = isHovered ? colors.primary : isRequired ? colors.outline : colors.outlineVariant;
   const borderStyle = isRequired ? 'solid' as const : 'dashed' as const;

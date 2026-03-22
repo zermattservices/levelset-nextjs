@@ -7,7 +7,7 @@ import React from "react";
 import { View, Text } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Rocket, Gavel } from "lucide-react-native";
+import { Rocket, Gavel, CalendarCheck, ArrowUpRight } from "lucide-react-native";
 import { useColors } from "../context/ThemeContext";
 import { typography, fontWeights, fontSizes } from "../lib/fonts";
 import { spacing, borderRadius } from "../lib/theme";
@@ -15,7 +15,6 @@ import { spacing, borderRadius } from "../lib/theme";
 const FOH_COLOR = "#006391";
 const BOH_COLOR = "#ffcc5b";
 import { GlassCard } from "./glass";
-import { AppIcon } from "./ui";
 import type { RecentActivity, RatingThresholds } from "../lib/api";
 import { getRatingColor } from "../lib/rating-colors";
 import { formatRelativeDate } from "../lib/date-utils";
@@ -53,11 +52,11 @@ function getTypeConfig(
         bgColor: colors.warningTransparent,
         renderIcon: (size: number, color: string) => <Gavel size={size} color={color} strokeWidth={1.5} />,
       };
-    case "review":
+    case "evaluation":
       return {
-        color: colors.info,
-        bgColor: colors.infoTransparent,
-        renderIcon: (size: number, color: string) => <AppIcon name="star.bubble.fill" size={size} tintColor={color} />,
+        color: colors.primary,
+        bgColor: colors.primaryTransparent,
+        renderIcon: (size: number, color: string) => <CalendarCheck size={size} color={color} strokeWidth={1.5} />,
       };
   }
 }
@@ -73,8 +72,8 @@ function getTypeLabel(
       return t("recentActivities.infraction");
     case "disc_action":
       return t("recentActivities.discAction");
-    case "review":
-      return t("recentActivities.review");
+    case "evaluation":
+      return "Evaluation";
   }
 }
 
@@ -108,18 +107,20 @@ export function ActivityCard({ activity, locationId, thresholds }: ActivityCardP
           params: { infractionId: activity.id, locationId, isDiscAction: "true" },
         });
         break;
-      case "review":
-        router.push({
-          pathname: "/(tabs)/(home)/review-detail",
-          params: { activityData: JSON.stringify(activity) },
-        });
+      case "evaluation":
+        if (activity.employee_id) {
+          router.push({
+            pathname: "/(tabs)/(home)/employee-overview",
+            params: { employeeId: activity.employee_id, locationId },
+          });
+        }
         break;
     }
   };
 
   return (
     <GlassCard onPress={handlePress}>
-      {/* Top row: type badge + date */}
+      {/* Top row: type badge + outgoing tag + date */}
       <View
         style={{
           flexDirection: "row",
@@ -128,28 +129,55 @@ export function ActivityCard({ activity, locationId, thresholds }: ActivityCardP
           marginBottom: spacing[2],
         }}
       >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: spacing[2],
-            backgroundColor: config.bgColor,
-            paddingHorizontal: spacing[2],
-            paddingVertical: 3,
-            borderRadius: borderRadius.sm,
-            borderCurve: "continuous",
-          }}
-        >
-          {config.renderIcon(12, config.color)}
-          <Text
+        <View style={{ flexDirection: "row", alignItems: "center", gap: spacing[2] }}>
+          <View
             style={{
-              ...typography.labelSmall,
-              fontWeight: fontWeights.semibold,
-              color: config.color,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: spacing[2],
+              backgroundColor: config.bgColor,
+              paddingHorizontal: spacing[2],
+              paddingVertical: 3,
+              borderRadius: borderRadius.sm,
+              borderCurve: "continuous",
+            }}
+          >
+            {config.renderIcon(12, config.color)}
+            <Text
+              style={{
+                ...typography.labelSmall,
+                fontWeight: fontWeights.semibold,
+                color: config.color,
             }}
           >
             {getTypeLabel(activity.type, t)}
           </Text>
+          </View>
+          {activity.is_outgoing && (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 3,
+                backgroundColor: colors.surfaceVariant,
+                paddingHorizontal: spacing[2],
+                paddingVertical: 3,
+                borderRadius: borderRadius.sm,
+                borderCurve: "continuous",
+              }}
+            >
+              <ArrowUpRight size={10} color={colors.onSurfaceVariant} strokeWidth={2} />
+              <Text
+                style={{
+                  ...typography.labelSmall,
+                  fontWeight: fontWeights.semibold,
+                  color: colors.onSurfaceVariant,
+                }}
+              >
+                Outgoing
+              </Text>
+            </View>
+          )}
         </View>
         <Text
           style={{
@@ -169,7 +197,7 @@ export function ActivityCard({ activity, locationId, thresholds }: ActivityCardP
       {activity.type === "disc_action" && (
         <DiscActionContent activity={activity} />
       )}
-      {activity.type === "review" && <ReviewContent activity={activity} />}
+      {activity.type === "evaluation" && <EvaluationContent activity={activity} />}
     </GlassCard>
   );
 }
@@ -229,14 +257,16 @@ function RatingContent({ activity, thresholds }: { activity: RecentActivity; thr
             </View>
           )}
         </View>
-        {activity.rater_name && (
-          <Text
-            style={{ ...typography.bodySmall, color: colors.onSurfaceDisabled }}
-            numberOfLines={1}
-          >
-            {t("recentActivities.ratedBy", { name: activity.rater_name })}
-          </Text>
-        )}
+        <Text
+          style={{ ...typography.bodySmall, color: colors.onSurfaceDisabled }}
+          numberOfLines={1}
+        >
+          {activity.is_outgoing
+            ? `Rated by You · ${activity.recipient_name || ""}`
+            : activity.rater_name
+              ? t("recentActivities.ratedBy", { name: activity.rater_name })
+              : ""}
+        </Text>
       </View>
 
       {/* Right: score tag */}
@@ -273,7 +303,6 @@ function InfractionContent({ activity }: { activity: RecentActivity }) {
   const { t, i18n } = useTranslation();
   const isEs = i18n.language === 'es';
 
-  // Dashboard uses red (#dc2626) for penalties (positive pts), no green — system only tracks penalties
   const PENALTY_RED = "#dc2626";
   const pointsColor =
     activity.points != null && activity.points > 0
@@ -288,7 +317,7 @@ function InfractionContent({ activity }: { activity: RecentActivity }) {
         justifyContent: "space-between",
       }}
     >
-      {/* Left: infraction name + leader */}
+      {/* Left: infraction name + submitter */}
       <View style={{ gap: 2, flex: 1 }}>
         <Text
           style={{
@@ -300,14 +329,16 @@ function InfractionContent({ activity }: { activity: RecentActivity }) {
         >
           {isEs ? (activity.infraction_name_es || activity.infraction_name) : activity.infraction_name}
         </Text>
-        {activity.leader_name && (
-          <Text
-            style={{ ...typography.bodySmall, color: colors.onSurfaceDisabled }}
-            numberOfLines={1}
-          >
-            {activity.leader_name}
-          </Text>
-        )}
+        <Text
+          style={{ ...typography.bodySmall, color: colors.onSurfaceDisabled }}
+          numberOfLines={1}
+        >
+          {activity.is_outgoing
+            ? `Submitted by You · ${activity.recipient_name || ""}`
+            : activity.leader_name
+              ? `Submitted by ${activity.leader_name}`
+              : ""}
+        </Text>
       </View>
 
       {/* Right: points tag */}
@@ -356,54 +387,156 @@ function DiscActionContent({ activity }: { activity: RecentActivity }) {
       >
         {isEs ? (activity.action_type_es || activity.action_type) : activity.action_type}
       </Text>
-      {activity.leader_name && (
+      <Text
+        style={{ ...typography.bodySmall, color: colors.onSurfaceDisabled }}
+      >
+        {activity.is_outgoing
+          ? `Submitted by You · ${activity.recipient_name || ""}`
+          : activity.leader_name
+            ? `Submitted by ${activity.leader_name}`
+            : ""}
+      </Text>
+    </View>
+  );
+}
+
+function formatCadenceLabel(cadence: string | null | undefined): string {
+  switch (cadence) {
+    case "monthly": return "Monthly";
+    case "quarterly": return "Quarterly";
+    case "semi_annual": return "Semi-Annual";
+    case "annual": return "Annual";
+    default: return "";
+  }
+}
+
+function getEvalScoreColor(score: number): string {
+  if (score >= 80) return "#16A34A";
+  if (score >= 60) return "#FACC15";
+  return "#D23230";
+}
+
+function EvaluationContent({ activity }: { activity: RecentActivity }) {
+  const colors = useColors();
+  const { i18n } = useTranslation();
+  const isEs = i18n.language === "es";
+
+  const title = isEs
+    ? (activity.evaluation_name_es || activity.evaluation_name || "Evaluation")
+    : (activity.evaluation_name || "Evaluation");
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      {/* Left: title + role tag + evaluator name */}
+      <View style={{ gap: 2, flex: 1 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: spacing[2] }}>
+          <Text
+            style={{
+              ...typography.labelLarge,
+              fontWeight: fontWeights.semibold,
+              color: colors.onSurface,
+            }}
+            numberOfLines={1}
+          >
+            {title}
+          </Text>
+          {activity.employee_role && (
+            <RoleBadge
+              role={activity.employee_role}
+              colorKey={activity.employee_role_color}
+            />
+          )}
+        </View>
         <Text
           style={{ ...typography.bodySmall, color: colors.onSurfaceDisabled }}
+          numberOfLines={1}
         >
-          {activity.leader_name}
+          {activity.is_outgoing
+            ? `Submitted by You · ${activity.recipient_name || ""}`
+            : activity.evaluator_name
+              ? `Rated by ${activity.evaluator_name}`
+              : ""}
         </Text>
+      </View>
+
+      {/* Right: score badge */}
+      {activity.evaluation_score != null && (
+        <View
+          style={{
+            backgroundColor: getEvalScoreColor(activity.evaluation_score),
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 10,
+            borderCurve: "continuous",
+            marginLeft: spacing[3],
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: typography.h2.fontFamily,
+              fontSize: 18,
+              fontWeight: fontWeights.bold,
+              color: "#ffffff",
+              fontVariant: ["tabular-nums"],
+            }}
+          >
+            {Math.round(activity.evaluation_score)}%
+          </Text>
+        </View>
       )}
     </View>
   );
 }
 
-function ReviewContent({ activity }: { activity: RecentActivity }) {
-  const colors = useColors();
+/** Role badge matching dashboard RolePill styling */
+function RoleBadge({ role, colorKey }: { role: string; colorKey?: string | null }) {
+  // Use dashboard role color system
+  const bg = colorKey ? getRoleBadgeColor(colorKey).bg : "#E5E7EB";
+  const text = colorKey ? getRoleBadgeColor(colorKey).text : "#374151";
 
   return (
-    <View style={{ gap: 2 }}>
+    <View
+      style={{
+        paddingHorizontal: 6,
+        height: 18,
+        borderRadius: 999,
+        backgroundColor: bg,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <Text
         style={{
-          ...typography.labelLarge,
+          fontSize: 10,
           fontWeight: fontWeights.semibold,
-          color: colors.onSurface,
+          color: text,
         }}
       >
-        {activity.author_name || "Anonymous"}
+        {role}
       </Text>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: spacing[1] }}>
-        {activity.review_rating != null &&
-          Array.from({ length: 5 }, (_, i) => (
-            <AppIcon
-              key={i}
-              name={i < activity.review_rating! ? "star.fill" : "star"}
-              size={12}
-              tintColor={
-                i < activity.review_rating!
-                  ? colors.warning
-                  : colors.onSurfaceDisabled
-              }
-            />
-          ))}
-      </View>
-      {activity.review_text_preview && (
-        <Text
-          numberOfLines={1}
-          style={{ ...typography.bodySmall, color: colors.onSurfaceVariant }}
-        >
-          {activity.review_text_preview}
-        </Text>
-      )}
     </View>
   );
+}
+
+/** Map dashboard role color keys to bg/text colors */
+function getRoleBadgeColor(colorKey: string): { bg: string; text: string } {
+  const map: Record<string, { bg: string; text: string }> = {
+    green: { bg: "#DCFCE7", text: "#166534" },
+    blue: { bg: "#DBEAFE", text: "#1E40AF" },
+    red: { bg: "#FEE2E2", text: "#991B1B" },
+    amber: { bg: "#FEF3C7", text: "#92400E" },
+    purple: { bg: "#F3E8FF", text: "#6B21A8" },
+    teal: { bg: "#CCFBF1", text: "#115E59" },
+    pink: { bg: "#FCE7F3", text: "#9D174D" },
+    grey: { bg: "#F3F4F6", text: "#374151" },
+    black: { bg: "#1F2937", text: "#F9FAFB" },
+    indigo: { bg: "#E0E7FF", text: "#3730A3" },
+  };
+  return map[colorKey] || map.grey;
 }

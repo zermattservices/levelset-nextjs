@@ -215,7 +215,7 @@ export function SubmissionDetailDialog({
               const score = calculateEvaluationScore(fields, submission.response_data);
               return (
                 <>
-                  <EvaluationScoreDisplay score={score} />
+                  <EvaluationScoreDisplay score={score} aiSummary={submission.metadata?.ai_summary} />
                   <Divider sx={{ marginY: 3 }} />
                 </>
               );
@@ -229,7 +229,7 @@ export function SubmissionDetailDialog({
             const score = calculateEvaluationScoreLegacy(submission.response_data, evalSettings);
             return (
               <>
-                <EvaluationScoreDisplay score={score} />
+                <EvaluationScoreDisplay score={score} aiSummary={submission.metadata?.ai_summary} />
                 <Divider sx={{ marginY: 3 }} />
               </>
             );

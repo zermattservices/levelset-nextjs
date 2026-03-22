@@ -24,6 +24,15 @@ export interface DropZoneRef {
   layout: LayoutRectangle;
 }
 
+/** Each slot stores its View ref so we can remeasure on demand */
+export interface DropZoneViewRef {
+  positionId: string;
+  slotIndex: number;
+  viewRef: React.RefObject<View | null>;
+}
+
+import { View } from 'react-native';
+
 interface DragContextValue {
   // Drag state
   activeDrag: DragItem | null;
@@ -37,6 +46,11 @@ interface DragContextValue {
   dropZones: React.MutableRefObject<Map<string, DropZoneRef>>;
   registerDropZone: (key: string, ref: DropZoneRef) => void;
   unregisterDropZone: (key: string) => void;
+
+  // View ref registration (for remeasuring)
+  registerDropZoneView: (key: string, ref: DropZoneViewRef) => void;
+  unregisterDropZoneView: (key: string) => void;
+  remeasureAllDropZones: () => void;
 
   // Hover state
   hoveredZoneKey: string | null;
@@ -54,6 +68,7 @@ export function DragProvider({ children }: { children: React.ReactNode }) {
   const dragX = useSharedValue(0);
   const dragY = useSharedValue(0);
   const dropZones = useRef<Map<string, DropZoneRef>>(new Map());
+  const dropZoneViews = useRef<Map<string, DropZoneViewRef>>(new Map());
 
   const registerDropZone = useCallback((key: string, ref: DropZoneRef) => {
     dropZones.current.set(key, ref);
@@ -61,6 +76,28 @@ export function DragProvider({ children }: { children: React.ReactNode }) {
 
   const unregisterDropZone = useCallback((key: string) => {
     dropZones.current.delete(key);
+  }, []);
+
+  const registerDropZoneView = useCallback((key: string, ref: DropZoneViewRef) => {
+    dropZoneViews.current.set(key, ref);
+  }, []);
+
+  const unregisterDropZoneView = useCallback((key: string) => {
+    dropZoneViews.current.delete(key);
+  }, []);
+
+  const remeasureAllDropZones = useCallback(() => {
+    for (const [key, zoneView] of dropZoneViews.current) {
+      zoneView.viewRef.current?.measureInWindow((x, y, width, height) => {
+        if (width > 0 && height > 0) {
+          dropZones.current.set(key, {
+            positionId: zoneView.positionId,
+            slotIndex: zoneView.slotIndex,
+            layout: { x, y, width, height },
+          });
+        }
+      });
+    }
   }, []);
 
   const hitTest = useCallback((x: number, y: number): DropZoneRef | null => {
@@ -78,6 +115,7 @@ export function DragProvider({ children }: { children: React.ReactNode }) {
       activeDrag, setActiveDrag,
       dragX, dragY,
       dropZones, registerDropZone, unregisterDropZone,
+      registerDropZoneView, unregisterDropZoneView, remeasureAllDropZones,
       hoveredZoneKey, setHoveredZoneKey,
       hitTest,
     }}>

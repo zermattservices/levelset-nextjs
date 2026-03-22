@@ -12,18 +12,20 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  View, ActivityIndicator, StyleSheet,
+  View, StyleSheet,
   useWindowDimensions, Pressable,
 } from 'react-native';
 import ReAnimated, {
   useSharedValue, useAnimatedStyle, withSpring, interpolate,
+  withTiming, withRepeat, Easing,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '../../context/ThemeContext';
 import { spacing } from '../../lib/theme';
 import { haptics } from '../../lib/theme';
-import { DragProvider } from './DragContext';
+import { DragProvider, useDrag } from './DragContext';
 import { SetupHeader } from './SetupHeader';
 import { SetupPositionGrid } from './SetupPositionGrid';
 import { SetupEmployeePanel } from './SetupEmployeePanel';
@@ -116,7 +118,8 @@ function getPrefetchDates(): string[] {
 function SetupBoardInner() {
   const colors = useColors();
   const { session } = useAuth();
-  const { selectedLocationId } = useLocation();
+  const { selectedLocationId, selectedLocation } = useLocation();
+  const { remeasureAllDropZones } = useDrag();
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const DRAWER_WIDTH = SCREEN_WIDTH * 0.5;
 
@@ -337,14 +340,52 @@ function SetupBoardInner() {
     };
   });
 
-  // Assign handler — also update local cache
+  // Helper to update assignments + local cache in one step
+  const updateAssignments = useCallback((updater: (prev: SetupAssignment[]) => SetupAssignment[]) => {
+    setAssignments((prev) => {
+      const updated = updater(prev);
+      const key = `${dateStr}:${zone}`;
+      const cached = localCache.current.get(key);
+      if (cached) localCache.current.set(key, { ...cached, assignments: updated });
+      return updated;
+    });
+  }, [dateStr, zone]);
+
+  // Assign handler — optimistic update, then validate server-side
   const handleAssign = useCallback(async (
     employeeId: string, shiftId: string, positionId: string
   ) => {
-    if (!session?.access_token || !selectedLocationId || !activeBlock) return;
+    if (!session?.access_token || !selectedLocationId || !activeBlock || !selectedLocation) return;
+
+    // Find employee + position for the optimistic assignment
+    const emp = employees.find((e) => e.id === employeeId);
+    const pos = positions.find((p) => p.id === positionId);
+    const shift = emp?.shift;
+
+    // Build optimistic assignment with a temp ID
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: SetupAssignment = {
+      id: tempId,
+      org_id: selectedLocation.org_id,
+      shift_id: shiftId,
+      employee_id: employeeId,
+      position_id: positionId,
+      assignment_date: dateStr,
+      start_time: activeBlock.block_time,
+      end_time: activeBlock.end_time,
+      employee: emp ? { id: emp.id, full_name: emp.full_name } : undefined,
+      position: pos ? { id: pos.id, name: pos.name, zone: pos.zone } : undefined,
+      shift: shift ? { id: shift.id, shift_date: dateStr, start_time: shift.start_time, end_time: shift.end_time, position_id: shift.position_id || '' } : undefined,
+    };
+
+    // Apply optimistically
+    updateAssignments((prev) => [...prev, optimistic]);
+
+    // Validate server-side in background
     try {
       const { assignment } = await setupAssignAuth(
         session.access_token, selectedLocationId, {
+          org_id: selectedLocation.org_id,
           shift_id: shiftId,
           employee_id: employeeId,
           position_id: positionId,
@@ -353,37 +394,38 @@ function SetupBoardInner() {
           end_time: activeBlock.end_time,
         }
       );
-      setAssignments((prev) => {
-        const updated = [...prev, assignment];
-        // Update local cache too
-        const key = `${dateStr}:${zone}`;
-        const cached = localCache.current.get(key);
-        if (cached) localCache.current.set(key, { ...cached, assignments: updated });
-        return updated;
-      });
-    } catch (err) {
-      console.error('Assign failed:', err);
+      // Replace temp with real assignment from server
+      updateAssignments((prev) => prev.map((a) => a.id === tempId ? assignment : a));
+    } catch (err: any) {
+      // Revert optimistic update
+      console.error('Assign failed:', err?.message || err);
+      updateAssignments((prev) => prev.filter((a) => a.id !== tempId));
       haptics.error();
     }
-  }, [session?.access_token, selectedLocationId, activeBlock, dateStr, zone]);
+  }, [session?.access_token, selectedLocationId, selectedLocation, activeBlock, dateStr, zone, employees, positions, updateAssignments]);
 
-  // Unassign handler — also update local cache
+  // Unassign handler — optimistic remove, then validate server-side
   const handleUnassign = useCallback(async (assignmentId: string) => {
     if (!session?.access_token || !selectedLocationId) return;
+
+    // Capture for revert
+    let removed: SetupAssignment | undefined;
+    updateAssignments((prev) => {
+      removed = prev.find((a) => a.id === assignmentId);
+      return prev.filter((a) => a.id !== assignmentId);
+    });
+
     try {
       await setupUnassignAuth(session.access_token, selectedLocationId, assignmentId);
-      setAssignments((prev) => {
-        const updated = prev.filter((a) => a.id !== assignmentId);
-        const key = `${dateStr}:${zone}`;
-        const cached = localCache.current.get(key);
-        if (cached) localCache.current.set(key, { ...cached, assignments: updated });
-        return updated;
-      });
     } catch (err) {
+      // Revert — re-add the removed assignment
       console.error('Unassign failed:', err);
+      if (removed) {
+        updateAssignments((prev) => [...prev, removed!]);
+      }
       haptics.error();
     }
-  }, [session?.access_token, selectedLocationId, dateStr, zone]);
+  }, [session?.access_token, selectedLocationId, updateAssignments]);
 
   // Zone change — save current block start time so we can match it in the new zone
   const handleZoneChange = useCallback((newZone: 'FOH' | 'BOH') => {
@@ -404,12 +446,16 @@ function SetupBoardInner() {
     setPanelVisible(false);
   }, []);
 
+  const handleDragStart = useCallback(() => {
+    setPanelVisible(false);
+    // Remeasure drop zones after the panel slides back (~350ms for spring)
+    setTimeout(() => {
+      remeasureAllDropZones();
+    }, 350);
+  }, [remeasureAllDropZones]);
+
   if (initialLoading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
+    return <SetupSkeleton />;
   }
 
   return (
@@ -421,6 +467,8 @@ function SetupBoardInner() {
           assignments={blockAssignments}
           zone={zone}
           onZoneChange={handleZoneChange}
+          onAssign={handleAssign}
+          onDragStart={handleDragStart}
           activeBlockStart={activeBlock?.block_time}
           activeBlockEnd={activeBlock?.end_time}
         />
@@ -458,9 +506,11 @@ function SetupBoardInner() {
             />
           )}
 
-          <DragOverlay />
         </ReAnimated.View>
       </GestureDetector>
+
+      {/* DragOverlay at root level so it renders above both sidebar and content */}
+      <DragOverlay />
     </View>
   );
 }
@@ -470,6 +520,120 @@ export function SetupBoard() {
     <DragProvider>
       <SetupBoardInner />
     </DragProvider>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Skeleton loading — mirrors the actual setup page layout (header + 3-col grid)
+// ---------------------------------------------------------------------------
+
+const SKEL_COL_COUNT = 3;
+const SKEL_GAP = spacing[2];
+
+function SetupSkeleton() {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
+  const cardWidth = (SCREEN_WIDTH - spacing[4] * 2 - SKEL_GAP * (SKEL_COL_COUNT - 1)) / SKEL_COL_COUNT;
+  const pulse = useSharedValue(1);
+
+  useEffect(() => {
+    pulse.value = withRepeat(
+      withTiming(0.4, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true,
+    );
+  }, [pulse]);
+
+  const boneStyle = useAnimatedStyle(() => ({
+    opacity: pulse.value,
+  }));
+
+  const Bone = ({ width, height, radius = 4 }: { width: number; height: number; radius?: number }) => (
+    <ReAnimated.View
+      style={[
+        { width, height, borderRadius: radius, borderCurve: 'continuous', backgroundColor: 'rgba(120,120,128,0.12)' },
+        boneStyle,
+      ]}
+    />
+  );
+
+  // Each skeleton card mirrors SetupPositionCard: header text + 2 slots
+  const SkeletonCard = ({ slotCount }: { slotCount: number }) => (
+    <View
+      style={{
+        width: cardWidth,
+        borderWidth: 1,
+        borderColor: colors.outline,
+        borderRadius: 10,
+        borderCurve: 'continuous',
+        padding: spacing[2],
+        marginBottom: spacing[2],
+      }}
+    >
+      {/* Position name */}
+      <View style={{ alignItems: 'center', marginBottom: spacing[1] }}>
+        <Bone width={cardWidth * 0.7} height={10} radius={3} />
+      </View>
+      {/* Slots */}
+      {Array.from({ length: slotCount }, (_, i) => (
+        <View
+          key={i}
+          style={{
+            borderWidth: 1,
+            borderColor: colors.outline,
+            borderRadius: 6,
+            borderCurve: 'continuous',
+            minHeight: 36,
+            marginTop: spacing[1],
+            padding: spacing[1],
+            justifyContent: 'center',
+          }}
+        >
+          <Bone width={cardWidth * 0.6} height={10} radius={3} />
+        </View>
+      ))}
+    </View>
+  );
+
+  // Vary slot counts to look realistic
+  const cards = [2, 1, 3, 2, 1, 2, 3, 1, 2];
+
+  return (
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
+      {/* Header — matches SetupHeader layout exactly */}
+      <View style={{ paddingTop: insets.top + spacing[1], paddingHorizontal: spacing[3], paddingBottom: spacing[2] }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* Back button */}
+          <Bone width={36} height={36} radius={18} />
+
+          {/* Center: chevron + date + block pill + chevron */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+            <Bone width={14} height={14} radius={3} />
+            <Bone width={90} height={18} radius={4} />
+            <Bone width={50} height={26} radius={13} />
+            <Bone width={14} height={14} radius={3} />
+          </View>
+
+          {/* Hamburger button */}
+          <Bone width={36} height={36} radius={18} />
+        </View>
+      </View>
+
+      {/* Position grid — 3-column layout matching SetupPositionGrid */}
+      <View
+        style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          padding: spacing[4],
+          gap: SKEL_GAP,
+        }}
+      >
+        {cards.map((slotCount, i) => (
+          <SkeletonCard key={i} slotCount={slotCount} />
+        ))}
+      </View>
+    </View>
   );
 }
 

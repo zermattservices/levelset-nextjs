@@ -10,8 +10,9 @@ import * as React from 'react';
 import Form from '@rjsf/mui';
 import validator from '@rjsf/validator-ajv8';
 import type { IChangeEvent } from '@rjsf/core';
-import type { RJSFSchema, UiSchema } from '@rjsf/utils';
-import { Button } from '@mui/material';
+import type { RJSFSchema, UiSchema, ErrorListProps } from '@rjsf/utils';
+import { Button, Typography, Box } from '@mui/material';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { getCustomWidgets, getCustomFields } from '@/components/forms/widgets';
 import { FormObjectFieldTemplate } from '@/components/forms/widgets/FormObjectFieldTemplate';
 import type { FormTemplate } from '@/lib/forms/types';
@@ -32,6 +33,69 @@ interface FormRendererProps {
   hideSubmit?: boolean;
   /** Custom submit button label */
   submitLabel?: string;
+}
+
+/**
+ * Patch boolean fields to have default: false so RJSF doesn't treat
+ * `false` as a missing/invalid value for required boolean fields.
+ */
+function patchBooleanDefaults(schema: RJSFSchema): RJSFSchema {
+  if (!schema.properties) return schema;
+
+  const patched = { ...schema, properties: { ...schema.properties } };
+  for (const [key, prop] of Object.entries(patched.properties)) {
+    const p = prop as Record<string, any>;
+    if (p.type === 'boolean' && p.default === undefined) {
+      patched.properties[key] = { ...p, default: false };
+    }
+  }
+  return patched;
+}
+
+/**
+ * Custom error list shown at the top of the form on validation failure.
+ * Renders a summary banner and scrolls to the first error field.
+ */
+function ErrorListTemplate({ errors }: ErrorListProps) {
+  const scrolledRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (errors.length > 0 && !scrolledRef.current) {
+      scrolledRef.current = true;
+
+      // Find the first field with an error and scroll to it
+      requestAnimationFrame(() => {
+        const errorEl = document.querySelector('.Mui-error, [class*="fieldError"]');
+        if (errorEl) {
+          errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    }
+  }, [errors]);
+
+  if (errors.length === 0) return null;
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        p: 2,
+        mb: 3,
+        borderRadius: '8px',
+        backgroundColor: 'var(--ls-color-destructive-soft)',
+        border: '1px solid var(--ls-color-destructive-border)',
+      }}
+    >
+      <ErrorOutlineIcon sx={{ fontSize: 18, color: 'var(--ls-color-destructive-base)' }} />
+      <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: 'var(--ls-color-destructive-base)' }}>
+        {errors.length === 1
+          ? 'Please complete 1 required field before submitting.'
+          : `Please complete ${errors.length} required fields before submitting.`}
+      </Typography>
+    </Box>
+  );
 }
 
 export function FormRenderer({
@@ -55,11 +119,24 @@ export function FormRenderer({
         properties: {},
       };
     }
-    return template.schema as RJSFSchema;
+    return patchBooleanDefaults(template.schema as RJSFSchema);
   }, [template.schema]);
 
   const uiSchema: UiSchema = React.useMemo(() => {
-    const base = (template.ui_schema || {}) as UiSchema;
+    const base = { ...(template.ui_schema || {}) } as UiSchema;
+
+    // Patch boolean fields to use yesNoSwitch widget if not already set
+    if (schema.properties) {
+      for (const [key, prop] of Object.entries(schema.properties)) {
+        const p = prop as Record<string, any>;
+        if (p.type === 'boolean') {
+          if (!base[key]) base[key] = {};
+          if (!base[key]['ui:widget']) {
+            base[key] = { ...base[key], 'ui:widget': 'yesNoSwitch' };
+          }
+        }
+      }
+    }
 
     if (readOnly) {
       return {
@@ -69,7 +146,7 @@ export function FormRenderer({
     }
 
     return base;
-  }, [template.ui_schema, readOnly]);
+  }, [template.ui_schema, readOnly, schema.properties]);
 
   const handleChange = (e: IChangeEvent) => {
     setFormData(e.formData);
@@ -79,6 +156,16 @@ export function FormRenderer({
     if (onSubmit) {
       onSubmit(e.formData);
     }
+  };
+
+  const handleError = () => {
+    // On validation error, scroll to the first error field
+    requestAnimationFrame(() => {
+      const errorEl = document.querySelector('.Mui-error, [class*="fieldError"]');
+      if (errorEl) {
+        errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
   };
 
   const hasFields = schema.properties && Object.keys(schema.properties).length > 0;
@@ -123,23 +210,49 @@ export function FormRenderer({
   }
 
   return (
-    <Form
+    <>
+      {/* Global styles for RJSF error highlighting */}
+      <style>{`
+        .rjsf .form-group.field-error .MuiOutlinedInput-notchedOutline,
+        .rjsf .form-group.field-error .MuiInputBase-root .MuiOutlinedInput-notchedOutline {
+          border-color: var(--ls-color-destructive-base) !important;
+          border-width: 2px !important;
+        }
+        .rjsf .form-group.field-error .MuiFormLabel-root {
+          color: var(--ls-color-destructive-base) !important;
+        }
+        .rjsf .form-group .field-error-message,
+        .rjsf .field-error .MuiFormHelperText-root {
+          color: var(--ls-color-destructive-base) !important;
+          font-family: ${fontFamily};
+          font-size: 12px;
+        }
+        .rjsf .Mui-error .MuiOutlinedInput-notchedOutline {
+          border-color: var(--ls-color-destructive-base) !important;
+          border-width: 2px !important;
+        }
+      `}</style>
+      <Form
         schema={schema}
         uiSchema={uiSchema}
         formData={formData}
         validator={validator}
         widgets={widgets}
         fields={fields}
-        templates={{ ObjectFieldTemplate: FormObjectFieldTemplate }}
+        templates={{
+          ObjectFieldTemplate: FormObjectFieldTemplate,
+          ErrorListTemplate,
+        }}
         formContext={{ orgId: template.org_id, locationId: selectedLocationId, formType: template.form_type }}
         onChange={handleChange}
         onSubmit={handleSubmit}
+        onError={handleError}
         disabled={readOnly}
         readonly={readOnly}
         noHtml5Validate
+        showErrorList="top"
       >
         {hideSubmit || readOnly ? (
-          // Empty fragment hides the default submit button
           <></>
         ) : (
           <Button
@@ -163,5 +276,6 @@ export function FormRenderer({
           </Button>
         )}
       </Form>
+    </>
   );
 }

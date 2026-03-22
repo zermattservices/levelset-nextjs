@@ -20,7 +20,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { getRoleColor, type OrgRole } from '@/lib/role-utils';
-import type { ScheduleRule, EvaluationCadence } from '@/lib/evaluations/types';
+import type { EvaluationRule, EvaluationCadence } from '@/lib/evaluations/types';
 import {
   fontFamily,
   dialogPaperSx,
@@ -39,13 +39,14 @@ interface FormTemplate {
   is_active: boolean;
 }
 
-export interface ScheduleRuleDialogProps {
+export interface EvaluationRuleDialogProps {
   open: boolean;
   onClose: () => void;
   onSaved: () => void;
   orgId: string;
-  rule?: ScheduleRule | null;
+  rule?: EvaluationRule | null;
   orgRoles?: OrgRole[];
+  getAccessToken?: () => Promise<string | null>;
 }
 
 const CADENCE_OPTIONS: { value: EvaluationCadence; label: string }[] = [
@@ -55,14 +56,15 @@ const CADENCE_OPTIONS: { value: EvaluationCadence; label: string }[] = [
   { value: 'annual', label: 'Annual' },
 ];
 
-export function ScheduleRuleDialog({
+export function EvaluationRuleDialog({
   open,
   onClose,
   onSaved,
   orgId,
   rule,
   orgRoles: passedRoles,
-}: ScheduleRuleDialogProps) {
+  getAccessToken,
+}: EvaluationRuleDialogProps) {
   const isEdit = Boolean(rule);
 
   const [formTemplates, setFormTemplates] = React.useState<FormTemplate[]>([]);
@@ -70,6 +72,18 @@ export function ScheduleRuleDialog({
   const [loadingData, setLoadingData] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  // Get access token — use prop if provided, otherwise fetch inline
+  const resolveToken = React.useCallback(async (): Promise<string | null> => {
+    if (getAccessToken) return getAccessToken();
+    try {
+      const supabase = createSupabaseClient();
+      const { data } = await supabase.auth.getSession();
+      return data.session?.access_token || null;
+    } catch {
+      return null;
+    }
+  }, [getAccessToken]);
 
   // Form state
   const [formTemplateId, setFormTemplateId] = React.useState<string>('');
@@ -86,11 +100,29 @@ export function ScheduleRuleDialog({
     async function loadData() {
       setLoadingData(true);
       setError(null);
+
+      // Set roles immediately from props (independent of API call)
+      if (passedRoles && passedRoles.length > 0) {
+        setRoles(passedRoles);
+      } else {
+        const supabase = createSupabaseClient();
+        const { data } = await supabase
+          .from('org_roles')
+          .select('*')
+          .eq('org_id', orgId)
+          .order('hierarchy_level', { ascending: true });
+        if (!cancelled) setRoles((data as OrgRole[]) ?? []);
+      }
+
       try {
-        // Fetch form templates via API (needs auth cookies)
+        // Fetch form templates via API with Bearer token
+        const headers: Record<string, string> = {};
+        const token = await resolveToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         const templatesRes = await fetch(
           `/api/forms?org_id=${orgId}&form_type=evaluation`,
-          { credentials: 'include' }
+          { headers }
         );
 
         if (cancelled) return;
@@ -98,22 +130,10 @@ export function ScheduleRuleDialog({
         if (!templatesRes.ok) throw new Error('Failed to load form templates');
         const templatesData = await templatesRes.json();
 
-        const allTemplates = templatesData.templates ?? [];
+        // API returns array directly, not { templates: [...] }
+        const allTemplates = Array.isArray(templatesData) ? templatesData : (templatesData.templates ?? []);
         const evalTemplates = allTemplates.filter((t: any) => t.is_active);
         setFormTemplates(evalTemplates);
-
-        // Use passed roles if available, otherwise fetch
-        if (passedRoles && passedRoles.length > 0) {
-          setRoles(passedRoles);
-        } else {
-          const supabase = createSupabaseClient();
-          const { data } = await supabase
-            .from('org_roles')
-            .select('*')
-            .eq('org_id', orgId)
-            .order('hierarchy_level', { ascending: true });
-          if (!cancelled) setRoles((data as OrgRole[]) ?? []);
-        }
       } catch (err: any) {
         if (!cancelled) setError(err.message || 'Failed to load data');
       } finally {
@@ -174,6 +194,7 @@ export function ScheduleRuleDialog({
     setSaving(true);
     try {
       const payload = {
+        org_id: orgId,
         form_template_id: formTemplateId,
         target_role_ids: targetRoleIds,
         reviewer_role_ids: reviewerRoleIds,
@@ -181,9 +202,13 @@ export function ScheduleRuleDialog({
         ...(isEdit && rule ? { id: rule.id } : {}),
       };
 
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const saveToken = await resolveToken();
+      if (saveToken) headers['Authorization'] = `Bearer ${saveToken}`;
+
       const res = await fetch('/api/evaluations/schedule-rules', {
         method: isEdit ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload),
       });
 

@@ -13,7 +13,7 @@ import React, {
 } from "react";
 import i18n from "../lib/i18n";
 
-export type FormType = "ratings" | "infractions" | null;
+export type FormType = "ratings" | "infractions" | "evaluation" | null;
 
 export interface SubmissionSummary {
   formType: FormType;

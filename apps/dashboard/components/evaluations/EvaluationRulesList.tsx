@@ -14,19 +14,19 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { createSupabaseClient } from '@/util/supabase/component';
-import type { ScheduleRule } from '@/lib/evaluations/types';
+import type { EvaluationRule } from '@/lib/evaluations/types';
 import { getRoleColor, type OrgRole } from '@/lib/role-utils';
-import { ScheduleRuleDialog } from './ScheduleRuleDialog';
+import { EvaluationRuleDialog } from './EvaluationRuleDialog';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
 
-export interface ScheduleRulesListProps {
+export interface EvaluationRulesListProps {
   orgId: string | null;
   getAccessToken: () => Promise<string | null>;
 }
 
-export function ScheduleRulesList({ orgId, getAccessToken }: ScheduleRulesListProps) {
-  const [rules, setRules] = React.useState<ScheduleRule[]>([]);
+export function EvaluationRulesList({ orgId, getAccessToken }: EvaluationRulesListProps) {
+  const [rules, setRules] = React.useState<EvaluationRule[]>([]);
   const [orgRoles, setOrgRoles] = React.useState<OrgRole[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -35,7 +35,7 @@ export function ScheduleRulesList({ orgId, getAccessToken }: ScheduleRulesListPr
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editingRule, setEditingRule] = React.useState<ScheduleRule | null>(null);
+  const [editingRule, setEditingRule] = React.useState<EvaluationRule | null>(null);
 
   const fetchRules = React.useCallback(async () => {
     if (!orgId) return;
@@ -79,7 +79,7 @@ export function ScheduleRulesList({ orgId, getAccessToken }: ScheduleRulesListPr
     setDialogOpen(true);
   };
 
-  const handleOpenEdit = (rule: ScheduleRule) => {
+  const handleOpenEdit = (rule: EvaluationRule) => {
     setEditingRule(rule);
     setDialogOpen(true);
   };
@@ -93,13 +93,17 @@ export function ScheduleRulesList({ orgId, getAccessToken }: ScheduleRulesListPr
     fetchRules();
   };
 
-  const handleToggleActive = async (rule: ScheduleRule) => {
+  const handleToggleActive = async (rule: EvaluationRule) => {
     setTogglingId(rule.id);
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const token = await getAccessToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/evaluations/schedule-rules', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: rule.id, is_active: !rule.is_active }),
+        headers,
+        body: JSON.stringify({ id: rule.id, org_id: orgId, is_active: !rule.is_active }),
       });
       if (!res.ok) throw new Error('Failed to update rule');
       const data = await res.json();
@@ -113,16 +117,20 @@ export function ScheduleRulesList({ orgId, getAccessToken }: ScheduleRulesListPr
     }
   };
 
-  const handleDelete = async (rule: ScheduleRule) => {
+  const handleDelete = async (rule: EvaluationRule) => {
     if (!window.confirm(`Delete the rule for "${rule.form_template?.name ?? 'this form'}"? This cannot be undone.`)) {
       return;
     }
     setDeletingId(rule.id);
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const token = await getAccessToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/evaluations/schedule-rules', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: rule.id }),
+        headers,
+        body: JSON.stringify({ id: rule.id, org_id: orgId }),
       });
       if (!res.ok) throw new Error('Failed to delete rule');
       setRules((prev) => prev.filter((r) => r.id !== rule.id));
@@ -234,13 +242,14 @@ export function ScheduleRulesList({ orgId, getAccessToken }: ScheduleRulesListPr
       )}
 
       {orgId && (
-        <ScheduleRuleDialog
+        <EvaluationRuleDialog
           open={dialogOpen}
           onClose={handleDialogClose}
           onSaved={handleSaved}
           orgId={orgId}
           rule={editingRule}
           orgRoles={orgRoles}
+          getAccessToken={getAccessToken}
         />
       )}
     </>
@@ -250,13 +259,13 @@ export function ScheduleRulesList({ orgId, getAccessToken }: ScheduleRulesListPr
 // ── Private sub-component ─────────────────────────────────────────────────────
 
 interface RuleCardProps {
-  rule: ScheduleRule;
+  rule: EvaluationRule;
   orgRoles: OrgRole[];
   isToggling: boolean;
   isDeleting: boolean;
-  onEdit: (rule: ScheduleRule) => void;
-  onToggleActive: (rule: ScheduleRule) => void;
-  onDelete: (rule: ScheduleRule) => void;
+  onEdit: (rule: EvaluationRule) => void;
+  onToggleActive: (rule: EvaluationRule) => void;
+  onDelete: (rule: EvaluationRule) => void;
 }
 
 function RuleCard({ rule, orgRoles, isToggling, isDeleting, onEdit, onToggleActive, onDelete }: RuleCardProps) {

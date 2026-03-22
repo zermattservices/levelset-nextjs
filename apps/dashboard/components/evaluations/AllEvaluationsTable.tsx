@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useRouter } from 'next/router';
 import { DataGridPro, GridColDef, gridClasses } from '@mui/x-data-grid-pro';
 import {
   Box,
@@ -8,15 +9,20 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Skeleton,
   Tooltip,
   Typography,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { format } from 'date-fns';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
-import type { EvaluationItem, EvaluationStatus, EvaluationSource } from '@/lib/evaluations/types';
-import { EvaluationScoreSummary } from './EvaluationScoreSummary';
+import type { EvaluationItem, EvaluationStatus, EvaluationSource, EvaluationCadence } from '@/lib/evaluations/types';
 import { OverrideMenu } from './OverrideMenu';
+import { EvaluationDeleteMenu } from './EvaluationDeleteMenu';
+import { RolePill } from '@/components/CodeComponents/shared/RolePill';
+import { SubmissionDetailDialog } from '@/components/forms/SubmissionDetailDialog';
+import { createSupabaseClient } from '@/util/supabase/component';
+import type { FormSubmission } from '@/lib/forms/types';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
 
@@ -55,12 +61,12 @@ const SOURCE_CHIP: Record<EvaluationSource, { label: string; bg: string; color: 
     color: 'var(--ls-color-muted)',
   },
   certification_pending: {
-    label: 'Certification — Pending',
+    label: 'Cert — Pending',
     bg: 'var(--ls-color-brand-soft)',
     color: 'var(--ls-color-brand-base)',
   },
   certification_pip: {
-    label: 'Certification — PIP',
+    label: 'Cert — PIP',
     bg: 'var(--ls-color-warning-soft)',
     color: 'var(--ls-color-warning-base)',
   },
@@ -70,6 +76,16 @@ const SOURCE_CHIP: Record<EvaluationSource, { label: string; bg: string; color: 
     color: 'var(--ls-color-muted)',
   },
 };
+
+function formatCadence(cadence: EvaluationCadence | null): string {
+  switch (cadence) {
+    case 'monthly': return 'Monthly';
+    case 'quarterly': return 'Quarterly';
+    case 'semi_annual': return 'Semi-annual';
+    case 'annual': return 'Annual';
+    default: return '';
+  }
+}
 
 const StyledContainer = styled(Box)(() => ({
   borderRadius: 16,
@@ -111,17 +127,45 @@ export interface AllEvaluationsTableProps {
   items: EvaluationItem[];
   loading: boolean;
   onRefresh: () => void;
+  orgId?: string | null;
+  onEmployeeClick?: (employeeId: string) => void;
 }
 
-export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluationsTableProps) {
-  const [viewScoreId, setViewScoreId] = React.useState<string | null>(null);
+export function AllEvaluationsTable({ items, loading, onRefresh, orgId, onEmployeeClick }: AllEvaluationsTableProps) {
+  const router = useRouter();
+  const [viewSubmission, setViewSubmission] = React.useState<FormSubmission | null>(null);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+
+  const getAccessToken = React.useCallback(async (): Promise<string | null> => {
+    try {
+      const supabase = createSupabaseClient();
+      const { data } = await supabase.auth.getSession();
+      return data.session?.access_token || null;
+    } catch { return null; }
+  }, []);
+
+  const handleViewSubmission = React.useCallback(async (submissionId: string | null) => {
+    if (!submissionId) return;
+    try {
+      const token = await getAccessToken();
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`/api/forms/submissions/${encodeURIComponent(submissionId)}${orgId ? `?org_id=${encodeURIComponent(orgId)}` : ''}`, { headers });
+      if (!res.ok) return;
+      const sub = await res.json();
+      if (sub) {
+        setViewSubmission(sub);
+        setDialogOpen(true);
+      }
+    } catch { /* silently fail */ }
+  }, [getAccessToken, orgId]);
 
   // Filter state
   const [roleFilter, setRoleFilter] = React.useState<string>('');
   const [evaluationFilter, setEvaluationFilter] = React.useState<string>('');
   const [statusFilter, setStatusFilter] = React.useState<string>('');
   const [sourceFilter, setSourceFilter] = React.useState<string>('');
-  const [locationFilter, setLocationFilter] = React.useState<string>('');
 
   // Derived filter options
   const roleOptions = React.useMemo(
@@ -132,10 +176,6 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
     () => Array.from(new Set(items.map((i) => i.evaluation?.name).filter(Boolean))).sort(),
     [items]
   );
-  const locationOptions = React.useMemo(
-    () => Array.from(new Set(items.map((i) => i.employee?.location_id).filter(Boolean))).sort(),
-    [items]
-  );
 
   const filteredItems = React.useMemo(() => {
     return items.filter((item) => {
@@ -143,21 +183,33 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
       if (evaluationFilter && item.evaluation?.name !== evaluationFilter) return false;
       if (statusFilter && item.status !== statusFilter) return false;
       if (sourceFilter && item.source !== sourceFilter) return false;
-      if (locationFilter && item.employee?.location_id !== locationFilter) return false;
       return true;
     });
-  }, [items, roleFilter, evaluationFilter, statusFilter, sourceFilter, locationFilter]);
+  }, [items, roleFilter, evaluationFilter, statusFilter, sourceFilter]);
 
   const columns = React.useMemo<GridColDef<EvaluationItem>[]>(
     () => [
       {
         field: 'employee',
         headerName: 'Employee',
-        width: 180,
+        headerAlign: 'center' as const,
+        flex: 1,
+        minWidth: 140,
         valueGetter: (value: EvaluationItem['employee']) => value?.name ?? '',
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
+            <Typography
+              onClick={(e) => {
+                e.stopPropagation();
+                if (params.row.employee?.id && onEmployeeClick) onEmployeeClick(params.row.employee.id);
+              }}
+              sx={{
+                fontFamily, fontSize: 13, fontWeight: 600,
+                color: 'var(--ls-color-neutral-soft-foreground)',
+                cursor: onEmployeeClick ? 'pointer' : 'default',
+                '&:hover': onEmployeeClick ? { color: 'var(--ls-color-brand)', textDecoration: 'underline' } : {},
+              }}
+            >
               {params.row.employee?.name ?? '—'}
             </Typography>
           </Box>
@@ -166,21 +218,26 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
       {
         field: 'role',
         headerName: 'Role',
-        width: 140,
+        headerAlign: 'center' as const,
+        align: 'center' as const,
+        width: 120,
         valueGetter: (_value, row) => row.employee?.role ?? '',
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)' }}>
-              {params.row.employee?.role ?? '—'}
-            </Typography>
+            <RolePill
+              role={params.row.employee?.role}
+              colorKey={params.row.employee?.role_color}
+            />
           </Box>
         ),
       },
       {
         field: 'evaluation',
         headerName: 'Evaluation',
+        headerAlign: 'center' as const,
+        align: 'center' as const,
         flex: 1,
-        minWidth: 180,
+        minWidth: 150,
         valueGetter: (value: EvaluationItem['evaluation']) => value?.name ?? '',
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
@@ -191,14 +248,38 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
         ),
       },
       {
-        field: 'reviewer',
-        headerName: 'Reviewer',
-        width: 160,
-        sortable: false,
-        renderCell: () => (
+        field: 'cadence',
+        headerName: 'Frequency',
+        headerAlign: 'center' as const,
+        align: 'center' as const,
+        width: 120,
+        renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)' }}>
-              —
+              {formatCadence(params.row.cadence) || '—'}
+            </Typography>
+          </Box>
+        ),
+      },
+      {
+        field: 'due_date',
+        headerName: 'Due Date',
+        headerAlign: 'center' as const,
+        align: 'center' as const,
+        width: 120,
+        renderCell: (params) => (
+          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <Typography sx={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: params.row.status === 'overdue' ? 600 : 400,
+              color: params.row.status === 'overdue'
+                ? 'var(--ls-color-destructive-base)'
+                : 'var(--ls-color-neutral-soft-foreground)',
+            }}>
+              {params.row.due_date
+                ? format(new Date(params.row.due_date + 'T00:00:00'), 'M/d/yyyy')
+                : '—'}
             </Typography>
           </Box>
         ),
@@ -206,7 +287,9 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
       {
         field: 'source',
         headerName: 'Source',
-        width: 220,
+        headerAlign: 'center' as const,
+        align: 'center' as const,
+        width: 140,
         renderCell: (params) => {
           const chip = SOURCE_CHIP[params.row.source] ?? SOURCE_CHIP.manual;
           return (
@@ -216,7 +299,7 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
                 size="small"
                 sx={{
                   fontFamily,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 600,
                   backgroundColor: chip.bg,
                   color: chip.color,
@@ -231,7 +314,9 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
       {
         field: 'status',
         headerName: 'Status',
-        width: 140,
+        headerAlign: 'center' as const,
+        align: 'center' as const,
+        width: 120,
         renderCell: (params) => {
           const chip = STATUS_CHIP[params.row.status] ?? STATUS_CHIP.not_yet_due;
           return (
@@ -241,7 +326,7 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
                 size="small"
                 sx={{
                   fontFamily,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 600,
                   backgroundColor: chip.bg,
                   color: chip.color,
@@ -256,7 +341,9 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
       {
         field: 'last_completed_at',
         headerName: 'Last Completed',
-        width: 160,
+        headerAlign: 'center' as const,
+        align: 'center' as const,
+        width: 150,
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-neutral-soft-foreground)' }}>
@@ -270,8 +357,10 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
       {
         field: 'actions',
         headerName: 'Action',
-        width: 200,
+        flex: 1,
+        minWidth: 140,
         sortable: false,
+        headerAlign: 'center' as const,
         renderCell: (params) => {
           const item = params.row;
           const isCompleted = item.status === 'completed';
@@ -283,7 +372,7 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
                 <Button
                   size="small"
                   variant="outlined"
-                  onClick={() => setViewScoreId(item.last_submission_id)}
+                  onClick={() => handleViewSubmission(item.last_submission_id)}
                   sx={{
                     fontFamily,
                     fontSize: 12,
@@ -311,7 +400,7 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
                       variant="contained"
                       disabled={!canStart}
                       onClick={() => {
-                        console.log('[EvaluationsPage] Start review for item:', item.id);
+                        router.push(`/evaluations/conduct/${item.id}`);
                       }}
                       sx={{
                         fontFamily,
@@ -331,26 +420,35 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
                         },
                       }}
                     >
-                      Start Review
+                      Go to Form
                     </Button>
                   </span>
                 </Tooltip>
               )}
 
-              {item.source === 'scheduled' && item.rule_id && item.period_start && (
-                <OverrideMenu
-                  ruleId={item.rule_id}
-                  employeeId={item.employee.id}
-                  periodStart={item.period_start}
-                  onOverrideCreated={onRefresh}
+              {isCompleted && item.last_submission_id ? (
+                <EvaluationDeleteMenu
+                  submissionId={item.last_submission_id}
+                  employeeName={item.employee?.name ?? 'this employee'}
+                  orgId={orgId}
+                  onDeleted={onRefresh}
                 />
+              ) : (
+                item.source === 'scheduled' && item.rule_id && item.period_start && (
+                  <OverrideMenu
+                    ruleId={item.rule_id}
+                    employeeId={item.employee.id}
+                    periodStart={item.period_start}
+                    onOverrideCreated={onRefresh}
+                  />
+                )
               )}
             </Box>
           );
         },
       },
     ],
-    [onRefresh]
+    [onRefresh, router]
   );
 
   const rowHeight = 52;
@@ -420,26 +518,32 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
             ))}
           </Select>
         </FormControl>
-
-        {locationOptions.length > 1 && (
-          <FormControl size="small">
-            <InputLabel sx={filterLabelSx}>Location</InputLabel>
-            <Select
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-              label="Location"
-              sx={filterSelectSx}
-            >
-              <MenuItem value="" sx={filterMenuItemSx}>All locations</MenuItem>
-              {locationOptions.map((l) => (
-                <MenuItem key={l} value={l} sx={filterMenuItemSx}>{l}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
       </Box>
 
-      {!loading && filteredItems.length === 0 ? (
+      {loading ? (
+        <StyledContainer>
+          <Box sx={{ p: 0 }}>
+            <Box sx={{ display: 'flex', gap: 2, px: 2, py: 1.5, backgroundColor: 'var(--ls-color-neutral-foreground)', borderBottom: '1px solid var(--ls-color-muted-border)' }}>
+              {[140, 90, 160, 80, 90, 100, 80, 100, 120].map((w, i) => (
+                <Skeleton key={i} variant="text" width={w} height={20} sx={{ borderRadius: '4px' }} />
+              ))}
+            </Box>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Box key={i} sx={{ display: 'flex', gap: 2, px: 2, py: 1.75, borderBottom: '1px solid var(--ls-color-muted-soft)', alignItems: 'center' }}>
+                <Skeleton variant="text" width={120} height={16} sx={{ borderRadius: '4px' }} />
+                <Skeleton variant="rounded" width={70} height={26} sx={{ borderRadius: '14px' }} />
+                <Skeleton variant="text" width={140} height={16} sx={{ borderRadius: '4px' }} />
+                <Skeleton variant="text" width={65} height={16} sx={{ borderRadius: '4px' }} />
+                <Skeleton variant="text" width={70} height={16} sx={{ borderRadius: '4px' }} />
+                <Skeleton variant="rounded" width={65} height={22} sx={{ borderRadius: '12px' }} />
+                <Skeleton variant="rounded" width={45} height={22} sx={{ borderRadius: '12px' }} />
+                <Skeleton variant="text" width={70} height={16} sx={{ borderRadius: '4px' }} />
+                <Skeleton variant="rounded" width={80} height={30} sx={{ borderRadius: '6px' }} />
+              </Box>
+            ))}
+          </Box>
+        </StyledContainer>
+      ) : filteredItems.length === 0 ? (
         <Box
           sx={{
             display: 'flex',
@@ -470,7 +574,6 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
             rows={filteredItems}
             columns={columns}
             getRowId={(row) => row.id}
-            loading={loading}
             disableRowSelectionOnClick
             disableColumnResize
             disableColumnMenu
@@ -493,7 +596,7 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
                 '&:focus, &:focus-within': { outline: 'none' },
               },
               '& .MuiDataGrid-columnHeaderTitleContainer': {
-                padding: '0 16px',
+                padding: 0,
               },
               [`& .${gridClasses.columnSeparator}`]: { display: 'none' },
               [`& .${gridClasses.cell}`]: {
@@ -515,12 +618,12 @@ export function AllEvaluationsTable({ items, loading, onRefresh }: AllEvaluation
         </StyledContainer>
       )}
 
-      {viewScoreId && (
-        <EvaluationScoreSummary
-          submissionId={viewScoreId}
-          onClose={() => setViewScoreId(null)}
-        />
-      )}
+      <SubmissionDetailDialog
+        open={dialogOpen}
+        submission={viewSubmission}
+        onClose={() => { setDialogOpen(false); setViewSubmission(null); }}
+        getAccessToken={getAccessToken}
+      />
     </>
   );
 }

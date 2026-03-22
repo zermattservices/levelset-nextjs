@@ -13,6 +13,39 @@
   padding: 24px;
 }
 
+.overallSectionWithSummary {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+}
+
+.overallScoreColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.overallSectionWithSummary .overallScoreColumn {
+  flex: 0 0 33.333%;
+}
+
+.summaryColumn {
+  flex: 1;
+  min-width: 0;
+}
+
+.summaryText {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ls-color-neutral-soft-foreground);
+  margin: 0;
+}
+
 .circleWrapper {
   position: relative;
   display: flex;
@@ -55,7 +88,7 @@
   gap: 12px;
 }
 
-.sectionHeader {
+.breakdownTitle {
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
   font-weight: 600;
@@ -63,10 +96,51 @@
   margin: 0;
 }
 
-.sectionRow {
+/* Section accordion card */
+.sectionCard {
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ls-color-bg-container);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sectionHeader:hover {
+  background: var(--ls-color-neutral-foreground);
+}
+
+.sectionHeaderExpanded {
+  border-bottom: 1px solid var(--ls-color-muted-border);
+}
+
+.caretIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: transform 0.2s ease;
+  transform: rotate(-90deg);
+}
+
+.caretIconExpanded {
+  transform: rotate(0deg);
+}
+
+.sectionHeaderContent {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .sectionLabelRow {
@@ -78,8 +152,8 @@
 .sectionName {
   font-family: "Satoshi", sans-serif;
   font-size: 13px;
-  font-weight: 500;
-  color: var(--ls-color-neutral-soft-foreground);
+  font-weight: 600;
+  color: var(--ls-color-text-primary);
 }
 
 .sectionPct {
@@ -101,42 +175,36 @@
   transition: width 0.4s ease;
 }
 
+.sectionStats {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .sectionPoints {
   font-family: "Satoshi", sans-serif;
   font-size: 11px;
   color: var(--ls-color-muted);
-  text-align: right;
 }
 
-.questionsToggle {
-  font-family: "Satoshi", sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--ls-color-brand);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 0;
-  text-align: left;
-}
-
-.questionsToggle:hover {
-  text-decoration: underline;
-}
-
+/* Questions list inside accordion */
 .questionsList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding-left: 12px;
-  border-left: 2px solid var(--ls-color-muted-border);
+  padding: 4px 14px 10px 42px;
 }
 
 .questionRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 0;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--ls-color-muted-soft);
+}
+
+.questionRow:last-child {
+  border-bottom: none;
 }
 
 .questionLabel {
@@ -147,18 +215,26 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin-right: 12px;
 }
 
-.questionAnswer {
+.questionScore {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.questionRaw {
   font-family: "Satoshi", sans-serif;
   font-size: 12px;
   color: var(--ls-color-muted);
-  margin: 0 12px;
 }
 
-.questionPoints {
+.questionPct {
   font-family: "Satoshi", sans-serif;
   font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: right;
 }

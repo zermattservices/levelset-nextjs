@@ -16,6 +16,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useIsLeader } from "../src/hooks/useIsLeader";
 import { ActionButton } from "../src/components/ui/ActionButton";
 import { ActionMenu, ActionMenuItem } from "../src/components/ui/ActionMenu";
+import { useLocation } from "../src/context/LocationContext";
+import { Rocket, Gavel, CalendarCheck, FileText } from "lucide-react-native";
 import { spacing } from "../src/lib/theme";
 import "react-native-reanimated";
 
@@ -39,6 +41,7 @@ function RootLayoutNav() {
   const segments = useSegments();
   const router = useRouter();
   const { isLeader } = useIsLeader();
+  const { selectedLocation } = useLocation();
   const insets = useSafeAreaInsets();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -75,7 +78,7 @@ function RootLayoutNav() {
   // FAB visibility: only on root Home/Schedule screens, only for leaders
   // Hide on detail pages by checking the last segment against known detail screen names
   const lastSegment = segments[segments.length - 1];
-  const isOnDetailPage = ['rating-detail', 'infraction-detail', 'review-detail', 'employee-overview', 'todays-setup', 'account', 'edit-profile', 'location-picker', 'day-detail', 'shift-actions'].includes(lastSegment);
+  const isOnDetailPage = ['rating-detail', 'infraction-detail', 'employee-overview', 'todays-setup', 'account', 'edit-profile', 'location-picker', 'day-detail', 'shift-actions', 'all-activities'].includes(lastSegment);
   const showFab = isLeader && isInTabs && !isOnDetailPage && (activeTab === "(home)" || activeTab === "(schedule)");
 
   // Context-aware menu items based on active tab
@@ -83,23 +86,22 @@ function RootLayoutNav() {
     if (activeTab === "(home)") {
       return [
         {
-          icon: "star.fill",
+          icon: <Rocket size={20} color={colors.primary} strokeWidth={1.5} />,
           label: "Submit Rating",
           onPress: () => router.push("/forms/ratings"),
         },
         {
-          icon: "doc.text.fill",
+          icon: <Gavel size={20} color={colors.primary} strokeWidth={1.5} />,
           label: "Record Infraction",
           onPress: () => router.push("/forms/infractions"),
         },
         {
-          icon: "checkmark.clipboard.fill",
+          icon: <CalendarCheck size={20} color={colors.primary} strokeWidth={1.5} />,
           label: "Submit Evaluation",
-          disabled: true,
-          badge: "Coming Soon",
+          onPress: () => router.push("/forms/evaluation-picker"),
         },
         {
-          icon: "square.grid.2x2.fill",
+          icon: <FileText size={20} color={colors.primary} strokeWidth={1.5} />,
           label: "View all Forms",
           onPress: () => router.push("/forms-hub"),
         },

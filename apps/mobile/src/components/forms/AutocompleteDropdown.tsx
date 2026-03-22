@@ -160,6 +160,7 @@ export function AutocompleteDropdown({
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="always"
       />
     );
   };
@@ -206,8 +207,8 @@ export function AutocompleteDropdown({
         <ScrollView
           style={[styles.modalContainer, { backgroundColor: colors.background }]}
           contentContainerStyle={{ flex: 1 }}
-          keyboardShouldPersistTaps="always"
           scrollEnabled={false}
+          keyboardShouldPersistTaps="always"
         >
           {/* Header — matches edit-profile pattern: Cancel | Title | (spacer) */}
           <View style={styles.header}>

@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { withAdminAuth } from '@/lib/permissions/middleware';
 
 type RangeKey = '1d' | '7d' | '30d';
 
@@ -18,7 +19,7 @@ function getTimeRange(range: RangeKey): { from: Date; to: Date; prevFrom: Date; 
   return { from, to, prevFrom, prevTo };
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -141,3 +142,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Failed to load analytics' });
   }
 }
+
+export default withAdminAuth(handler);

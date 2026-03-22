@@ -22,6 +22,7 @@ export function isScorable(fieldType: string): boolean {
 
 export interface ScoredQuestion {
   fieldId: string;
+  fieldLabel: string;
   sectionId: string | null;
   fieldType: string;
   weight: number;
@@ -157,6 +158,7 @@ export function calculateEvaluationScore(
 
     const scored: ScoredQuestion = {
       fieldId: field.id,
+      fieldLabel: field.label || field.id,
       sectionId: childToSection.get(field.id) || null,
       fieldType: field.type,
       weight,

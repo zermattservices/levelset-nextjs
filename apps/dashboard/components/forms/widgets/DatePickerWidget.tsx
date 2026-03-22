@@ -8,9 +8,28 @@ const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Se
 /**
  * Date picker widget for RJSF forms.
  * Wraps the shared LsDatePicker (MUI X DatePicker with Levelset styling).
+ *
+ * Supports `defaultToCurrentDate` in ui:fieldMeta — when true, auto-fills
+ * today's date if the field has no value on mount.
  */
 export function DatePickerWidget(props: WidgetProps) {
-  const { id, value, required, disabled, readonly, onChange, label, rawErrors } = props;
+  const { id, value, required, disabled, readonly, onChange, label, rawErrors, uiSchema } = props;
+
+  const meta = uiSchema?.['ui:fieldMeta'] || {};
+  const defaultToCurrentDate = meta.defaultToCurrentDate === true;
+
+  // Auto-fill today's date on mount if setting is enabled and no value exists
+  const didAutoFill = React.useRef(false);
+  React.useEffect(() => {
+    if (defaultToCurrentDate && !value && !didAutoFill.current) {
+      didAutoFill.current = true;
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      onChange(`${y}-${m}-${d}`);
+    }
+  }, [defaultToCurrentDate, value, onChange]);
 
   const handleChange = (date: Date | null) => {
     if (!date) {

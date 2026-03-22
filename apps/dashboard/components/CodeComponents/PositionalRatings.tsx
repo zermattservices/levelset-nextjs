@@ -586,6 +586,7 @@ export function PositionalRatings({
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [realtimeTick, setRealtimeTick] = React.useState(0);
   
   // DataGrid API ref to access filtered rows
   const apiRef = useGridApiRef();
@@ -1284,7 +1285,52 @@ export function PositionalRatings({
     return () => {
       isActive = false;
     };
-  }, [locationId, employeeId, startDate, endDate, showFOH, showBOH, fetchBig5Labels]);
+  }, [locationId, employeeId, startDate, endDate, showFOH, showBOH, fetchBig5Labels, realtimeTick]);
+
+  // Real-time subscription: refetch when ratings change for this location
+  React.useEffect(() => {
+    if (!locationId) return;
+
+    let channel: any = null;
+    const supabase = createSupabaseClient();
+
+    try {
+      channel = supabase
+        .channel(`ratings-changes-${locationId}`)
+        .on('postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'ratings',
+            filter: `location_id=eq.${locationId}`
+          },
+          () => {
+            // Trigger a re-render by bumping a counter — the data fetch useEffect
+            // depends on realtimeTick and will re-run automatically
+            setRealtimeTick(prev => prev + 1);
+          }
+        )
+        .subscribe((status: string) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Subscribed to ratings changes');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.warn('Failed to subscribe to ratings changes — continuing without real-time updates');
+          }
+        });
+    } catch (error) {
+      console.warn('Error setting up ratings real-time subscription:', error);
+    }
+
+    return () => {
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch (error) {
+          console.warn('Error removing ratings channel:', error);
+        }
+      }
+    };
+  }, [locationId]);
 
   // Update filtered rows from DataGrid API whenever filters or data changes
   React.useEffect(() => {
@@ -2409,6 +2455,7 @@ export function PositionalRatings({
           searchText={searchText}
           filterModel={filterModel}
           loading={loading}
+          realtimeTick={realtimeTick}
           onMetricsCalculated={setMetricsData}
         />
         

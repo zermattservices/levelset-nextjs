@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { Employee } from '@/lib/supabase.types';
 import { calculatePayForLocation, shouldCalculatePay } from '@/lib/pay-calculator';
+import { withAuth } from '@/lib/permissions/middleware';
 
 interface NewEmployeeUpdate {
   id?: string; // employee id from database (for existing employees)
@@ -14,7 +15,7 @@ interface NewEmployeeUpdate {
   match_existing_id?: string | null; // ID of existing employee to merge with (manual match)
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -272,4 +273,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+export default withAuth(handler);
 

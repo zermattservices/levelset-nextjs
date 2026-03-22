@@ -487,7 +487,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
               </div>
             )}
             <StyledTextField
-              value={language === 'es' ? position.name_es : position.name}
+              value={(language === 'es' ? position.name_es : position.name) ?? ''}
               onChange={(e) => handlePositionChange(position.id, language === 'es' ? 'name_es' : 'name', e.target.value)}
               placeholder={language === 'es' ? 'Nombre de la posición' : 'Position name'}
               size="small"
@@ -498,7 +498,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
               ref={(el) => {
                 if (el) textareaRefs.current.set(`${position.id}-${language}`, el);
               }}
-              value={language === 'es' ? position.description_es : position.description}
+              value={(language === 'es' ? position.description_es : position.description) ?? ''}
               onChange={(e) => handleTextareaChange(position.id, language === 'es' ? 'description_es' : 'description', e.target.value, e.target)}
               placeholder={language === 'es' ? 'Descripción de la posición...' : 'Position description...'}
               className={sty.descriptionField}

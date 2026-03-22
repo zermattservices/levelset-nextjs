@@ -4,11 +4,13 @@ import type { Employee } from '@/lib/supabase.types';
 import { calculatePayForLocation, shouldCalculatePay } from '@/lib/pay-calculator';
 import { allPositionsQualified } from '@/lib/certification-utils';
 import { fetchEmployeePositionAverages } from '@/lib/fetch-position-averages';
+import { withAuth } from '@/lib/permissions/middleware';
+import { setCorsOrigin } from '@/lib/cors';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();
@@ -301,3 +303,5 @@ async function ensureEvaluationForPending(supabase: ReturnType<typeof createServ
     console.error('[Employees API] Unexpected error while creating evaluation:', error);
   }
 }
+
+export default withAuth(handler);

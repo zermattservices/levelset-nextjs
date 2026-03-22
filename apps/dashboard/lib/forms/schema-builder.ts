@@ -56,6 +56,10 @@ export interface FieldSettings {
   /** For text_block: rich text content */
   content?: string;
   contentEs?: string;
+  /** For date fields: default to current date when form is opened */
+  defaultToCurrentDate?: boolean;
+  /** System field — cannot be deleted from the form editor */
+  isSystemField?: boolean;
   /** For import: maps scored field to evaluation section ID */
   evaluationSectionId?: string;
 }
@@ -296,6 +300,8 @@ export function fieldsToJsonSchema(fields: FormField[]): {
       ...(field.settings.connectedTo ? { connectedTo: field.settings.connectedTo } : {}),
       ...(field.settings.connectorParams ? { connectorParams: field.settings.connectorParams } : {}),
       ...(field.settings.roleFilter && field.settings.roleFilter.length > 0 ? { roleFilter: field.settings.roleFilter } : {}),
+      ...(field.settings.defaultToCurrentDate ? { defaultToCurrentDate: true } : {}),
+      ...(field.settings.isSystemField ? { isSystemField: true } : {}),
     };
 
     if (Object.keys(fieldUiSchema).length > 0) {
@@ -425,6 +431,8 @@ export function jsonSchemaToFields(
     if (meta.connectedTo) field.settings.connectedTo = meta.connectedTo;
     if (meta.connectorParams) field.settings.connectorParams = meta.connectorParams;
     if (meta.roleFilter) field.settings.roleFilter = meta.roleFilter;
+    if (meta.defaultToCurrentDate) field.settings.defaultToCurrentDate = true;
+    if (meta.isSystemField) field.settings.isSystemField = true;
 
     // Backward compat: old format stored scoringType separately
     if (meta.scoringType && !field.settings.scored) {

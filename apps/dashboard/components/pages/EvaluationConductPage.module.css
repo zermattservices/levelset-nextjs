@@ -1,0 +1,124 @@
+.root {
+  display: grid;
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  align-content: flex-start;
+  justify-items: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: var(--ls-color-bg-page);
+  min-width: 0;
+  grid-template-columns:
+    var(--plsmc-viewport-gap) 1fr minmax(0, var(--plsmc-wide-chunk))
+    min(
+      var(--plsmc-standard-width),
+      calc(100% - var(--plsmc-viewport-gap) - var(--plsmc-viewport-gap))
+    )
+    minmax(0, var(--plsmc-wide-chunk)) 1fr var(--plsmc-viewport-gap);
+  padding: 0px;
+}
+
+.root > * {
+  grid-column: 4;
+}
+
+.menuNavigation {
+  max-width: 100%;
+  width: 100%;
+  left: 0px;
+  top: 0px;
+  z-index: 1;
+  position: sticky;
+  grid-column-start: 1 !important;
+  grid-column-end: -1 !important;
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  background: var(--ls-color-bg-card);
+  grid-column-start: 1 !important;
+  grid-column-end: -1 !important;
+  padding: 8px 8px 100px;
+}
+
+.contentInner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  max-width: var(--ls-max-content-width);
+  justify-content: flex-start;
+  align-items: stretch;
+  min-width: 0;
+  padding: 16px 8px;
+  gap: 24px;
+}
+
+.pageHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 0;
+  gap: 12px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--ls-color-text-primary);
+  margin: 0;
+}
+
+.formContainer {
+  width: 100%;
+  background: var(--ls-color-bg-container);
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0px 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.placeholderCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  gap: 12px;
+  border: 2px dashed var(--ls-color-muted-border);
+  border-radius: 12px;
+  background: var(--ls-color-neutral-foreground);
+}
+
+.placeholderText {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  margin: 0;
+}
+
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+}
+
+.loadingText {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  color: var(--ls-color-muted);
+}

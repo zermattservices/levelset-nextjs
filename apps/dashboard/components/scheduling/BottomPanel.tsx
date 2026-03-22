@@ -19,6 +19,10 @@ export type BottomTab = 'house_shifts' | 'summary' | 'labor_spread';
 
 interface BottomPanelProps {
   shifts: Shift[];
+  /** All shifts (unfiltered by zone) for the "Scheduled All" line in labor spread */
+  allShifts?: Shift[];
+  /** Current zone filter ('all' | 'FOH' | 'BOH') */
+  zoneFilter?: string;
   positions: Position[];
   laborSummary: LaborSummary;
   days: string[];
@@ -27,6 +31,21 @@ interface BottomPanelProps {
   timeViewMode: TimeViewMode;
   selectedDay: string;
   onDeleteShift: (id: string) => Promise<void>;
+  /** Create a new shift */
+  onCreateShift?: (params: {
+    shift_date: string;
+    start_time: string;
+    end_time: string;
+    position_id?: string;
+    is_house_shift?: boolean;
+  }) => Promise<void>;
+  /** Bulk-create house shifts (single API call, no page reload) */
+  onCreateBulkHouseShifts?: (shifts: Array<{
+    shift_date: string;
+    start_time: string;
+    end_time: string;
+    position_id?: string;
+  }>) => Promise<void>;
   /** Hover time in minutes-of-day from ScheduleGrid */
   externalHoverMinute?: number | null;
   /** Called when the LaborSpreadTab hover changes */
@@ -40,9 +59,9 @@ const MAX_CONTENT_HEIGHT = 600;
 const DEFAULT_CONTENT_HEIGHT = 280;
 
 export function BottomPanel({
-  shifts, positions, laborSummary, days, canViewPay, isPublished,
+  shifts, allShifts, zoneFilter, positions, laborSummary, days, canViewPay, isPublished,
   timeViewMode, selectedDay,
-  onDeleteShift,
+  onDeleteShift, onCreateShift, onCreateBulkHouseShifts,
   externalHoverMinute, onHoverMinuteChange,
   forecasts,
 }: BottomPanelProps) {
@@ -53,7 +72,8 @@ export function BottomPanel({
   const startYRef = React.useRef(0);
   const startHeightRef = React.useRef(0);
 
-  const houseShifts = React.useMemo(() => shifts.filter(s => s.is_house_shift), [shifts]);
+  // House shifts should show regardless of zone filter — use allShifts if available
+  const houseShifts = React.useMemo(() => (allShifts || shifts).filter(s => s.is_house_shift), [allShifts, shifts]);
 
   const handleDragStart = React.useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -124,6 +144,12 @@ export function BottomPanel({
               houseShifts={houseShifts}
               isPublished={isPublished}
               onDeleteShift={onDeleteShift}
+              onCreateShift={onCreateShift}
+              onCreateBulkHouseShifts={onCreateBulkHouseShifts}
+              positions={positions}
+              days={days}
+              timeViewMode={timeViewMode}
+              selectedDay={selectedDay}
             />
           )}
           {activeTab === 'summary' && (
@@ -134,11 +160,15 @@ export function BottomPanel({
               canViewPay={canViewPay}
               forecasts={forecasts}
               days={days}
+              timeViewMode={timeViewMode}
+              selectedDay={selectedDay}
             />
           )}
           {activeTab === 'labor_spread' && (
             <LaborSpreadTab
               shifts={shifts}
+              allShifts={allShifts}
+              zoneFilter={zoneFilter}
               laborSummary={laborSummary}
               days={days}
               canViewPay={canViewPay}

@@ -30,6 +30,23 @@ export interface PendingShiftPreview {
   positionZone?: 'FOH' | 'BOH' | null; // set when position is selected in the drawer
 }
 
+// Module-level drag state: tracks house shift info during drag so dragover handlers
+// can validate without reading dataTransfer (which is restricted during dragover in most browsers)
+let activeDragHouseShift: { shiftId: string; shiftDate: string; startTime: string; endTime: string } | null = null;
+
+function parseTimeMin(time: string): number {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + (m || 0);
+}
+
+function shiftsOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string): boolean {
+  let aS = parseTimeMin(aStart), aE = parseTimeMin(aEnd);
+  let bS = parseTimeMin(bStart), bE = parseTimeMin(bEnd);
+  if (aE <= aS) aE += 1440;
+  if (bE <= bS) bE += 1440;
+  return aS < bE && bS < aE;
+}
+
 interface ScheduleGridProps {
   shifts: Shift[];
   positions: Position[];
@@ -61,6 +78,10 @@ interface ScheduleGridProps {
   onHoverMinuteChange?: (minute: number | null) => void;
   /** Called when a house shift card is dropped onto an employee row */
   onAssignHouseShift?: (shiftId: string, employeeId: string) => void;
+  /** Called when an assigned shift is dragged to a different employee */
+  onReassignShift?: (shiftId: string, oldEmployeeId: string, newEmployeeId: string) => void;
+  /** Called when a drag-drop fails validation (wrong day, overlap) */
+  onDragError?: (message: string) => void;
 }
 
 const DAY_LABELS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -249,6 +270,7 @@ function WeekEmployeeView({
   shifts, employees, days, laborSummary, isPublished,
   canViewPay, columnConfig, onColumnConfigUpdate,
   onCellClick, onAddShiftClick, onShiftClick, onShiftDelete, businessHours,
+  onAssignHouseShift, onReassignShift, onDragError,
 }: Omit<ScheduleGridProps, 'positions' | 'selectedDay' | 'gridViewMode' | 'timeViewMode' | 'onDragCreate'>) {
   const shiftMap = React.useMemo(() => {
     const map = new Map<string, Map<string, Shift[]>>();
@@ -262,16 +284,42 @@ function WeekEmployeeView({
     return map;
   }, [shifts]);
 
-  // Sort: employees with shifts first, then alphabetically
+  // Sort state: column = 'name' | day string, direction = 'asc' | 'desc'
+  const [sortCol, setSortCol] = React.useState<string>('name');
+  const [sortDir, setSortDir] = React.useState<'asc' | 'desc'>('asc');
+
+  const toggleSort = React.useCallback((col: string) => {
+    setSortCol(prev => {
+      if (prev === col) {
+        setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+        return col;
+      }
+      setSortDir('asc');
+      return col;
+    });
+  }, []);
+
+  // All employees sorted (include all, not just those with shifts)
   const rowEmployees = React.useMemo(() => {
-    const withShifts: Employee[] = [];
-    const without: Employee[] = [];
-    for (const emp of employees) {
-      if (shiftMap.has(emp.id)) withShifts.push(emp);
-      else without.push(emp);
-    }
-    return [...withShifts, ...without];
-  }, [employees, shiftMap]);
+    const sorted = [...employees];
+    sorted.sort((a, b) => {
+      let cmp = 0;
+      if (sortCol === 'name') {
+        cmp = a.full_name.localeCompare(b.full_name);
+      } else {
+        // Sort by earliest shift start time on the given day
+        const aShifts = shiftMap.get(a.id)?.get(sortCol) ?? [];
+        const bShifts = shiftMap.get(b.id)?.get(sortCol) ?? [];
+        const aMin = aShifts.length > 0 ? Math.min(...aShifts.map(s => parseTimeMin(s.start_time))) : 9999;
+        const bMin = bShifts.length > 0 ? Math.min(...bShifts.map(s => parseTimeMin(s.start_time))) : 9999;
+        cmp = aMin - bMin;
+        // Secondary sort by name when times are equal
+        if (cmp === 0) cmp = a.full_name.localeCompare(b.full_name);
+      }
+      return sortDir === 'desc' ? -cmp : cmp;
+    });
+    return sorted;
+  }, [employees, shiftMap, sortCol, sortDir]);
 
   const openShifts = React.useMemo(() => shiftMap.get('__open__') ?? new Map(), [shiftMap]);
 
@@ -302,7 +350,13 @@ function WeekEmployeeView({
     <div className={sty.gridWrapper}>
       <div className={sty.grid} style={{ gridTemplateColumns: '200px repeat(7, 1fr)' }}>
         <div className={`${sty.headerCell} ${sty.cornerCell}`}>
-          <span className={sty.cornerLabel}>Employee</span>
+          <span
+            className={sty.cornerLabel}
+            style={{ cursor: 'pointer', userSelect: 'none' }}
+            onClick={() => toggleSort('name')}
+          >
+            Employee {sortCol === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+          </span>
           {columnConfig && onColumnConfigUpdate && (
             <ColumnConfigPopover config={columnConfig} canViewPay={!!canViewPay} onUpdate={onColumnConfigUpdate} />
           )}
@@ -310,9 +364,16 @@ function WeekEmployeeView({
         {days.map((day) => {
           const { dayLabel, dateLabel } = formatDateHeader(day);
           return (
-            <div key={day} className={`${sty.headerCell} ${isToday(day) ? sty.todayHeader : ''}`}>
+            <div
+              key={day}
+              className={`${sty.headerCell} ${isToday(day) ? sty.todayHeader : ''}`}
+              style={{ cursor: 'pointer', userSelect: 'none' }}
+              onClick={() => toggleSort(day)}
+            >
               <span className={sty.dayLabel}>{dayLabel}</span>
-              <span className={sty.dateHeaderLabel}>{dateLabel}</span>
+              <span className={sty.dateHeaderLabel}>
+                {dateLabel} {sortCol === day ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+              </span>
             </div>
           );
         })}
@@ -339,7 +400,70 @@ function WeekEmployeeView({
               {days.map((day) => {
                 const dayShifts = empDayMap?.get(day) ?? [];
                 return (
-                  <div key={day} className={`${sty.cell} ${isToday(day) ? sty.todayCol : ''}`} onClick={() => onCellClick(day, emp.id)}>
+                  <div
+                    key={day}
+                    className={`${sty.cell} ${isToday(day) ? sty.todayCol : ''}`}
+                    onClick={() => onCellClick(day, emp.id)}
+                    onDragOver={(e) => {
+                      const isHs = e.dataTransfer.types.includes('application/x-house-shift');
+                      const isReassign = e.dataTransfer.types.includes('application/x-shift-reassign');
+                      if (!isHs && !isReassign) return;
+                      e.preventDefault();
+
+                      // Validate house shift day match
+                      if (isHs) {
+                        const dragInfo = (window as any).__levelsetDragHouseShift;
+                        if (dragInfo && dragInfo.shiftDate !== day) {
+                          e.dataTransfer.dropEffect = 'none';
+                          (e.currentTarget as HTMLElement).style.background = 'var(--ls-color-destructive-soft, rgba(239,68,68,0.08))';
+                          (e.currentTarget as HTMLElement).style.opacity = '0.5';
+                          return;
+                        }
+                      }
+
+                      e.dataTransfer.dropEffect = 'move';
+                      (e.currentTarget as HTMLElement).style.background = 'var(--ls-color-brand-soft)';
+                      (e.currentTarget as HTMLElement).style.opacity = '';
+                    }}
+                    onDragLeave={(e) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.opacity = ''; }}
+                    onDrop={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = '';
+                      (e.currentTarget as HTMLElement).style.opacity = '';
+                      // House shift assignment
+                      const hsRaw = e.dataTransfer.getData('application/x-house-shift');
+                      if (hsRaw && onAssignHouseShift) {
+                        try {
+                          const d = JSON.parse(hsRaw);
+                          if (!d.shiftId) return;
+                          // Validate day
+                          if (d.shiftDate && d.shiftDate !== day) {
+                            onDragError?.(`Cannot assign: this house shift is for ${d.shiftDate}, not ${day}`);
+                            return;
+                          }
+                          // Validate overlap
+                          const hasOverlap = dayShifts.some(s =>
+                            s.assignment?.employee_id === emp.id && shiftsOverlap(d.startTime, d.endTime, s.start_time, s.end_time)
+                          );
+                          if (hasOverlap) {
+                            onDragError?.(`Cannot assign: this shift overlaps with an existing shift for ${emp.full_name}`);
+                            return;
+                          }
+                          onAssignHouseShift(d.shiftId, emp.id);
+                        } catch { /* */ }
+                        return;
+                      }
+                      // Shift reassignment
+                      const reRaw = e.dataTransfer.getData('application/x-shift-reassign');
+                      if (reRaw && onReassignShift) {
+                        try {
+                          const d = JSON.parse(reRaw);
+                          if (d.shiftId && d.employeeId !== emp.id) {
+                            onReassignShift(d.shiftId, d.employeeId, emp.id);
+                          }
+                        } catch { /* */ }
+                      }
+                    }}
+                  >
                     {dayShifts.map((s) => (
                       <ShiftBlock key={s.id} shift={s} viewMode="employees" onClick={onShiftClick} onDelete={onShiftDelete} />
                     ))}
@@ -705,7 +829,7 @@ function DayEmployeeView({
   shifts, employees, selectedDay, isPublished,
   canViewPay, columnConfig, onColumnConfigUpdate,
   onCellClick, onShiftClick, onDragCreate,
-  onAssignHouseShift,
+  onAssignHouseShift, onReassignShift, onDragError,
   pendingShift, businessHours,
   externalHoverMinute, onHoverMinuteChange,
 }: {
@@ -721,6 +845,8 @@ function DayEmployeeView({
   onShiftDelete: (shiftId: string) => void;
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
   onAssignHouseShift?: (shiftId: string, employeeId: string) => void;
+  onReassignShift?: (shiftId: string, oldEmployeeId: string, newEmployeeId: string) => void;
+  onDragError?: (message: string) => void;
   pendingShift?: PendingShiftPreview | null;
   businessHours?: LocationBusinessHours[];
   externalHoverMinute?: number | null;
@@ -870,6 +996,8 @@ function DayEmployeeView({
               onShiftClick={onShiftClick}
               onDragCreate={onDragCreate}
               onAssignHouseShift={onAssignHouseShift}
+              onReassignShift={onReassignShift}
+              onDragError={onDragError}
               pendingShift={empPending}
               gridHoverPct={activeHoverPct}
             />
@@ -900,7 +1028,7 @@ function DayEmployeeView({
 function DayEmployeeRow({
   emp, empShifts, empHours, empCost, selectedDay, timeRange, totalMinutes, shiftStyleFn, isPublished,
   canViewPay, columnConfig,
-  onCellClick, onShiftClick, onDragCreate, onAssignHouseShift,
+  onCellClick, onShiftClick, onDragCreate, onAssignHouseShift, onReassignShift, onDragError,
   pendingShift, gridHoverPct,
 }: {
   emp: Employee;
@@ -918,6 +1046,8 @@ function DayEmployeeRow({
   onShiftClick: (shift: Shift) => void;
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
   onAssignHouseShift?: (shiftId: string, employeeId: string) => void;
+  onReassignShift?: (shiftId: string, oldEmployeeId: string, newEmployeeId: string) => void;
+  onDragError?: (message: string) => void;
   pendingShift?: PendingShiftPreview | null;
   gridHoverPct: number | null;
 }) {
@@ -970,10 +1100,10 @@ function DayEmployeeRow({
     };
   }, [dragPreview, emp.actual_pay, emp.actual_pay_type, emp.calculated_pay]);
 
-  // House shift drop handlers
+  // Shift drop handlers (house shift assignment + shift reassignment)
   const [isDragOver, setIsDragOver] = React.useState(false);
   const handleDragOver = React.useCallback((e: React.DragEvent) => {
-    if (e.dataTransfer.types.includes('application/x-house-shift')) {
+    if (e.dataTransfer.types.includes('application/x-house-shift') || e.dataTransfer.types.includes('application/x-shift-reassign')) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       setIsDragOver(true);
@@ -982,13 +1112,36 @@ function DayEmployeeRow({
   const handleDragLeave = React.useCallback(() => setIsDragOver(false), []);
   const handleDrop = React.useCallback((e: React.DragEvent) => {
     setIsDragOver(false);
-    const raw = e.dataTransfer.getData('application/x-house-shift');
-    if (!raw || !onAssignHouseShift) return;
-    try {
-      const data = JSON.parse(raw);
-      if (data.shiftId) onAssignHouseShift(data.shiftId, emp.id);
-    } catch { /* ignore */ }
-  }, [onAssignHouseShift, emp.id]);
+    // House shift assignment
+    const hsRaw = e.dataTransfer.getData('application/x-house-shift');
+    if (hsRaw && onAssignHouseShift) {
+      try {
+        const d = JSON.parse(hsRaw);
+        if (!d.shiftId) return;
+        // Validate day
+        if (d.shiftDate && d.shiftDate !== selectedDay) {
+          onDragError?.(`Cannot assign: this house shift is for a different day`);
+          return;
+        }
+        // Validate overlap
+        const hasOverlap = empShifts.some(s => shiftsOverlap(d.startTime, d.endTime, s.start_time, s.end_time));
+        if (hasOverlap) {
+          onDragError?.(`Cannot assign: this shift overlaps with an existing shift for ${emp.full_name}`);
+          return;
+        }
+        onAssignHouseShift(d.shiftId, emp.id);
+      } catch { /* */ }
+      return;
+    }
+    // Shift reassignment
+    const reRaw = e.dataTransfer.getData('application/x-shift-reassign');
+    if (reRaw && onReassignShift) {
+      try {
+        const d = JSON.parse(reRaw);
+        if (d.shiftId && d.employeeId !== emp.id) onReassignShift(d.shiftId, d.employeeId, emp.id);
+      } catch { /* */ }
+    }
+  }, [onAssignHouseShift, onReassignShift, onDragError, emp.id, emp.full_name, empShifts, selectedDay]);
 
   return (
     <div
@@ -1571,7 +1724,7 @@ export function ScheduleGrid(props: ScheduleGridProps) {
   } = props;
 
   if (timeViewMode === 'day' && gridViewMode === 'employees') {
-    return <DayEmployeeView shifts={shifts} employees={employees} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} onAssignHouseShift={props.onAssignHouseShift} pendingShift={pendingShift} businessHours={businessHours} externalHoverMinute={externalHoverMinute} onHoverMinuteChange={onHoverMinuteChange} />;
+    return <DayEmployeeView shifts={shifts} employees={employees} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} onAssignHouseShift={props.onAssignHouseShift} onReassignShift={props.onReassignShift} onDragError={props.onDragError} pendingShift={pendingShift} businessHours={businessHours} externalHoverMinute={externalHoverMinute} onHoverMinuteChange={onHoverMinuteChange} />;
   }
   if (timeViewMode === 'day' && gridViewMode === 'positions') {
     return <DayPositionView shifts={shifts} positions={positions} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} pendingShift={pendingShift} businessHours={businessHours} externalHoverMinute={externalHoverMinute} onHoverMinuteChange={onHoverMinuteChange} />;
@@ -1579,5 +1732,5 @@ export function ScheduleGrid(props: ScheduleGridProps) {
   if (gridViewMode === 'positions') {
     return <WeekPositionView shifts={shifts} positions={positions} days={days} laborSummary={laborSummary} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
   }
-  return <WeekEmployeeView shifts={shifts} employees={employees} days={days} laborSummary={laborSummary} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onAddShiftClick={props.onAddShiftClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} businessHours={businessHours} />;
+  return <WeekEmployeeView shifts={shifts} employees={employees} days={days} laborSummary={laborSummary} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onAddShiftClick={props.onAddShiftClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} businessHours={businessHours} onAssignHouseShift={props.onAssignHouseShift} onReassignShift={props.onReassignShift} onDragError={props.onDragError} />;
 }

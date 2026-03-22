@@ -16,8 +16,9 @@ import { getStripe } from '@/lib/stripe';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { getStripePriceId, PlanTier, TIER_ORDER, TRIAL_DAYS } from '@/lib/billing/constants';
 import { syncFeaturesFromTier, clearFeatures } from '@/lib/billing/sync-features';
+import { withAdminAuth } from '@/lib/permissions/middleware';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -228,3 +229,5 @@ async function handleCancelSubscription(
     return res.status(500).json({ error: err.message || 'Failed to cancel subscription' });
   }
 }
+
+export default withAdminAuth(handler);

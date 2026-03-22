@@ -117,6 +117,10 @@ export function SchedulePage() {
   const [gridHoverMinute, setGridHoverMinute] = React.useState<number | null>(null);
   const [chartHoverMinute, setChartHoverMinute] = React.useState<number | null>(null);
 
+  // Drag error message displayed above the bottom tray
+  const [dragError, setDragError] = React.useState<string | null>(null);
+  const dragErrorTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const data = useScheduleData();
 
   // Fetch business hours for the selected location
@@ -333,10 +337,18 @@ export function SchedulePage() {
     setShiftModalOpen(true);
   };
 
+
+  const handleDragError = (message: string) => {
+    setDragError(message);
+    if (dragErrorTimer.current) clearTimeout(dragErrorTimer.current);
+    dragErrorTimer.current = setTimeout(() => setDragError(null), 4000);
+  };
+
   const handleAssignHouseShift = async (shiftId: string, employeeId: string) => {
     try {
-      await data.assignEmployee(shiftId, employeeId);
+      // Update is_house_shift first (optimistic), then assign — no full refetch
       await data.updateShift(shiftId, { is_house_shift: false });
+      await data.assignEmployee(shiftId, employeeId);
     } catch (err) {
       console.error('Failed to assign house shift:', err);
     }
@@ -446,6 +458,8 @@ export function SchedulePage() {
                     onShiftDelete={handleShiftDelete}
                     onDragCreate={handleDragCreate}
                     onAssignHouseShift={handleAssignHouseShift}
+                    onReassignShift={data.reassignEmployee}
+                    onDragError={handleDragError}
                     pendingShift={shiftModalOpen && !editingShift ? pendingShift : null}
                     businessHours={businessHours}
                     externalHoverMinute={chartHoverMinute}
@@ -453,9 +467,34 @@ export function SchedulePage() {
                   />
                 )}
 
+                {dragError && (
+                  <div style={{
+                    padding: '8px 16px',
+                    background: 'var(--ls-color-destructive-soft, #fef2f2)',
+                    borderLeft: '3px solid var(--ls-color-destructive-base)',
+                    fontFamily: 'var(--ls-font-body)',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: 'var(--ls-color-destructive-base)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                    <span>{dragError}</span>
+                    <button
+                      onClick={() => setDragError(null)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ls-color-destructive-base)', fontSize: 14, fontWeight: 700, padding: '0 4px' }}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                )}
+
                 {!data.isLoading && (
                   <BottomPanel
                     shifts={data.shifts}
+                    allShifts={data.allShifts}
+                    zoneFilter={data.zoneFilter}
                     positions={data.allPositions}
                     laborSummary={data.laborSummary}
                     days={data.days}
@@ -464,6 +503,8 @@ export function SchedulePage() {
                     timeViewMode={data.timeViewMode}
                     selectedDay={data.selectedDay}
                     onDeleteShift={data.deleteShift}
+                    onCreateShift={data.createShift}
+                    onCreateBulkHouseShifts={data.createBulkHouseShifts}
                     externalHoverMinute={gridHoverMinute}
                     onHoverMinuteChange={setChartHoverMinute}
                     forecasts={data.forecasts}
@@ -545,7 +586,7 @@ export function SchedulePage() {
       {!!data.pendingHsNotificationId && (
         <SyncEmployeesModal
           open
-          onClose={() => data.clearPendingHsImport()}
+          onClose={() => data.dismissPendingHsImport()}
           locationId={selectedLocationId}
           orgId={selectedLocationOrgId ?? auth.org_id}
           scheduleImportMode

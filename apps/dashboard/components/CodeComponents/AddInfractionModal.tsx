@@ -188,17 +188,19 @@ export function AddInfractionModal({
           setEmployees(empData as Employee[]);
         }
 
-        // Fetch leaders for documenting leader dropdown
-        const { data: leadersData, error: leadersError } = await supabase
-          .from('employees')
-          .select('id, full_name')
-          .eq('location_id', locationId)
-          .eq('is_leader', true)
-          .eq('active', true)
-          .order('full_name');
-        
-        if (!leadersError && leadersData) {
-          setLeaders(leadersData as Employee[]);
+        // Fetch leaders for documenting leader dropdown via API (service role bypasses RLS)
+        if (locData?.org_id) {
+          try {
+            const res = await fetch(
+              `/api/forms/widget-data?type=leaders&org_id=${locData.org_id}&location_id=${locationId}&form_type=discipline`
+            );
+            if (res.ok) {
+              const { data: leadersData } = await res.json();
+              setLeaders((leadersData || []).map((l: any) => ({ id: l.id, full_name: l.full_name } as Employee)));
+            }
+          } catch (err) {
+            console.error('[AddInfractionModal] Error fetching leaders via API:', err);
+          }
         }
 
         // Fetch infractions_rubric options - first try org-level, then fallback to location-level

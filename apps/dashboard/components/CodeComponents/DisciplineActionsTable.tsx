@@ -163,36 +163,48 @@ export function DisciplineActionsTable({
     }
   }, [locationId, fetchDisciplineActions]);
 
-  // Real-time subscription disabled - Realtime not enabled on disc_actions_rubric table
-  // If you need real-time updates, enable Realtime on the disc_actions_rubric table in Supabase
-  // Then uncomment the code below
-  /*
+  // Real-time subscription: refetch when discipline actions rubric changes
   React.useEffect(() => {
     if (!locationId) return;
-    
+
+    let channel: any = null;
     const supabase = createSupabaseClient();
-    const channel = supabase
-      .channel('discipline-actions-changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'disc_actions_rubric',
-          filter: `location_id=eq.${locationId}`
-        }, 
-        (payload) => {
-          console.log('Discipline actions data changed:', payload);
-          fetchDisciplineActions();
-        }
-      )
-      .subscribe();
+
+    try {
+      channel = supabase
+        .channel(`disc-actions-rubric-changes-${locationId}`)
+        .on('postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'disc_actions_rubric',
+            filter: `location_id=eq.${locationId}`
+          },
+          () => {
+            fetchDisciplineActions();
+          }
+        )
+        .subscribe((status: string) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Subscribed to discipline actions changes');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.warn('Failed to subscribe to discipline actions changes — continuing without real-time updates');
+          }
+        });
+    } catch (error) {
+      console.warn('Error setting up discipline actions real-time subscription:', error);
+    }
 
     return () => {
-      const supabase = createSupabaseClient();
-      supabase.removeChannel(channel);
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch (error) {
+          console.warn('Error removing discipline actions channel:', error);
+        }
+      }
     };
   }, [locationId, fetchDisciplineActions]);
-  */
 
   if (loading && data.length === 0) {
     return (

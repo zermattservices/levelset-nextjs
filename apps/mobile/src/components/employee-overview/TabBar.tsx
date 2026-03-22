@@ -16,7 +16,7 @@ const TABS = [
   { key: "discipline", label: "Discipline" },
   { key: "schedule", label: "Schedule" },
   { key: "pathway", label: "Pathway" },
-  { key: "reviews", label: "Reviews" },
+  { key: "evaluations", label: "Evaluations" },
 ] as const;
 
 export type TabKey = (typeof TABS)[number]["key"];

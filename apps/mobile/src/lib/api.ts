@@ -784,7 +784,7 @@ export async function fetchEmployeeProfileAuth(
 
 export interface RecentActivity {
   id: string;
-  type: 'rating' | 'infraction' | 'disc_action' | 'review';
+  type: 'rating' | 'infraction' | 'disc_action' | 'evaluation';
   date: string;
   position?: string;
   position_es?: string | null;
@@ -797,9 +797,17 @@ export interface RecentActivity {
   action_type?: string;
   action_type_es?: string | null;
   leader_name?: string | null;
-  author_name?: string | null;
-  review_rating?: number;
-  review_text_preview?: string | null;
+  // Evaluation-specific
+  evaluation_name?: string;
+  evaluation_name_es?: string | null;
+  evaluation_score?: number | null;
+  evaluation_cadence?: string | null;
+  evaluator_name?: string | null;
+  employee_role?: string | null;
+  employee_role_color?: string | null;
+  employee_id?: string;
+  is_outgoing?: boolean;
+  recipient_name?: string | null;
 }
 
 export interface RatingThresholds {
@@ -923,6 +931,133 @@ export interface SetupBoardResponse {
 }
 
 // =============================================================================
+// Form Template & Generic Submission API (JWT-based, authenticated)
+// =============================================================================
+
+/**
+ * Fetch active evaluation form templates for the org.
+ */
+export async function fetchEvaluationTemplatesAuth(
+  accessToken: string,
+  orgId: string
+): Promise<any[]> {
+  const cacheKey = `eval_templates_${orgId}`;
+  const cached = getCached<any[]>(cacheKey);
+  if (cached && isFresh(cacheKey)) return cached;
+
+  const res = await fetch(
+    `${API_BASE_URL}/api/evaluations/templates?org_id=${encodeURIComponent(orgId)}`,
+    { headers: authHeaders(accessToken) }
+  );
+  const data = await handleResponse<any>(res);
+  const templates = Array.isArray(data) ? data : [];
+  setCache(cacheKey, templates);
+  return templates;
+}
+
+/**
+ * Fetch a single form template by ID.
+ */
+export async function fetchFormTemplateAuth(
+  accessToken: string,
+  templateId: string,
+  orgId: string
+): Promise<any> {
+  const cacheKey = `form_template_${templateId}`;
+  const entry = cache.get(cacheKey);
+  if (entry && Date.now() - entry.timestamp <= TEMPLATE_CACHE_TTL) {
+    return entry.data;
+  }
+
+  // Try evaluation-specific endpoint first (uses EVAL_VIEW_EVALUATIONS permission),
+  // fall back to general forms endpoint (uses FM_VIEW_FORMS permission)
+  let res = await fetch(
+    `${API_BASE_URL}/api/evaluations/templates?org_id=${encodeURIComponent(orgId)}&template_id=${encodeURIComponent(templateId)}`,
+    { headers: authHeaders(accessToken) }
+  );
+
+  if (!res.ok) {
+    // Fallback to general forms endpoint
+    res = await fetch(
+      `${API_BASE_URL}/api/forms/${encodeURIComponent(templateId)}?org_id=${encodeURIComponent(orgId)}`,
+      { headers: authHeaders(accessToken) }
+    );
+  }
+
+  const data = await handleResponse<any>(res);
+  setCache(cacheKey, data);
+  return data;
+}
+
+/**
+ * Fetch widget data for data_select form fields.
+ * Reuses fetchPositionalDataAuth for employee/leader sources.
+ */
+export async function fetchWidgetDataAuth(
+  accessToken: string,
+  orgId: string,
+  locationId: string,
+  dataSource: string,
+  roleFilter?: string[]
+): Promise<{ value: string; label: string; subtitle?: string; group?: string }[]> {
+  if (dataSource === "positions") {
+    const data = await fetchPositionalDataAuth(accessToken, locationId);
+    // Deduplicate by name and use English name as value/label
+    const seen = new Set<string>();
+    return (data.positions || []).filter((p: any) => {
+      if (seen.has(p.name)) return false;
+      seen.add(p.name);
+      return true;
+    }).map((p: any) => ({
+      value: p.name,
+      label: p.name,
+      group: p.zone === "FOH" ? "Front of House" : "Back of House",
+    }));
+  }
+  if (dataSource === "employees" || dataSource === "leaders") {
+    const data = await fetchPositionalDataAuth(accessToken, locationId);
+    let list = dataSource === "leaders" ? data.leaders : data.employees;
+    // Apply role filter if specified in the form template
+    if (roleFilter && roleFilter.length > 0 && list) {
+      const allowedRoles = new Set(roleFilter.map((r: string) => r.toLowerCase()));
+      list = list.filter((e: any) => e.role && allowedRoles.has(e.role.toLowerCase()));
+    }
+    return (list || []).map((e: any) => ({
+      value: e.id,
+      label: e.full_name || e.name || `${e.first_name} ${e.last_name}`,
+      subtitle: e.role || "",
+    }));
+  }
+  const res = await fetch(
+    `${API_BASE_URL}/api/forms/widget-data?type=${encodeURIComponent(dataSource)}&org_id=${encodeURIComponent(orgId)}`,
+    { headers: authHeaders(accessToken) }
+  );
+  const data = await handleResponse<any>(res);
+  return Array.isArray(data) ? data : data.options ?? [];
+}
+
+/**
+ * Submit a form (evaluation or custom).
+ */
+export async function submitFormAuth(
+  accessToken: string,
+  orgId: string,
+  payload: {
+    template_id: string;
+    location_id?: string;
+    employee_id?: string;
+    response_data: Record<string, any>;
+  }
+): Promise<{ id: string }> {
+  const res = await fetch(`${API_BASE_URL}/api/forms/submissions`, {
+    method: "POST",
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({ org_id: orgId, ...payload }),
+  });
+  return handleResponse<{ id: string }>(res);
+}
+
+// =============================================================================
 // In-memory cache (TTL-based with stale-while-revalidate)
 // =============================================================================
 
@@ -994,7 +1129,8 @@ export async function fetchSystemTemplate(
 // =============================================================================
 
 /**
- * Fetch the last 5 recent activities for the authenticated employee.
+ * Fetch all activities (up to 100) for the authenticated employee within the last 90 days.
+ * The home page fetches the full 90-day dataset; RecentActivities shows the first 5.
  * Returns cached data instantly if available, revalidates in background.
  */
 export async function fetchRecentActivitiesAuth(
@@ -1003,20 +1139,23 @@ export async function fetchRecentActivitiesAuth(
   employeeId: string,
   options?: { skipCache?: boolean }
 ): Promise<RecentActivitiesResponse> {
-  const cacheKey = `recent-activities:${locationId}:${employeeId}`;
+  const cacheKey = `all-activities:${locationId}:${employeeId}`;
 
   const doFetch = async (): Promise<RecentActivitiesResponse> => {
     const params = new URLSearchParams({
       location_id: locationId,
       employee_id: employeeId,
+      limit: '100',
     });
     const url = `${API_BASE_URL}/api/native/forms/my-recent-activities?${params}`;
     const response = await fetch(url, { headers: authHeaders(accessToken) });
     const data = await handleResponse<RecentActivitiesResponse>(response);
+    // Filter out review type — reviews are not shown in the mobile app
+    data.activities = data.activities.filter((a) => a.type !== 'review');
     setCache(cacheKey, data);
 
-    // Pre-warm detail caches for visible activities
-    prefetchActivityDetails(accessToken, locationId, data.activities);
+    // Pre-warm detail caches for visible activities (first 5)
+    prefetchActivityDetails(accessToken, locationId, data.activities.slice(0, 5));
 
     return data;
   };
@@ -1037,6 +1176,53 @@ export async function fetchRecentActivitiesAuth(
   }
 
   return doFetch();
+}
+
+/**
+ * Fetch all activities with optional date filtering.
+ * Used by the "See All" activities screen.
+ * For default 90-day range, reuses the cached data from the home page fetch.
+ */
+export async function fetchAllActivitiesAuth(
+  accessToken: string,
+  locationId: string,
+  employeeId: string,
+  options?: { startDate?: string; limit?: number }
+): Promise<RecentActivitiesResponse & { totalCount: number }> {
+  // Check if we can use the cached 90-day data from the home page
+  const cacheKey = `all-activities:${locationId}:${employeeId}`;
+  const cached = getCached<RecentActivitiesResponse>(cacheKey);
+  if (cached) {
+    // Apply start_date filter client-side if needed
+    let activities = cached.activities;
+    if (options?.startDate) {
+      const startMs = new Date(options.startDate).getTime();
+      activities = activities.filter((a) => new Date(a.date).getTime() >= startMs);
+    }
+    return {
+      activities,
+      thresholds: cached.thresholds,
+      totalCount: activities.length,
+    };
+  }
+
+  // No cache — fetch from API
+  const params = new URLSearchParams({
+    location_id: locationId,
+    employee_id: employeeId,
+    limit: String(options?.limit || 100),
+  });
+  if (options?.startDate) params.set("start_date", options.startDate);
+
+  const url = `${API_BASE_URL}/api/native/forms/my-recent-activities?${params}`;
+  const response = await fetch(url, { headers: authHeaders(accessToken) });
+  const data = await handleResponse<RecentActivitiesResponse & { totalCount: number }>(response);
+  // Filter out review type — reviews are not shown in the mobile app
+  data.activities = data.activities.filter((a) => a.type !== 'review');
+  data.totalCount = data.activities.length;
+  // Cache the result for subsequent use
+  setCache(cacheKey, { activities: data.activities, thresholds: data.thresholds });
+  return data;
 }
 
 /**
@@ -1169,11 +1355,13 @@ export function invalidateSetupCache(locationId: string, date: string, zone: str
 
 /**
  * Assign an employee to a position slot.
+ * Uses the dashboard's setup-assignments route (proven working with DnD).
  */
 export async function setupAssignAuth(
   accessToken: string,
   locationId: string,
   payload: {
+    org_id: string;
     shift_id: string;
     employee_id: string;
     position_id: string;
@@ -1182,32 +1370,34 @@ export async function setupAssignAuth(
     end_time: string;
   }
 ): Promise<{ assignment: SetupAssignment }> {
-  const response = await fetch(`${API_BASE_URL}/api/native/forms/setup-board`, {
+  const response = await fetch(`${API_BASE_URL}/api/scheduling/setup-assignments`, {
     method: 'POST',
     headers: authHeaders(accessToken),
-    body: JSON.stringify({ ...payload, location_id: locationId, intent: 'assign' }),
+    body: JSON.stringify({ ...payload, intent: 'assign' }),
   });
   return handleResponse<{ assignment: SetupAssignment }>(response);
 }
 
 /**
  * Unassign an employee from a position slot.
+ * Uses the dashboard's setup-assignments route.
  */
 export async function setupUnassignAuth(
   accessToken: string,
   locationId: string,
   assignmentId: string
 ): Promise<{ success: boolean }> {
-  const response = await fetch(`${API_BASE_URL}/api/native/forms/setup-board`, {
+  const response = await fetch(`${API_BASE_URL}/api/scheduling/setup-assignments`, {
     method: 'POST',
     headers: authHeaders(accessToken),
-    body: JSON.stringify({ location_id: locationId, intent: 'unassign', id: assignmentId }),
+    body: JSON.stringify({ intent: 'unassign', id: assignmentId }),
   });
   return handleResponse<{ success: boolean }>(response);
 }
 
 /**
  * Reassign an employee to a different position.
+ * Uses the dashboard's setup-assignments route.
  */
 export async function setupReassignAuth(
   accessToken: string,
@@ -1215,10 +1405,10 @@ export async function setupReassignAuth(
   assignmentId: string,
   newPositionId: string
 ): Promise<{ assignment: SetupAssignment }> {
-  const response = await fetch(`${API_BASE_URL}/api/native/forms/setup-board`, {
+  const response = await fetch(`${API_BASE_URL}/api/scheduling/setup-assignments`, {
     method: 'POST',
     headers: authHeaders(accessToken),
-    body: JSON.stringify({ location_id: locationId, intent: 'reassign', id: assignmentId, position_id: newPositionId }),
+    body: JSON.stringify({ intent: 'reassign', id: assignmentId, position_id: newPositionId }),
   });
   return handleResponse<{ assignment: SetupAssignment }>(response);
 }
@@ -1268,4 +1458,10 @@ export default {
   setupAssignAuth,
   setupUnassignAuth,
   setupReassignAuth,
+  // Form Template & Generic Submission API
+  fetchAllActivitiesAuth,
+  fetchEvaluationTemplatesAuth,
+  fetchFormTemplateAuth,
+  fetchWidgetDataAuth,
+  submitFormAuth,
 };

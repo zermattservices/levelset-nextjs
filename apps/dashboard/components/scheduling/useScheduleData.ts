@@ -247,12 +247,28 @@ export function useScheduleData() {
     checkPendingHs();
   }, [hsCheckDone, isLoading, schedule, selectedLocationId]);
 
-  // Called when the schedule import modal completes
+  // Called when the schedule import modal completes successfully
   const clearPendingHsImport = useCallback(() => {
     setPendingHsNotificationId(null);
     fetchSchedule();
     fetchPositions();
   }, [fetchSchedule, fetchPositions]);
+
+  // Called when the user dismisses/cancels the import — marks notification as viewed
+  const dismissPendingHsImport = useCallback(async () => {
+    if (pendingHsNotificationId) {
+      try {
+        await fetch('/api/employees/sync-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notification_id: pendingHsNotificationId }),
+        });
+      } catch {
+        // Best-effort
+      }
+    }
+    setPendingHsNotificationId(null);
+  }, [pendingHsNotificationId]);
 
   // Refetch when location or week changes
   useEffect(() => {
@@ -440,6 +456,45 @@ export function useScheduleData() {
     await fetchSchedule();
   }, [ensureSchedule, fetchSchedule]);
 
+  // Bulk-create house shifts: single API call, append to local state without full refetch
+  const createBulkHouseShifts = useCallback(async (shiftParams: Array<{
+    shift_date: string;
+    start_time: string;
+    end_time: string;
+    position_id?: string;
+  }>) => {
+    const sched = await ensureSchedule();
+    const res = await fetch('/api/scheduling/shifts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        intent: 'bulk_create',
+        shifts: shiftParams.map(p => ({
+          schedule_id: sched.id,
+          org_id: sched.org_id,
+          shift_date: p.shift_date,
+          start_time: p.start_time,
+          end_time: p.end_time,
+          position_id: p.position_id || null,
+          break_minutes: 0,
+          is_house_shift: true,
+        })),
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to create house shifts');
+    }
+    const data = await res.json();
+    // Append new shifts to local state (they come back with position data)
+    const newShifts = (data.shifts || []).map((s: any) => ({
+      ...s,
+      position: s.position || null,
+      assignment: null,
+    }));
+    setShifts(prev => [...prev, ...newShifts]);
+  }, [ensureSchedule]);
+
   const updateShift = useCallback(async (id: string, params: Partial<{
     position_id: string | null;
     shift_date: string;
@@ -450,6 +505,8 @@ export function useScheduleData() {
     notes: string | null;
     is_house_shift: boolean;
   }>) => {
+    // Optimistic local update
+    setShifts(prev => prev.map(s => s.id === id ? { ...s, ...params } : s));
     const res = await fetch('/api/scheduling/shifts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -457,9 +514,9 @@ export function useScheduleData() {
     });
     if (!res.ok) {
       const err = await res.json();
+      await fetchSchedule(); // revert on error
       throw new Error(err.error || 'Failed to update shift');
     }
-    await fetchSchedule();
   }, [fetchSchedule]);
 
   const deleteShift = useCallback(async (id: string) => {
@@ -490,6 +547,21 @@ export function useScheduleData() {
 
   // ── CRUD: Assignments ──
   const assignEmployee = useCallback(async (shiftId: string, employeeId: string) => {
+    // Optimistic: assign employee locally
+    const emp = employees.find(e => e.id === employeeId);
+    setShifts(prev => prev.map(s => {
+      if (s.id !== shiftId) return s;
+      return {
+        ...s,
+        assignment: {
+          id: `temp-${Date.now()}`,
+          employee_id: employeeId,
+          assigned_by: null,
+          projected_cost: null,
+          employee: emp || null,
+        } as any,
+      };
+    }));
     const res = await fetch('/api/scheduling/assignments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -502,10 +574,10 @@ export function useScheduleData() {
     });
     if (!res.ok) {
       const err = await res.json();
+      await fetchSchedule(); // revert on error
       throw new Error(err.error || 'Failed to assign employee');
     }
-    await fetchSchedule();
-  }, [orgId, fetchSchedule]);
+  }, [orgId, employees, fetchSchedule]);
 
   const unassignEmployee = useCallback(async (shiftId: string, employeeId: string) => {
     const res = await fetch('/api/scheduling/assignments', {
@@ -527,6 +599,19 @@ export function useScheduleData() {
   const reassignEmployee = useCallback(async (
     shiftId: string, oldEmployeeId: string, newEmployeeId: string,
   ) => {
+    // Optimistic: reassign locally
+    const newEmp = employees.find(e => e.id === newEmployeeId);
+    setShifts(prev => prev.map(s => {
+      if (s.id !== shiftId) return s;
+      return {
+        ...s,
+        assignment: s.assignment ? {
+          ...s.assignment,
+          employee_id: newEmployeeId,
+          employee: newEmp || null,
+        } : s.assignment,
+      };
+    }));
     const res = await fetch('/api/scheduling/assignments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -540,10 +625,10 @@ export function useScheduleData() {
     });
     if (!res.ok) {
       const err = await res.json();
+      await fetchSchedule(); // revert on error
       throw new Error(err.error || 'Failed to reassign employee');
     }
-    await fetchSchedule();
-  }, [orgId, fetchSchedule]);
+  }, [orgId, employees, fetchSchedule]);
 
   // ── Per-shift publish state ──
   const unpublishedCount = useMemo(() => {
@@ -583,6 +668,14 @@ export function useScheduleData() {
     setWeekStartRaw(prev => {
       const d = new Date(prev);
       d.setDate(d.getDate() + direction * 7);
+      // Keep selectedDay in sync — snap to the same weekday in the new week
+      setSelectedDay(prevDay => {
+        const prevDayDate = new Date(prevDay + 'T00:00:00');
+        const dayOfWeek = prevDayDate.getDay(); // 0=Sun..6=Sat
+        const newDay = new Date(d);
+        newDay.setDate(newDay.getDate() + dayOfWeek);
+        return formatDate(newDay);
+      });
       return d;
     });
   }, []);
@@ -591,6 +684,9 @@ export function useScheduleData() {
     setSelectedDay(prev => {
       const d = new Date(prev + 'T00:00:00');
       d.setDate(d.getDate() + direction);
+      // If we crossed a week boundary, update the week too
+      const newSunday = toSunday(d);
+      setWeekStartRaw(newSunday);
       return formatDate(d);
     });
   }, []);
@@ -605,6 +701,7 @@ export function useScheduleData() {
     // Data
     schedule,
     shifts: filteredShifts,
+    allShifts: shifts,
     positions: filteredPositions,
     employees: filteredEmployees,
     allPositions: positions,
@@ -613,6 +710,7 @@ export function useScheduleData() {
     isLoading,
     pendingHsNotificationId,
     clearPendingHsImport,
+    dismissPendingHsImport,
     days,
     weekStartStr,
 
@@ -635,6 +733,7 @@ export function useScheduleData() {
 
     // Shift CRUD
     createShift,
+    createBulkHouseShifts,
     updateShift,
     deleteShift,
     restoreShift,

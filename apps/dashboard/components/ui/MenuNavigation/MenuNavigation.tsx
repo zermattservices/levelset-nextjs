@@ -59,7 +59,7 @@ export interface MenuNavigationProps {
 export function MenuNavigation({ className, firstName, userRole, fullWidth }: MenuNavigationProps) {
   const auth = useAuth();
   const { isImpersonating, impersonatedUser } = useImpersonation();
-  const { userHierarchyLevel, selectedLocationId } = useLocationContext();
+  const { userHierarchyLevel, selectedLocationId, selectedLocationOrgId } = useLocationContext();
   const { has } = usePermissions();
   const { hasFeature } = useOrgFeatures();
   const isRoadmapSubdomain = useIsRoadmapSubdomain();
@@ -216,14 +216,15 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
   const [pendingCount, setPendingCount] = React.useState(0);
 
   React.useEffect(() => {
-    if (!hasFeature(F.SCHEDULING) || !auth.org_id) return;
+    const orgIdForPending = selectedLocationOrgId || auth.org_id;
+    if (!hasFeature(F.SCHEDULING) || !orgIdForPending) return;
     const fetchPendingCount = async () => {
       try {
         const supabase = createSupabaseClient();
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.access_token) return;
 
-        const params = new URLSearchParams({ org_id: auth.org_id! });
+        const params = new URLSearchParams({ org_id: orgIdForPending });
         if (selectedLocationId) params.set('location_id', selectedLocationId);
         const resp = await fetch(`/api/scheduling/pending-count?${params}`, {
           headers: { Authorization: `Bearer ${session.access_token}` },
@@ -237,7 +238,7 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
       }
     };
     fetchPendingCount();
-  }, [hasFeature, auth.org_id, selectedLocationId]);
+  }, [hasFeature, auth.org_id, selectedLocationId, selectedLocationOrgId]);
 
   const menuButtons: { type: MenuType; label: string; featureFlag?: any }[] = [
     { type: 'operations', label: 'Operations' },

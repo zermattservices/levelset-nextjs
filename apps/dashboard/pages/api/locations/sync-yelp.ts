@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { fetchPlaceDetails } from '@/lib/google-places';
 import { findAndConnectYelpBusiness, syncReviewsFromYelp } from '@/lib/yelp-places';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { setCorsOrigin } from '@/lib/cors';
 
 /**
  * POST /api/locations/sync-yelp
@@ -14,7 +15,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();

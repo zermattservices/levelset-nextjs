@@ -20,3 +20,5 @@ export type { PEFilterState } from "./PEFilterDrawer";
 export { DisciplineTab } from "./DisciplineTab";
 export { DisciplineFilterDrawer } from "./DisciplineFilterDrawer";
 export type { DisciplineFilterState } from "./DisciplineFilterDrawer";
+
+export { EvaluationsTab } from "./EvaluationsTab";

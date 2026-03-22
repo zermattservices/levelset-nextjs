@@ -1,9 +1,11 @@
+import { withAuth } from '@/lib/permissions/middleware';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { setCorsOrigin } from '@/lib/cors';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    setCorsOrigin(req, res);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();
@@ -84,11 +86,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'Failed to create assignment' });
       }
 
+      // Audit log
+      await supabase.from('shift_audit_log').insert({
+        shift_id,
+        schedule_id: shift.schedule_id,
+        org_id,
+        changed_by: assigned_by || null,
+        change_type: 'assigned',
+        new_values: { employee_id, projected_cost: projectedCost },
+      });
+
       return res.status(201).json({ assignment: data });
     }
 
     if (intent === 'unassign') {
       const { id, shift_id, employee_id } = req.body;
+
+      // Fetch shift info for audit log before deletion
+      let auditShift: any = null;
+      if (shift_id) {
+        const { data } = await supabase.from('shifts').select('schedule_id, org_id').eq('id', shift_id).single();
+        auditShift = data;
+      }
 
       // Support deletion by id or by shift_id + employee_id
       let query = supabase.from('shift_assignments').delete();
@@ -108,6 +127,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'Failed to remove assignment' });
       }
 
+      // Audit log
+      if (auditShift && shift_id) {
+        await supabase.from('shift_audit_log').insert({
+          shift_id,
+          schedule_id: auditShift.schedule_id,
+          org_id: auditShift.org_id,
+          change_type: 'unassigned',
+          old_values: { employee_id },
+        });
+      }
+
       return res.status(200).json({ success: true });
     }
 
@@ -121,7 +151,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Get shift details
       const { data: shift } = await supabase
         .from('shifts')
-        .select('start_time, end_time, break_minutes, shift_date')
+        .select('start_time, end_time, break_minutes, shift_date, schedule_id, org_id')
         .eq('id', shift_id)
         .single();
 
@@ -169,6 +199,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'Failed to reassign shift' });
       }
 
+      // Audit log
+      if (shift) {
+        await supabase.from('shift_audit_log').insert({
+          shift_id,
+          schedule_id: (shift as any).schedule_id,
+          org_id: (shift as any).org_id || org_id,
+          change_type: 'reassigned',
+          old_values: { employee_id: old_employee_id },
+          new_values: { employee_id: new_employee_id, projected_cost: projectedCost },
+        });
+      }
+
       return res.status(200).json({ assignment: data });
     }
 
@@ -212,3 +254,5 @@ function parseTime(time: string): number {
   const parts = time.split(':');
   return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
 }
+
+export default withAuth(handler);

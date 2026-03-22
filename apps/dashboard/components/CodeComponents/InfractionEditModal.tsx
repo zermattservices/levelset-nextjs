@@ -204,36 +204,41 @@ export function InfractionEditModal({
       }
     };
 
-    // Fetch leaders (employees with is_leader = true) + ensure the documenting leader is included
+    // Fetch leaders via API (service role bypasses RLS for Levelset Admins)
     const fetchLeaders = async () => {
       try {
-        const { data, error } = await supabase
-          .from('employees')
-          .select('id, full_name')
-          .eq('location_id', locationId)
-          .eq('is_leader', true)
-          .eq('active', true)
-          .order('full_name');
-        
-        if (!error && data) {
-          let leadersList = data as Employee[];
-          
-          // If there's a leader_id but it's not in the list, fetch and add it
-          if (infraction.leader_id && !leadersList.find(l => l.id === infraction.leader_id)) {
-            const { data: originalLeader } = await supabase
-              .from('employees')
-              .select('id, full_name')
-              .eq('id', infraction.leader_id)
-              .single();
-            
-            if (originalLeader) {
-              leadersList = [...leadersList, originalLeader as Employee].sort((a, b) => 
-                (a.full_name || '').localeCompare(b.full_name || '')
-              );
+        // Get org_id from location
+        const { data: locData } = await supabase
+          .from('locations')
+          .select('org_id')
+          .eq('id', locationId)
+          .single();
+
+        if (locData?.org_id) {
+          const res = await fetch(
+            `/api/forms/widget-data?type=leaders&org_id=${locData.org_id}&location_id=${locationId}&form_type=discipline`
+          );
+          if (res.ok) {
+            const { data } = await res.json();
+            let leadersList = (data || []).map((l: any) => ({ id: l.id, full_name: l.full_name } as Employee));
+
+            // If there's a leader_id but it's not in the list, fetch and add it
+            if (infraction.leader_id && !leadersList.find((l: Employee) => l.id === infraction.leader_id)) {
+              const { data: originalLeader } = await supabase
+                .from('employees')
+                .select('id, full_name')
+                .eq('id', infraction.leader_id)
+                .single();
+
+              if (originalLeader) {
+                leadersList = [...leadersList, originalLeader as Employee].sort((a: Employee, b: Employee) =>
+                  (a.full_name || '').localeCompare(b.full_name || '')
+                );
+              }
             }
+
+            setLeaders(leadersList);
           }
-          
-          setLeaders(leadersList);
         }
       } catch (err) {
         console.error('Error fetching leaders:', err);

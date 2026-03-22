@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import dns from 'dns';
 import { promisify } from 'util';
+import { withAdminAuth } from '@/lib/permissions/middleware';
 
 const resolveMx = promisify(dns.resolveMx);
 
@@ -52,7 +53,7 @@ async function isGoogleEmail(email: string): Promise<{ isGoogle: boolean; error?
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
@@ -167,3 +168,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'An unexpected error occurred' });
   }
 }
+
+export default withAdminAuth(handler);

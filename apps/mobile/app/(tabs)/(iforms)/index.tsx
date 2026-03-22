@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { Rocket, Gavel } from "lucide-react-native";
+import { Rocket, Gavel, ClipboardCheck } from "lucide-react-native";
 import { useForms } from "../../../src/context/FormsContext";
 import { useLocation } from "../../../src/context/LocationContext";
 import { useColors } from "../../../src/context/ThemeContext";
@@ -110,6 +110,8 @@ export default function FormsTab() {
                   {lastSubmission.employeeName} •{" "}
                   {lastSubmission.formType === "ratings"
                     ? t("forms.positionalRatings")
+                    : lastSubmission.formType === "evaluation"
+                    ? "Evaluation"
                     : t("forms.disciplineInfraction")}
                 </Text>
               </View>
@@ -158,6 +160,29 @@ export default function FormsTab() {
                 </Text>
                 <Text style={[styles.formDescription, { color: colors.onSurfaceVariant }]}>
                   Log infractions and capture acknowledgements
+                </Text>
+              </View>
+              <AppIcon name="chevron.right" size={14} tintColor={colors.onSurfaceDisabled} />
+            </View>
+          </GlassCard>
+        </Animated.View>
+
+        {/* Evaluations Card */}
+        <Animated.View entering={FadeIn.delay(160)}>
+          <GlassCard
+            onPress={() => {
+              haptics.light();
+              router.push("/forms/evaluation-picker");
+            }}
+          >
+            <View style={styles.formCardContent}>
+              <View style={[styles.iconContainer, { backgroundColor: colors.primaryTransparent }]}>
+                <ClipboardCheck size={24} color={colors.primary} strokeWidth={1.5} />
+              </View>
+              <View style={styles.formInfo}>
+                <Text style={[styles.formTitle, { color: colors.onSurface }]}>Evaluations</Text>
+                <Text style={[styles.formDescription, { color: colors.onSurfaceVariant }]}>
+                  Complete team performance evaluations
                 </Text>
               </View>
               <AppIcon name="chevron.right" size={14} tintColor={colors.onSurfaceDisabled} />

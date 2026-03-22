@@ -25,6 +25,7 @@ interface FormGroupsListProps {
   typeFilter: string | null;
   onDuplicateTemplate?: (template: FormTemplate) => void;
   onArchiveTemplate?: (template: FormTemplate) => void;
+  onDeleteTemplate?: (template: FormTemplate) => void;
 }
 
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -49,6 +50,7 @@ export function FormGroupsList({
   typeFilter,
   onDuplicateTemplate,
   onArchiveTemplate,
+  onDeleteTemplate,
 }: FormGroupsListProps) {
   // Separate locked system groups (PE + Discipline) from display groups
   const lockedGroups = React.useMemo(() => groups.filter((g) => LOCKED_SLUGS.includes(g.slug)), [groups]);
@@ -236,6 +238,7 @@ export function FormGroupsList({
                   template={template}
                   onDuplicate={onDuplicateTemplate}
                   onArchive={onArchiveTemplate}
+                  onDelete={onDeleteTemplate}
                 />
               ))}
             </div>

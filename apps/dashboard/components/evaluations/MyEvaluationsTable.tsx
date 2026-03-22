@@ -1,12 +1,17 @@
 import * as React from 'react';
+import { useRouter } from 'next/router';
 import { DataGridPro, GridColDef, gridClasses } from '@mui/x-data-grid-pro';
-import { Box, Button, Chip, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Chip, Skeleton, Tooltip, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { format } from 'date-fns';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
-import type { EvaluationItem, EvaluationStatus, EvaluationSource } from '@/lib/evaluations/types';
-import { EvaluationScoreSummary } from './EvaluationScoreSummary';
+import type { EvaluationItem, EvaluationStatus, EvaluationSource, EvaluationCadence } from '@/lib/evaluations/types';
 import { OverrideMenu } from './OverrideMenu';
+import { EvaluationDeleteMenu } from './EvaluationDeleteMenu';
+import { RolePill } from '@/components/CodeComponents/shared/RolePill';
+import { SubmissionDetailDialog } from '@/components/forms/SubmissionDetailDialog';
+import { createSupabaseClient } from '@/util/supabase/component';
+import type { FormSubmission } from '@/lib/forms/types';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
 
@@ -39,27 +44,21 @@ const STATUS_CHIP: Record<EvaluationStatus, { label: string; bg: string; color: 
 };
 
 const SOURCE_CHIP: Record<EvaluationSource, { label: string; bg: string; color: string }> = {
-  scheduled: {
-    label: 'Scheduled',
-    bg: 'var(--ls-color-muted-soft)',
-    color: 'var(--ls-color-muted)',
-  },
-  certification_pending: {
-    label: 'Certification — Pending',
-    bg: 'var(--ls-color-brand-soft)',
-    color: 'var(--ls-color-brand-base)',
-  },
-  certification_pip: {
-    label: 'Certification — PIP',
-    bg: 'var(--ls-color-warning-soft)',
-    color: 'var(--ls-color-warning-base)',
-  },
-  manual: {
-    label: 'Manual',
-    bg: 'var(--ls-color-muted-soft)',
-    color: 'var(--ls-color-muted)',
-  },
+  scheduled: { label: 'Scheduled', bg: 'var(--ls-color-muted-soft)', color: 'var(--ls-color-muted)' },
+  certification_pending: { label: 'Cert — Pending', bg: 'var(--ls-color-brand-soft)', color: 'var(--ls-color-brand-base)' },
+  certification_pip: { label: 'Cert — PIP', bg: 'var(--ls-color-warning-soft)', color: 'var(--ls-color-warning-base)' },
+  manual: { label: 'Manual', bg: 'var(--ls-color-muted-soft)', color: 'var(--ls-color-muted)' },
 };
+
+function formatCadence(cadence: EvaluationCadence | null): string {
+  switch (cadence) {
+    case 'monthly': return 'Monthly';
+    case 'quarterly': return 'Quarterly';
+    case 'semi_annual': return 'Semi-annual';
+    case 'annual': return 'Annual';
+    default: return '';
+  }
+}
 
 const StyledContainer = styled(Box)(() => ({
   borderRadius: 16,
@@ -78,21 +77,63 @@ export interface MyEvaluationsTableProps {
   loading: boolean;
   onRefresh: () => void;
   canManage: boolean;
+  orgId?: string | null;
+  onEmployeeClick?: (employeeId: string) => void;
 }
 
-export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyEvaluationsTableProps) {
-  const [viewScoreId, setViewScoreId] = React.useState<string | null>(null);
+export function MyEvaluationsTable({ items, loading, onRefresh, canManage, orgId, onEmployeeClick }: MyEvaluationsTableProps) {
+  const router = useRouter();
+  const [viewSubmission, setViewSubmission] = React.useState<FormSubmission | null>(null);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+
+  const getAccessToken = React.useCallback(async (): Promise<string | null> => {
+    try {
+      const supabase = createSupabaseClient();
+      const { data } = await supabase.auth.getSession();
+      return data.session?.access_token || null;
+    } catch { return null; }
+  }, []);
+
+  const handleViewSubmission = React.useCallback(async (submissionId: string | null) => {
+    if (!submissionId) return;
+    try {
+      const token = await getAccessToken();
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`/api/forms/submissions/${encodeURIComponent(submissionId)}${orgId ? `?org_id=${encodeURIComponent(orgId)}` : ''}`, { headers });
+      if (!res.ok) return;
+      const sub = await res.json();
+      if (sub) {
+        setViewSubmission(sub);
+        setDialogOpen(true);
+      }
+    } catch { /* silently fail */ }
+  }, [getAccessToken, orgId]);
 
   const columns = React.useMemo<GridColDef<EvaluationItem>[]>(
     () => [
       {
         field: 'employee',
         headerName: 'Employee',
-        width: 180,
+        headerAlign: 'center' as const,
+        flex: 1,
+        minWidth: 140,
         valueGetter: (value: EvaluationItem['employee']) => value?.name ?? '',
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
+            <Typography
+              onClick={(e) => {
+                e.stopPropagation();
+                if (params.row.employee?.id && onEmployeeClick) onEmployeeClick(params.row.employee.id);
+              }}
+              sx={{
+                fontFamily, fontSize: 13, fontWeight: 600,
+                color: 'var(--ls-color-neutral-soft-foreground)',
+                cursor: onEmployeeClick ? 'pointer' : 'default',
+                '&:hover': onEmployeeClick ? { color: 'var(--ls-color-brand)', textDecoration: 'underline' } : {},
+              }}
+            >
               {params.row.employee?.name ?? '—'}
             </Typography>
           </Box>
@@ -101,21 +142,26 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
       {
         field: 'role',
         headerName: 'Role',
-        width: 140,
+        headerAlign: 'center' as const,
+        align: 'center' as const,
+        width: 120,
         valueGetter: (_value, row) => row.employee?.role ?? '',
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)' }}>
-              {params.row.employee?.role ?? '—'}
-            </Typography>
+            <RolePill
+              role={params.row.employee?.role}
+              colorKey={params.row.employee?.role_color}
+            />
           </Box>
         ),
       },
       {
         field: 'evaluation',
         headerName: 'Evaluation',
+        headerAlign: 'center' as const,
+        align: 'center' as const,
         flex: 1,
-        minWidth: 180,
+        minWidth: 150,
         valueGetter: (value: EvaluationItem['evaluation']) => value?.name ?? '',
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
@@ -126,9 +172,48 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
         ),
       },
       {
+        field: 'cadence',
+        headerName: 'Frequency',
+        headerAlign: 'center' as const,
+        align: 'center' as const,
+        width: 120,
+        renderCell: (params) => (
+          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)' }}>
+              {formatCadence(params.row.cadence) || '—'}
+            </Typography>
+          </Box>
+        ),
+      },
+      {
+        field: 'due_date',
+        headerName: 'Due Date',
+        headerAlign: 'center' as const,
+        align: 'center' as const,
+        width: 120,
+        renderCell: (params) => (
+          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <Typography sx={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: params.row.status === 'overdue' ? 600 : 400,
+              color: params.row.status === 'overdue'
+                ? 'var(--ls-color-destructive-base)'
+                : 'var(--ls-color-neutral-soft-foreground)',
+            }}>
+              {params.row.due_date
+                ? format(new Date(params.row.due_date + 'T00:00:00'), 'M/d/yyyy')
+                : '—'}
+            </Typography>
+          </Box>
+        ),
+      },
+      {
         field: 'source',
         headerName: 'Source',
-        width: 220,
+        width: 140,
+        headerAlign: 'center' as const,
+        align: 'center' as const,
         renderCell: (params) => {
           const chip = SOURCE_CHIP[params.row.source] ?? SOURCE_CHIP.manual;
           return (
@@ -138,7 +223,7 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
                 size="small"
                 sx={{
                   fontFamily,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 600,
                   backgroundColor: chip.bg,
                   color: chip.color,
@@ -153,7 +238,9 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
       {
         field: 'status',
         headerName: 'Status',
-        width: 140,
+        headerAlign: 'center' as const,
+        align: 'center' as const,
+        width: 120,
         renderCell: (params) => {
           const chip = STATUS_CHIP[params.row.status] ?? STATUS_CHIP.not_yet_due;
           return (
@@ -178,7 +265,9 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
       {
         field: 'last_completed_at',
         headerName: 'Last Completed',
-        width: 160,
+        headerAlign: 'center' as const,
+        align: 'center' as const,
+        width: 150,
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-neutral-soft-foreground)' }}>
@@ -192,8 +281,10 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
       {
         field: 'actions',
         headerName: 'Action',
-        width: 200,
+        flex: 1,
+        minWidth: 140,
         sortable: false,
+        headerAlign: 'center' as const,
         renderCell: (params) => {
           const item = params.row;
           const isCompleted = item.status === 'completed';
@@ -205,7 +296,7 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
                 <Button
                   size="small"
                   variant="outlined"
-                  onClick={() => setViewScoreId(item.last_submission_id)}
+                  onClick={() => handleViewSubmission(item.last_submission_id)}
                   sx={{
                     fontFamily,
                     fontSize: 12,
@@ -233,7 +324,7 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
                       variant="contained"
                       disabled={!canStart}
                       onClick={() => {
-                        console.log('[EvaluationsPage] Start review for item:', item.id);
+                        router.push(`/evaluations/conduct/${item.id}`);
                       }}
                       sx={{
                         fontFamily,
@@ -253,26 +344,37 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
                         },
                       }}
                     >
-                      Start Review
+                      Go to Form
                     </Button>
                   </span>
                 </Tooltip>
               )}
 
-              {item.source === 'scheduled' && item.rule_id && item.period_start && canManage && (
-                <OverrideMenu
-                  ruleId={item.rule_id}
-                  employeeId={item.employee.id}
-                  periodStart={item.period_start}
-                  onOverrideCreated={onRefresh}
-                />
+              {isCompleted && item.last_submission_id ? (
+                canManage && (
+                  <EvaluationDeleteMenu
+                    submissionId={item.last_submission_id}
+                    employeeName={item.employee?.name ?? 'this employee'}
+                    orgId={orgId}
+                    onDeleted={onRefresh}
+                  />
+                )
+              ) : (
+                item.source === 'scheduled' && item.rule_id && item.period_start && canManage && (
+                  <OverrideMenu
+                    ruleId={item.rule_id}
+                    employeeId={item.employee.id}
+                    periodStart={item.period_start}
+                    onOverrideCreated={onRefresh}
+                  />
+                )
               )}
             </Box>
           );
         },
       },
     ],
-    [canManage, onRefresh]
+    [canManage, onRefresh, router]
   );
 
   const rowHeight = 52;
@@ -280,7 +382,35 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
   const minRows = 1;
   const gridHeight = headerHeight + Math.max(items.length, minRows) * rowHeight + 2;
 
-  if (!loading && items.length === 0) {
+  if (loading) {
+    return (
+      <StyledContainer>
+        <Box sx={{ p: 0 }}>
+          {/* Header skeleton */}
+          <Box sx={{ display: 'flex', gap: 2, px: 2, py: 1.5, backgroundColor: 'var(--ls-color-neutral-foreground)', borderBottom: '1px solid var(--ls-color-muted-border)' }}>
+            {[160, 120, 200, 100, 100, 80, 120, 140].map((w, i) => (
+              <Skeleton key={i} variant="text" width={w} height={20} sx={{ borderRadius: '4px' }} />
+            ))}
+          </Box>
+          {/* Row skeletons */}
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Box key={i} sx={{ display: 'flex', gap: 2, px: 2, py: 1.75, borderBottom: '1px solid var(--ls-color-muted-soft)', alignItems: 'center' }}>
+              <Skeleton variant="text" width={130} height={16} sx={{ borderRadius: '4px' }} />
+              <Skeleton variant="rounded" width={70} height={26} sx={{ borderRadius: '14px' }} />
+              <Skeleton variant="text" width={150} height={16} sx={{ borderRadius: '4px' }} />
+              <Skeleton variant="text" width={70} height={16} sx={{ borderRadius: '4px' }} />
+              <Skeleton variant="text" width={75} height={16} sx={{ borderRadius: '4px' }} />
+              <Skeleton variant="rounded" width={50} height={22} sx={{ borderRadius: '12px' }} />
+              <Skeleton variant="text" width={75} height={16} sx={{ borderRadius: '4px' }} />
+              <Skeleton variant="rounded" width={85} height={30} sx={{ borderRadius: '6px' }} />
+            </Box>
+          ))}
+        </Box>
+      </StyledContainer>
+    );
+  }
+
+  if (items.length === 0) {
     return (
       <Box
         sx={{
@@ -314,7 +444,6 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
           rows={items}
           columns={columns}
           getRowId={(row) => row.id}
-          loading={loading}
           disableRowSelectionOnClick
           disableColumnResize
           disableColumnMenu
@@ -337,7 +466,7 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
               '&:focus, &:focus-within': { outline: 'none' },
             },
             '& .MuiDataGrid-columnHeaderTitleContainer': {
-              padding: '0 16px',
+              padding: 0,
             },
             [`& .${gridClasses.columnSeparator}`]: { display: 'none' },
             [`& .${gridClasses.cell}`]: {
@@ -358,12 +487,12 @@ export function MyEvaluationsTable({ items, loading, onRefresh, canManage }: MyE
         />
       </StyledContainer>
 
-      {viewScoreId && (
-        <EvaluationScoreSummary
-          submissionId={viewScoreId}
-          onClose={() => setViewScoreId(null)}
-        />
-      )}
+      <SubmissionDetailDialog
+        open={dialogOpen}
+        submission={viewSubmission}
+        onClose={() => { setDialogOpen(false); setViewSubmission(null); }}
+        getAccessToken={getAccessToken}
+      />
     </>
   );
 }

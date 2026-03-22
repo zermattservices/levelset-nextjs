@@ -7,6 +7,9 @@
  * validation. If the session was refreshed, GoTrue returns 403
  * "session_not_found" even though the JWT is still valid. Local decode avoids
  * this and is faster (no network round-trip).
+ *
+ * Tokens are extracted from the Authorization: Bearer header first, then
+ * from the levelset-access-token cookie (set by AuthProvider for cross-domain auth).
  */
 
 import { NextApiRequest, NextApiResponse, NextApiHandler } from 'next';
@@ -47,13 +50,95 @@ async function isLevelsetAdmin(
 }
 
 /**
- * Decode a Supabase JWT and extract the user ID (sub claim).
- * Returns null if the token is malformed or expired.
+ * Extract auth token from the request.
+ * Checks three sources in order:
+ *   1. Authorization: Bearer header (explicit, used by newer client code)
+ *   2. levelset-access-token cookie (cross-domain on .levelset.io, production only)
+ *   3. Supabase SSR auth cookies (sb-<ref>-auth-token, same-origin, works on localhost)
+ *      These are base64url-encoded with a "base64-" prefix by @supabase/ssr
  */
+function getAuthToken(req: NextApiRequest): string | null {
+  // 1. Authorization: Bearer header
+  const bearerToken = req.headers.authorization?.replace('Bearer ', '');
+  if (bearerToken) return bearerToken;
+
+  // 2. levelset-access-token cookie (works on *.levelset.io, not localhost)
+  const cookieToken = req.cookies?.['levelset-access-token'];
+  if (cookieToken) return cookieToken;
+
+  // 3. Supabase SSR auth cookies (set by @supabase/ssr createBrowserClient)
+  try {
+    const cookies = req.cookies || {};
+    const cookieNames = Object.keys(cookies);
+
+    // Find the base cookie name: sb-<ref>-auth-token (non-chunked)
+    const baseName = cookieNames.find(
+      k => k.startsWith('sb-') && k.includes('-auth-token') && !k.includes('.')
+    );
+
+    let rawValue: string | null = null;
+
+    if (baseName) {
+      rawValue = cookies[baseName];
+    } else {
+      // Try chunked cookies: sb-<ref>-auth-token.0, .1, .2, ...
+      const firstChunk = cookieNames.find(
+        k => k.startsWith('sb-') && k.includes('-auth-token.')
+      );
+      if (firstChunk) {
+        const prefix = firstChunk.substring(0, firstChunk.lastIndexOf('.'));
+        const chunks = cookieNames
+          .filter(k => k.startsWith(prefix + '.'))
+          .sort((a, b) => {
+            const numA = parseInt(a.substring(a.lastIndexOf('.') + 1) || '0');
+            const numB = parseInt(b.substring(b.lastIndexOf('.') + 1) || '0');
+            return numA - numB;
+          })
+          .map(k => cookies[k]);
+        rawValue = chunks.join('');
+      }
+    }
+
+    if (rawValue) {
+      // @supabase/ssr base64url-encodes values with a "base64-" prefix
+      let decoded = rawValue;
+      if (rawValue.startsWith('base64-')) {
+        decoded = Buffer.from(rawValue.substring(7), 'base64url').toString();
+      }
+      const session = JSON.parse(decoded);
+      if (session?.access_token) return session.access_token;
+    }
+  } catch {
+    // Failed to parse Supabase SSR cookies — fall through to null
+  }
+
+  return null;
+}
+
+/**
+ * Verify and decode a Supabase JWT.
+ *
+ * When SUPABASE_JWT_SECRET is set, verifies the HMAC-SHA256 signature locally
+ * (no network call). When the secret is not available, falls back to
+ * decode-only (payload + expiration check) for backwards compatibility.
+ */
+const jwtSecret = process.env.SUPABASE_JWT_SECRET || null;
+
 function decodeJwt(token: string): { sub: string } | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
+
+    // Verify signature if secret is available
+    if (jwtSecret) {
+      const { createHmac } = require('crypto');
+      const signatureInput = parts[0] + '.' + parts[1];
+      const expectedSig = createHmac('sha256', jwtSecret)
+        .update(signatureInput)
+        .digest('base64url');
+      if (expectedSig !== parts[2]) return null;
+    }
+
     const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
     if (!payload.sub) return null;
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
@@ -77,7 +162,7 @@ export function withPermission(
 ): NextApiHandler {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
+      const token = getAuthToken(req);
       if (!token) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
@@ -172,7 +257,7 @@ export function withPermissionAndContext(
 ): NextApiHandler {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
+      const token = getAuthToken(req);
       if (!token) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
@@ -246,6 +331,69 @@ export function withPermissionAndContext(
       return handler(authenticatedReq, res, { userId, orgId: orgId as string });
     } catch (error) {
       console.error('Permission middleware error:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+}
+
+/**
+ * Lightweight auth middleware — validates JWT but does NOT check permissions.
+ * Use for routes where any authenticated user should have access.
+ * Supports both Authorization: Bearer header and levelset-access-token cookie.
+ *
+ * Usage:
+ *   export default withAuth(handler);
+ */
+export function withAuth(handler: NextApiHandler): NextApiHandler {
+  return async (req: NextApiRequest, res: NextApiResponse) => {
+    try {
+      const token = getAuthToken(req);
+      if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const decoded = decodeJwt(token);
+      if (!decoded) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      return handler(req, res);
+    } catch (error) {
+      console.error('Auth middleware error:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+}
+
+/**
+ * Admin auth middleware — validates JWT and requires Levelset Admin role.
+ * Use for admin-only routes (user management, billing admin, etc.).
+ *
+ * Usage:
+ *   export default withAdminAuth(handler);
+ */
+export function withAdminAuth(handler: NextApiHandler): NextApiHandler {
+  return async (req: NextApiRequest, res: NextApiResponse) => {
+    try {
+      const token = getAuthToken(req);
+      if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const supabase = createServerSupabaseClient();
+      const decoded = decodeJwt(token);
+      if (!decoded) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const admin = await isLevelsetAdmin(supabase, decoded.sub);
+      if (!admin) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      return handler(req, res);
+    } catch (error) {
+      console.error('Admin auth middleware error:', error);
       return res.status(500).json({ error: 'Internal server error' });
     }
   };

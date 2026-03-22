@@ -680,6 +680,7 @@ function safeFetch(path){return hsFetch(path).catch(function(){return [];});}
 loadingDiv.textContent='Fetching schedule configuration...';
 hsFetch('/hs/spring/scheduling/bootstrap').then(function(bootstrap){
 var weekStart=bootstrap.currentWeekStartDate||'';
+try{var dateBtn=null;var allEls=document.querySelectorAll('button,span,div');for(var bi=0;bi<allEls.length;bi++){var txt=allEls[bi].textContent||'';if(txt.match(/Sun,?\\s+\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}\\s*-\\s*Sat/i)){dateBtn=allEls[bi];break;}}if(dateBtn){var dtxt=dateBtn.textContent||'';var dm=dtxt.match(/(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2,4})/);if(dm){var yr=dm[3].length===2?'20'+dm[3]:dm[3];var mn=dm[1].padStart(2,'0');var dy=dm[2].padStart(2,'0');var viewedWeek=yr+'-'+mn+'-'+dy;if(viewedWeek!==weekStart){console.log('[Levelset] Using viewed week '+viewedWeek+' instead of bootstrap week '+weekStart);weekStart=viewedWeek;}}}}catch(e){console.warn('[Levelset] Could not detect viewed week, using bootstrap:',e);}
 var prevWeek=new Date(weekStart);prevWeek.setDate(prevWeek.getDate()-7);
 var nextWeek=new Date(weekStart);nextWeek.setDate(nextWeek.getDate()+14);
 var rangeStart=prevWeek.toISOString().split('T')[0];
@@ -1906,6 +1907,21 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
     const totalEmployees = scheduling.total_employees_scheduled;
     const totalHours = scheduling.total_hours;
 
+    // Build name lookup from new + modified employees so unmatched HS employees show real names
+    const hsNameLookup = new Map<number, string>();
+    for (const emp of notification.sync_data.new_employees || []) {
+      if (emp.hs_id) {
+        const name = `${emp.first_name ?? ''} ${emp.last_name ?? ''}`.trim();
+        if (name) hsNameLookup.set(emp.hs_id, name);
+      }
+    }
+    for (const emp of notification.sync_data.modified_employees || []) {
+      if (emp.hs_id) {
+        const name = `${emp.first_name ?? ''} ${emp.last_name ?? ''}`.trim();
+        if (name) hsNameLookup.set(emp.hs_id, name);
+      }
+    }
+
     const handleScheduleConfirm = async () => {
       if (!notification) return;
       setScheduleSyncing(true);
@@ -2008,7 +2024,9 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
               sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1 } }}
             >
               <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600 }}>
-                {group.employee_name}
+                {group.employee_name?.startsWith('HS Employee #') && group.hs_employee_id
+                  ? (hsNameLookup.get(group.hs_employee_id) || group.employee_name)
+                  : group.employee_name}
               </Typography>
               <Box sx={{
                 backgroundColor: levelsetGreen, color: 'white', borderRadius: '12px',

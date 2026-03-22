@@ -1,7 +1,8 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { withAdminAuth } from '@/lib/permissions/middleware';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const supabase = createServerSupabaseClient();
 
   if (req.method === 'GET') {
@@ -20,3 +21,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
+export default withAdminAuth(handler);

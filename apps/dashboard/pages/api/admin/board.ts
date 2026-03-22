@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { withAdminAuth } from '@/lib/permissions/middleware';
 
 // Board status -> Roadmap status
 const BOARD_TO_ROADMAP_STATUS: Record<string, string> = {
@@ -21,7 +22,7 @@ const ROADMAP_TO_BOARD_STATUS: Record<string, string> = {
   cancelled: 'archived',
 };
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
@@ -163,3 +164,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'An unexpected error occurred', details: error?.message || 'Unknown error' });
   }
 }
+
+export default withAdminAuth(handler);
