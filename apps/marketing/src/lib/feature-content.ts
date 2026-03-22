@@ -19,6 +19,23 @@ export interface FeatureContent {
   screenshots: FeatureScreenshot[];
   /** Slugs of features that work well together with this one */
   worksWith?: { slug: string; reason: string }[];
+  /** When set, replaces "How it works" + "See it in action" with a custom transformation layout */
+  transformationShowcase?: TransformationShowcase;
+}
+
+export interface TransformationHighlight {
+  icon: string;
+  text: string;
+  /** If provided, wraps the text in a Next.js Link */
+  link?: string;
+}
+
+export interface TransformationShowcase {
+  before: { src: string; alt: string; label: string };
+  after: { src: string; alt: string; label: string };
+  result: { src: string; alt: string; caption: string };
+  importDescription: string;
+  highlights: TransformationHighlight[];
 }
 
 const CONTENT: Record<string, FeatureContent> = {
@@ -186,43 +203,66 @@ const CONTENT: Record<string, FeatureContent> = {
 
   evaluations: {
     tagline:
-      'Performance reviews that actually reference performance — not just leader memory.',
-    heroImage: '/screenshots/evaluations-form.png',
+      'Turn any paper evaluation into a digital, AI-scored performance review — connected to real data.',
+    heroImage: '/screenshots/certified-trainer-evaluation.png',
     problem:
       'Evaluation time comes around and leaders scramble to remember three months of performance. They fill out forms from memory, give vague feedback, and the team member leaves the meeting with no clear picture of where they actually stand.',
     solution:
-      'Levelset evaluations pull in real positional rating data so leaders walk into the review with evidence. "Here\'s your iPOS average over the last 90 days. Here\'s your discipline record. Here\'s what the data says." Reviews become conversations, not guessing games.',
-    capabilities: [
-      {
-        icon: 'link',
-        title: 'Connected to Your Rating Data',
-        description:
-          'Evaluations automatically reference the team member\'s positional rating averages — so feedback is grounded in real performance, not memory.',
+      'Import any evaluation form you already use — PDF, Google Form, or Jotform — and Levelset\'s AI analyzes it, extracts every question and scoring criterion, and builds a digital version. Leaders evaluate with real performance data at their fingertips, and the scored result is available instantly.',
+    capabilities: [],
+    screenshots: [],
+    transformationShowcase: {
+      before: {
+        src: '/screenshots/certified-trainer-evaluation.png',
+        alt: 'A paper Certified Trainer Evaluation form with manual scoring fields',
+        label: 'Your existing evaluation form',
       },
-      {
-        icon: 'file-text',
-        title: 'Structured Templates',
-        description:
-          'Use evaluation templates that match your organization\'s review process. Consistent structure means consistent conversations.',
+      after: {
+        src: '/screenshots/evaluation-example-levelset.png',
+        alt: 'The same evaluation digitized in Levelset with interactive scoring sliders',
+        label: 'Digitized & enhanced by AI',
       },
-      {
-        icon: 'clock',
-        title: 'Full History for Every Team Member',
-        description:
-          'Every evaluation is saved and searchable. Track progress over time and see how a team member has grown — or where they\'ve plateaued.',
-      },
-    ],
-    screenshots: [
-      {
-        src: '/screenshots/evaluations-form.png',
-        alt: 'Evaluation form with embedded rating data from positional ratings',
+      result: {
+        src: '/screenshots/evaluation-scored-levelset.png',
+        alt: 'A completed evaluation in Levelset showing AI-generated scores, section breakdowns, and summary',
         caption:
-          'Reviews backed by data — not three months of trying to remember.',
+          'The completed evaluation — scored, summarized, and ready for a real development conversation.',
       },
-    ],
+      importDescription:
+        'Upload any evaluation form and AI extracts every question, section, and scoring criterion automatically. Works with PDFs, Google Forms, and Jotforms.',
+      highlights: [
+        {
+          icon: 'sparkles',
+          text: 'AI analyzes and extracts questions & scoring from any form you upload',
+        },
+        {
+          icon: 'rocket',
+          text: 'Evaluate team members on their Positional Excellence ratings',
+          link: '/features/positional-ratings',
+        },
+        {
+          icon: 'star',
+          text: 'Evaluate on Operational Excellence pillar scores',
+          link: '/features/oe-pillars',
+        },
+        {
+          icon: 'clock',
+          text: 'View evaluation history over time for informed decisions and stronger development conversations',
+        },
+        {
+          icon: 'file-text',
+          text: 'Export any evaluation to PDF for documentation and records',
+        },
+        {
+          icon: 'smartphone',
+          text: 'Completed evaluations are available to team members on the mobile app (coming soon)',
+        },
+      ],
+    },
     worksWith: [
       { slug: 'positional-ratings', reason: 'Real rating data is embedded directly in evaluations' },
-      { slug: 'goal-tracking', reason: 'Goal progress is reviewed during evaluations' },
+      { slug: 'oe-pillars', reason: 'OE pillar scores can be used as evaluation criteria' },
+      { slug: 'forms', reason: 'Custom forms power your evaluation templates' },
     ],
   },
 
@@ -502,6 +542,7 @@ const CONTENT: Record<string, FeatureContent> = {
   },
 
   'oe-pillars': {
+    heroImage: '/screenshots/oe-pillars-dashboard.png',
     tagline:
       'Your five pillars of operational excellence — measured, tracked, and visible to every leader.',
     problem:
