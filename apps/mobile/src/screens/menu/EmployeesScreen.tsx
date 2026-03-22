@@ -1,38 +1,29 @@
 /**
  * EmployeesScreen
- * Displays employees for the selected location with filters and profile drawer.
+ * Displays employees for the selected location with filters. Tapping navigates to employee detail page.
  */
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
   FlatList,
   Pressable,
   RefreshControl,
-  ScrollView,
-  ActivityIndicator,
   StyleSheet,
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { Image } from "expo-image";
-import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "expo-router";
 import { useLocation } from "../../context/LocationContext";
 import { useEmployees } from "../../context/EmployeesContext";
 import { useColors } from "../../context/ThemeContext";
 import { typography, fontWeights } from "../../lib/fonts";
 import { spacing, borderRadius, haptics } from "../../lib/theme";
-import { GlassCard, GlassButton, GlassDrawer, GlassModal } from "../../components/glass";
+import { GlassCard, GlassButton, GlassModal } from "../../components/glass";
 import { AppIcon } from "../../components/ui";
 import {
-  fetchEmployeeProfileAuth,
-  ApiError,
   type EmployeeListItem,
-  type EmployeeProfileResponse,
-  type EmployeeProfileRating,
-  type EmployeeProfileInfraction,
-  type EmployeeProfileDiscAction,
-  type ScheduleShift,
 } from "../../lib/api";
 
 // =============================================================================
@@ -73,31 +64,6 @@ function avatarColor(name: string): string {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
-
-function formatTime(time: string): string {
-  const [h, m] = time.split(":");
-  const hour = parseInt(h, 10);
-  const ampm = hour >= 12 ? "PM" : "AM";
-  const display = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-  return `${display}:${m} ${ampm}`;
-}
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function formatDayLabel(dateStr: string): string {
-  const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-}
-
-function ratingColor(avg: number | null): string {
-  if (avg == null) return "#9CA3AF";
-  if (avg >= 2.75) return "#16A34A";
-  if (avg >= 1.75) return "#CA8A04";
-  return "#DC2626";
 }
 
 // =============================================================================
@@ -348,361 +314,12 @@ function FilterModal({
 }
 
 // =============================================================================
-// Profile Drawer — Tab Content
-// =============================================================================
-
-function ScheduleTab({ schedule }: { schedule: EmployeeProfileResponse["schedule"] }) {
-  const colors = useColors();
-  if (!schedule || schedule.shifts.length === 0) {
-    return (
-      <View style={styles.tabEmpty}>
-        <Text style={[styles.tabEmptyText, { color: colors.onSurfaceVariant }]}>
-          No shifts this week
-        </Text>
-      </View>
-    );
-  }
-
-  const grouped = new Map<string, ScheduleShift[]>();
-  for (const s of schedule.shifts) {
-    const arr = grouped.get(s.shift_date) || [];
-    arr.push(s);
-    grouped.set(s.shift_date, arr);
-  }
-
-  return (
-    <View style={styles.tabContent}>
-      {Array.from(grouped.entries()).map(([date, shifts]) => (
-        <GlassCard key={date}>
-          <Text style={[styles.schedDayLabel, { color: colors.onSurface }]}>
-            {formatDayLabel(date)}
-          </Text>
-          {shifts.map((s) => (
-            <View key={s.id} style={styles.schedShiftRow}>
-              <Text style={[styles.schedPosition, { color: colors.onSurface }]}>
-                {s.position?.name ?? "Shift"}
-              </Text>
-              <Text style={[styles.schedTime, { color: colors.onSurfaceVariant }]}>
-                {formatTime(s.start_time)} – {formatTime(s.end_time)}
-              </Text>
-            </View>
-          ))}
-        </GlassCard>
-      ))}
-    </View>
-  );
-}
-
-function PETab({ ratings, summary }: { ratings: EmployeeProfileRating[]; summary: EmployeeProfileResponse["summary"] }) {
-  const colors = useColors();
-  if (ratings.length === 0) {
-    return (
-      <View style={styles.tabEmpty}>
-        <Text style={[styles.tabEmptyText, { color: colors.onSurfaceVariant }]}>
-          No ratings in the last 90 days
-        </Text>
-      </View>
-    );
-  }
-  return (
-    <View style={styles.tabContent}>
-      <Text style={[styles.tabSummary, { color: colors.onSurfaceVariant }]}>
-        {ratings.length} rating{ratings.length !== 1 ? "s" : ""} · Avg{" "}
-        <Text style={{ color: ratingColor(summary.avg_rating), fontWeight: fontWeights.bold }}>
-          {summary.avg_rating?.toFixed(2) ?? "—"}
-        </Text>
-      </Text>
-      {ratings.map((r) => (
-        <GlassCard key={r.id}>
-          <View style={styles.ratingHeader}>
-            <Text style={[styles.ratingPosition, { color: colors.onSurface }]}>{r.position}</Text>
-            <Text style={[styles.ratingAvg, { color: ratingColor(r.rating_avg) }]}>
-              {r.rating_avg?.toFixed(2) ?? "—"}
-            </Text>
-          </View>
-          <View style={styles.ratingScores}>
-            {[r.rating_1, r.rating_2, r.rating_3, r.rating_4, r.rating_5].map((v, i) => (
-              <View key={i} style={[styles.scorePill, { backgroundColor: colors.surfaceVariant }]}>
-                <Text style={[styles.scoreText, { color: colors.onSurfaceVariant }]}>
-                  {v ?? "—"}
-                </Text>
-              </View>
-            ))}
-          </View>
-          <Text style={[styles.ratingMeta, { color: colors.onSurfaceDisabled }]}>
-            {formatDate(r.created_at)}{r.rater_name ? ` · ${r.rater_name}` : ""}
-          </Text>
-          {r.notes ? (
-            <Text style={[styles.ratingNotes, { color: colors.onSurfaceVariant }]}>{r.notes}</Text>
-          ) : null}
-        </GlassCard>
-      ))}
-    </View>
-  );
-}
-
-function DisciplineTab({
-  infractions,
-  discActions,
-  summary,
-}: {
-  infractions: EmployeeProfileInfraction[];
-  discActions: EmployeeProfileDiscAction[];
-  summary: EmployeeProfileResponse["summary"];
-}) {
-  const colors = useColors();
-  if (infractions.length === 0 && discActions.length === 0) {
-    return (
-      <View style={styles.tabEmpty}>
-        <Text style={[styles.tabEmptyText, { color: colors.onSurfaceVariant }]}>
-          No infractions or actions in the last 90 days
-        </Text>
-      </View>
-    );
-  }
-  return (
-    <View style={styles.tabContent}>
-      <View style={styles.discSummaryRow}>
-        <GlassCard style={styles.discSummaryCard}>
-          <Text style={[styles.discSummaryValue, { color: colors.onSurface }]}>
-            {summary.infraction_count}
-          </Text>
-          <Text style={[styles.discSummaryLabel, { color: colors.onSurfaceVariant }]}>
-            Infractions
-          </Text>
-        </GlassCard>
-        <GlassCard style={styles.discSummaryCard}>
-          <Text
-            style={[
-              styles.discSummaryValue,
-              { color: summary.total_points > 0 ? "#DC2626" : colors.onSurface },
-            ]}
-          >
-            {summary.total_points}
-          </Text>
-          <Text style={[styles.discSummaryLabel, { color: colors.onSurfaceVariant }]}>
-            Total Points
-          </Text>
-        </GlassCard>
-      </View>
-
-      {infractions.length > 0 && (
-        <>
-          <Text style={[styles.discSectionTitle, { color: colors.onSurfaceVariant }]}>Infractions</Text>
-          {infractions.map((inf) => (
-            <GlassCard key={inf.id}>
-              <View style={styles.discRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.discTitle, { color: colors.onSurface }]}>{inf.infraction}</Text>
-                  {inf.description ? (
-                    <Text style={[styles.discDesc, { color: colors.onSurfaceVariant }]}>{inf.description}</Text>
-                  ) : null}
-                  <Text style={[styles.discMeta, { color: colors.onSurfaceDisabled }]}>
-                    {formatDate(inf.infraction_date)}{inf.leader_name ? ` · ${inf.leader_name}` : ""}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.pointsBadge,
-                    { backgroundColor: inf.points > 0 ? "#FEE2E2" : colors.surfaceVariant },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.pointsText,
-                      { color: inf.points > 0 ? "#DC2626" : colors.onSurfaceVariant },
-                    ]}
-                  >
-                    {inf.points}pt{inf.points !== 1 ? "s" : ""}
-                  </Text>
-                </View>
-              </View>
-            </GlassCard>
-          ))}
-        </>
-      )}
-
-      {discActions.length > 0 && (
-        <>
-          <Text style={[styles.discSectionTitle, { color: colors.onSurfaceVariant }]}>
-            Disciplinary Actions
-          </Text>
-          {discActions.map((da) => (
-            <GlassCard key={da.id}>
-              <Text style={[styles.discTitle, { color: colors.onSurface }]}>{da.action}</Text>
-              <Text style={[styles.discMeta, { color: colors.onSurfaceDisabled }]}>
-                {formatDate(da.action_date)}{da.leader_name ? ` · ${da.leader_name}` : ""}
-              </Text>
-            </GlassCard>
-          ))}
-        </>
-      )}
-    </View>
-  );
-}
-
-function ComingSoonTab({ label }: { label: string }) {
-  const colors = useColors();
-  return (
-    <View style={styles.tabEmpty}>
-      <GlassCard style={{ alignItems: "center", paddingVertical: spacing[10] } as any}>
-        <Text style={{ fontSize: 48, marginBottom: spacing[3] }}>🚧</Text>
-        <Text style={[styles.tabEmptyText, { color: colors.onSurfaceVariant }]}>
-          {label} — Coming Soon
-        </Text>
-      </GlassCard>
-    </View>
-  );
-}
-
-// =============================================================================
-// Profile Drawer
-// =============================================================================
-
-const PROFILE_TABS = ["Schedule", "PE", "Discipline", "Pathway", "Evaluations"] as const;
-type ProfileTab = (typeof PROFILE_TABS)[number];
-
-function EmployeeProfileDrawer({
-  visible,
-  onClose,
-  employeeId,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  employeeId: string | null;
-}) {
-  const colors = useColors();
-  const { session } = useAuth();
-  const { selectedLocationId } = useLocation();
-  const [data, setData] = useState<EmployeeProfileResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<ProfileTab>("Schedule");
-
-  useEffect(() => {
-    if (!visible || !employeeId || !session?.access_token || !selectedLocationId) {
-      setData(null);
-      setActiveTab("Schedule");
-      return;
-    }
-    let cancelled = false;
-    setLoading(true);
-    fetchEmployeeProfileAuth(session.access_token, selectedLocationId, employeeId)
-      .then((res) => { if (!cancelled) setData(res); })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [visible, employeeId, session?.access_token, selectedLocationId]);
-
-  const renderTabContent = () => {
-    if (!data) return null;
-    switch (activeTab) {
-      case "Schedule":
-        return <ScheduleTab schedule={data.schedule} />;
-      case "PE":
-        return <PETab ratings={data.ratings} summary={data.summary} />;
-      case "Discipline":
-        return <DisciplineTab infractions={data.infractions} discActions={data.disc_actions} summary={data.summary} />;
-      case "Pathway":
-        return <ComingSoonTab label="Pathway" />;
-      case "Evaluations":
-        return <ComingSoonTab label="Evaluations" />;
-    }
-  };
-
-  return (
-    <GlassDrawer
-      visible={visible}
-      onClose={onClose}
-      title={data?.employee.full_name ?? "Employee"}
-      fullScreen
-      scrollable={false}
-    >
-      {loading ? (
-        <View style={styles.drawerLoading}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      ) : data ? (
-        <View style={{ flex: 1 }}>
-          {/* Profile header */}
-          <View style={styles.profileHeader}>
-            {data.employee.profile_image ? (
-              <Image
-                source={{ uri: data.employee.profile_image }}
-                style={[styles.profileAvatar, { backgroundColor: colors.surfaceVariant }]}
-                cachePolicy="disk"
-              />
-            ) : (
-              <View style={[styles.profileAvatar, { backgroundColor: avatarColor(data.employee.full_name) }]}>
-                <Text style={styles.profileAvatarText}>{getInitials(data.employee.full_name)}</Text>
-              </View>
-            )}
-            <View style={styles.profileInfo}>
-              <Text style={[styles.profileName, { color: colors.onSurface }]}>
-                {data.employee.full_name}
-              </Text>
-              {data.employee.role && (
-                <View style={[styles.rolePill, { backgroundColor: colors.primaryTransparent }]}>
-                  <Text style={[styles.rolePillText, { color: colors.primary }]}>
-                    {data.employee.role}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </View>
-
-          {/* Tab bar */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tabBar}
-            style={{ flexGrow: 0 }}
-          >
-            {PROFILE_TABS.map((tab) => {
-              const active = activeTab === tab;
-              return (
-                <Pressable
-                  key={tab}
-                  onPress={() => { haptics.selection(); setActiveTab(tab); }}
-                  style={[
-                    styles.tabItem,
-                    active && { borderBottomColor: colors.primary, borderBottomWidth: 2 },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.tabLabel,
-                      { color: active ? colors.primary : colors.onSurfaceVariant },
-                      active && { fontWeight: fontWeights.semibold },
-                    ]}
-                  >
-                    {tab}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-
-          {/* Tab content */}
-          <ScrollView
-            style={{ flex: 1 }}
-            contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10] }}
-            showsVerticalScrollIndicator={false}
-          >
-            {renderTabContent()}
-          </ScrollView>
-        </View>
-      ) : null}
-    </GlassDrawer>
-  );
-}
-
-// =============================================================================
 // Main Screen
 // =============================================================================
 
 export default function EmployeesScreen() {
   const colors = useColors();
-  const { session } = useAuth();
+  const router = useRouter();
   const { selectedLocationId } = useLocation();
   const { employees, loading: isLoading, refreshEmployees } = useEmployees();
 
@@ -710,9 +327,6 @@ export default function EmployeesScreen() {
 
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [filterVisible, setFilterVisible] = useState(false);
-
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
-  const [drawerVisible, setDrawerVisible] = useState(false);
 
   const availableRoles = useMemo(() => {
     const roles = new Set<string>();
@@ -724,13 +338,12 @@ export default function EmployeesScreen() {
   const activeFilterCount = countActiveFilters(filters);
 
   const openProfile = useCallback((id: string) => {
-    setSelectedEmployeeId(id);
-    setDrawerVisible(true);
-  }, []);
-
-  const closeProfile = useCallback(() => {
-    setDrawerVisible(false);
-  }, []);
+    if (!selectedLocationId) return;
+    router.push({
+      pathname: '/(tabs)/(home)/employee-overview',
+      params: { employeeId: id, locationId: selectedLocationId },
+    });
+  }, [router, selectedLocationId]);
 
   const renderItem = useCallback(
     ({ item, index }: { item: EmployeeListItem; index: number }) => (
@@ -821,12 +434,6 @@ export default function EmployeesScreen() {
         availableRoles={availableRoles}
       />
 
-      {/* Profile drawer */}
-      <EmployeeProfileDrawer
-        visible={drawerVisible}
-        onClose={closeProfile}
-        employeeId={selectedEmployeeId}
-      />
     </View>
   );
 }
@@ -928,190 +535,4 @@ const styles = StyleSheet.create({
   },
   filterFooter: { flexDirection: "row", gap: spacing[3], justifyContent: "flex-end" },
 
-  // Profile drawer
-  drawerLoading: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  profileHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: spacing[4],
-    gap: spacing[4],
-  },
-  profileAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  profileAvatarText: {
-    color: "#fff",
-    fontSize: 22,
-    fontWeight: "700",
-  },
-  profileInfo: { flex: 1, gap: spacing[1] },
-  profileName: {
-    ...typography.h3,
-  },
-  rolePill: {
-    alignSelf: "flex-start",
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[1],
-    borderRadius: borderRadius.full,
-    borderCurve: "continuous",
-  },
-  rolePillText: {
-    ...typography.labelSmall,
-    fontWeight: fontWeights.semibold,
-  },
-
-  // Tab bar
-  tabBar: {
-    paddingHorizontal: spacing[4],
-    gap: spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.06)",
-  },
-  tabItem: {
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[1],
-  },
-  tabLabel: {
-    ...typography.labelMedium,
-  },
-
-  // Tab content shared
-  tabContent: { gap: spacing[3] },
-  tabEmpty: {
-    paddingVertical: spacing[10],
-    alignItems: "center",
-  },
-  tabEmptyText: {
-    ...typography.bodyMedium,
-    textAlign: "center",
-  },
-  tabSummary: {
-    ...typography.labelMedium,
-    marginBottom: spacing[1],
-  },
-
-  // Schedule tab
-  schedDayLabel: {
-    ...typography.labelLarge,
-    fontWeight: fontWeights.semibold,
-    marginBottom: spacing[1],
-  },
-  schedShiftRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing[2],
-    marginTop: spacing[1],
-  },
-  schedPosition: {
-    ...typography.bodyMedium,
-    fontWeight: fontWeights.semibold,
-    minWidth: 80,
-  },
-  schedTime: {
-    ...typography.bodySmall,
-    fontVariant: ["tabular-nums"],
-  },
-
-  // PE tab
-  ratingHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacing[2],
-  },
-  ratingPosition: {
-    ...typography.bodyLarge,
-    fontWeight: fontWeights.semibold,
-  },
-  ratingAvg: {
-    ...typography.h4,
-    fontWeight: fontWeights.bold,
-  },
-  ratingScores: {
-    flexDirection: "row",
-    gap: spacing[2],
-    marginBottom: spacing[2],
-  },
-  scorePill: {
-    width: 36,
-    height: 28,
-    borderRadius: borderRadius.sm,
-    borderCurve: "continuous",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  scoreText: {
-    ...typography.labelSmall,
-    fontWeight: fontWeights.semibold,
-    fontVariant: ["tabular-nums"],
-  },
-  ratingMeta: {
-    ...typography.bodySmall,
-  },
-  ratingNotes: {
-    ...typography.bodySmall,
-    fontStyle: "italic",
-    marginTop: spacing[1],
-  },
-
-  // Discipline tab
-  discSummaryRow: {
-    flexDirection: "row",
-    gap: spacing[3],
-    marginBottom: spacing[3],
-  },
-  discSummaryCard: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: spacing[4],
-  },
-  discSummaryValue: {
-    ...typography.h2,
-    marginBottom: spacing[1],
-  },
-  discSummaryLabel: {
-    ...typography.labelSmall,
-  },
-  discSectionTitle: {
-    ...typography.labelLarge,
-    fontWeight: fontWeights.semibold,
-    marginTop: spacing[2],
-    marginBottom: spacing[2],
-  },
-  discRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: spacing[3],
-  },
-  discTitle: {
-    ...typography.bodyMedium,
-    fontWeight: fontWeights.semibold,
-    marginBottom: 2,
-  },
-  discDesc: {
-    ...typography.bodySmall,
-    marginBottom: 2,
-  },
-  discMeta: {
-    ...typography.bodySmall,
-  },
-  pointsBadge: {
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
-    borderCurve: "continuous",
-  },
-  pointsText: {
-    ...typography.labelSmall,
-    fontWeight: fontWeights.bold,
-  },
 });
