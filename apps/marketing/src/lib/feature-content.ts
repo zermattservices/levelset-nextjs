@@ -204,7 +204,7 @@ const CONTENT: Record<string, FeatureContent> = {
   evaluations: {
     tagline:
       'Turn any paper evaluation into a digital, AI-scored performance review — connected to real data.',
-    heroImage: '/screenshots/certified-trainer-evaluation.png',
+    heroImage: '/screenshots/evaluation-hero.png',
     problem:
       'Evaluation time comes around and leaders scramble to remember three months of performance. They fill out forms from memory, give vague feedback, and the team member leaves the meeting with no clear picture of where they actually stand.',
     solution:
