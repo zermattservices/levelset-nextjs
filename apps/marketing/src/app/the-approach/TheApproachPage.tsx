@@ -471,19 +471,11 @@ function LeadForm({ activeTimeslot }: { activeTimeslot: number | null }) {
 /* -------------------------------------------------------------------------- */
 
 export function TheApproachPage() {
-  const [unlocked, setUnlocked] = useState(false);
   const [timeslots, setTimeslots] = useState<Timeslot[]>([]);
   const [activeSlot, setActiveSlot] = useState<Timeslot | null>(null);
   const [overrideSlot, setOverrideSlot] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
-
-  // Check sessionStorage for password on mount
-  useEffect(() => {
-    if (sessionStorage.getItem('approach_unlocked') === '1') {
-      setUnlocked(true);
-    }
-  }, []);
 
   // Fetch timeslot content
   const fetchContent = useCallback(async () => {
@@ -503,8 +495,8 @@ export function TheApproachPage() {
   }, []);
 
   useEffect(() => {
-    if (unlocked) fetchContent();
-  }, [unlocked, fetchContent]);
+    fetchContent();
+  }, [fetchContent]);
 
   // Handle dropdown override
   useEffect(() => {
@@ -516,11 +508,6 @@ export function TheApproachPage() {
       setActiveSlot(getCurrentTimeslot(timeslots));
     }
   }, [overrideSlot, timeslots]);
-
-  // Password gate
-  if (!unlocked) {
-    return <PasswordGate onUnlock={() => setUnlocked(true)} />;
-  }
 
   // Loading state
   if (loading) {
@@ -560,31 +547,7 @@ export function TheApproachPage() {
           }}
         />
 
-        {/* Timeslot Selector — inside hero, dark-styled */}
-        <div className="relative z-10 border-b border-white/10 py-2 px-6 mb-12 md:mb-16">
-          <div className="max-w-content mx-auto flex items-center justify-between gap-4">
-            <span className="text-xs text-white/50 font-medium">
-              {displaySlot.day_label} &middot; {displaySlot.time_range}
-            </span>
-            <select
-              value={overrideSlot ?? ''}
-              onChange={(e) => {
-                const val = e.target.value;
-                setOverrideSlot(val ? Number(val) : null);
-              }}
-              className="text-xs bg-white/10 border border-white/20 rounded px-2 py-1 text-white/60 focus:outline-none focus:ring-1 focus:ring-white/30"
-            >
-              <option value="">Auto (current time)</option>
-              {timeslots.map((s) => (
-                <option key={s.timeslot_number} value={s.timeslot_number}>
-                  #{s.timeslot_number} — {s.day_label} {s.time_range}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="max-w-content mx-auto px-6 relative z-10">
+        <div className="max-w-content mx-auto px-6 relative z-10 pt-12 md:pt-16">
           <div className="max-w-2xl mx-auto text-center">
             {displaySlot.badge_text && (
               <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 text-sm font-medium mb-6 backdrop-blur-sm">
