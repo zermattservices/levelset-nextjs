@@ -1,6 +1,7 @@
 'use client';
 
 import { PLAN_TIERS, TIER_ORDER, FEATURE_GROUPS, TRIAL_DAYS, formatPrice, type PlanTier, type FeatureStatus } from '@levelset/shared';
+import { CTA_MODE, CTA_TEXT } from '@/lib/cta-config';
 import { useState } from 'react';
 import { PricingTable } from '@/components/pricing/PricingTable';
 import { useTrialModal } from '@/components/cta/TrialModalProvider';
@@ -123,7 +124,7 @@ export function PricingPageContent() {
             onClick={openModal}
             className="px-8 py-3.5 rounded-lg bg-white text-[#31664A] font-semibold text-base hover:bg-white/90 transition-colors duration-200 shadow-lg"
           >
-            Start Your Free Trial
+            {CTA_TEXT[CTA_MODE].button}
           </button>
         </div>
       </section>

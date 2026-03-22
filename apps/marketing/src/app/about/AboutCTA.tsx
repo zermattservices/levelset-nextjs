@@ -1,6 +1,7 @@
 'use client';
 
 import { TrialCTA } from '@/components/cta/TrialCTA';
+import { CTA_MODE } from '@/lib/cta-config';
 
 export function AboutCTA() {
   return (
@@ -20,7 +21,9 @@ export function AboutCTA() {
             Ready to see Levelset in action?
           </h2>
           <p className="text-lg text-white/70 mb-10 max-w-xl mx-auto">
-            Start your 30-day free trial with full access to every feature. No contracts, cancel anytime.
+            {CTA_MODE === 'demo'
+              ? 'Book a demo and see every feature in action. No commitment.'
+              : 'Start your 30-day free trial with full access to every feature. No contracts, cancel anytime.'}
           </p>
           <div className="flex justify-center">
             <TrialCTA dark />

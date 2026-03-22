@@ -6,6 +6,7 @@ import type { MarketingFeature, FeatureStatus } from '@/lib/features';
 import type { FeatureContent, FeatureScreenshot, TransformationShowcase, TransformationHighlight } from '@/lib/feature-content';
 import { FEATURES, getFeature } from '@/lib/features';
 import { FeaturePageCTA } from './FeaturePageCTA';
+import { CTA_MODE } from '@/lib/cta-config';
 
 function StatusBadge({ status, variant = 'default' }: { status: FeatureStatus; variant?: 'default' | 'hero' }) {
   if (status === 'live') return null;
@@ -527,7 +528,9 @@ export function FeaturePageTemplate({ feature, content }: FeaturePageTemplatePro
               Ready to try {feature.name}?
             </h2>
             <p className="text-lg text-white/60 mb-10">
-              Every trial includes full access to all features for 30 days.
+              {CTA_MODE === 'demo'
+                ? 'See how it works for your team — no commitment.'
+                : 'Every trial includes full access to all features for 30 days.'}
             </p>
             <FeaturePageCTA />
           </div>

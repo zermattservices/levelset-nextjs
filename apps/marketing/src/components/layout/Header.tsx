@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { FeaturesDropdown, FeaturesMenuItems } from './FeaturesDropdown';
 import { useTrialModal } from '@/components/cta/TrialModalProvider';
+import { CTA_MODE } from '@/lib/cta-config';
 
 /** Pages that have a light/white hero background (no dark overlay for the header to sit on). */
 const LIGHT_HERO_PAGES = ['/pricing', '/contact', '/integrations'];
@@ -181,7 +182,7 @@ export function Header() {
                 : 'bg-white/15 text-white border border-white/25 hover:bg-white/25 backdrop-blur-sm'
             }`}
           >
-            Get Started
+            {CTA_MODE === 'demo' ? 'Book a Demo' : 'Get Started'}
           </button>
         </nav>
 
@@ -257,7 +258,7 @@ export function Header() {
                 openModal();
               }}
             >
-              Get Started
+              {CTA_MODE === 'demo' ? 'Book a Demo' : 'Get Started'}
             </button>
           </nav>
         </div>

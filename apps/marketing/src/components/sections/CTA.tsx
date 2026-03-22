@@ -1,6 +1,7 @@
 'use client';
 
 import { TrialCTA } from '@/components/cta/TrialCTA';
+import { CTA_MODE } from '@/lib/cta-config';
 
 export function CTA() {
   return (
@@ -21,7 +22,9 @@ export function CTA() {
             Ready to ditch the spreadsheets?
           </h2>
           <p className="text-lg text-white/70 mb-10 max-w-xl mx-auto">
-            Start your free trial and see how Levelset connects your positions, discipline, and team roster in one platform.
+            {CTA_MODE === 'demo'
+              ? 'See how Levelset connects your positions, discipline, and team roster in one platform.'
+              : 'Start your free trial and see how Levelset connects your positions, discipline, and team roster in one platform.'}
           </p>
           <div className="flex justify-center">
             <TrialCTA dark />

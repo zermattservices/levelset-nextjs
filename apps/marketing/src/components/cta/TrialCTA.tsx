@@ -1,6 +1,7 @@
 'use client';
 
 import { useTrialModal } from './TrialModalProvider';
+import { CTA_MODE, CTA_TEXT } from '@/lib/cta-config';
 
 interface TrialCTAProps {
   /** Use the dark variant when placed on a dark background (e.g. hero section). */
@@ -9,6 +10,7 @@ interface TrialCTAProps {
 
 export function TrialCTA({ dark = false }: TrialCTAProps) {
   const { openModal } = useTrialModal();
+  const text = CTA_TEXT[CTA_MODE];
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -26,10 +28,10 @@ export function TrialCTA({ dark = false }: TrialCTAProps) {
           }
         `}
       >
-        Start Your 30-Day Free Trial
+        {text.button}
       </button>
       <p className={`text-xs ${dark ? 'text-white/50' : 'text-gray-400'}`}>
-        No commitment — cancel anytime.
+        {text.subtext}
       </p>
     </div>
   );
