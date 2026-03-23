@@ -14,7 +14,6 @@ import type {
   HotSchedulesAvailability,
   SchedulingSyncAnalysis,
 } from '@/lib/hotschedules.types';
-import { withAuth } from '@/lib/permissions/middleware';
 import { setCorsOrigin } from '@/lib/cors';
 
 // Increase body size limit for large HS payloads (900+ shifts)
@@ -79,8 +78,33 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
+  let syncLogId: string | undefined;
+
   try {
     const supabase = createServerSupabaseClient();
+
+    // Create sync log entry immediately (captures attempt even if handler crashes)
+    const { data: syncLog } = await supabase
+      .from('hs_sync_log')
+      .insert({
+        status: 'started',
+        source: req.body.source || (req.body.bookmarklet_version ? 'bookmarklet' : null),
+        bookmarklet_version: req.body.bookmarklet_version || null,
+        hs_client_id: req.body.hs_client_id || null,
+        location_number: req.body.hs_location_number || null,
+        request_meta: {
+          user_agent: req.headers['user-agent'] || null,
+          origin: req.headers.origin || null,
+          employee_count: Array.isArray(req.body.employees) ? req.body.employees.length :
+                          Array.isArray(req.body) ? req.body.length : 0,
+          has_shifts: !!(req.body.shifts?.length),
+          has_bootstrap: !!req.body.bootstrap,
+        },
+      })
+      .select('id')
+      .single();
+    syncLogId = syncLog?.id;
+
     const employees: HotSchedulesEmployee[] = req.body.employees || req.body;
     const locationId = req.body.location_id as string | undefined;     // backward compat
     const orgId = req.body.org_id as string | undefined;               // backward compat
@@ -108,6 +132,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const weekStartDate: string | undefined = req.body.weekStartDate;
 
     if (!Array.isArray(employees) || employees.length === 0) {
+      if (syncLogId) {
+        await supabase.from('hs_sync_log').update({
+          status: 'error',
+          error_message: 'Invalid request body. Expected array of employees.',
+          completed_at: new Date().toISOString(),
+        }).eq('id', syncLogId);
+      }
       return res.status(400).json({ error: 'Invalid request body. Expected array of employees.' });
     }
 
@@ -179,10 +210,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (!finalLocationId || !finalOrgId) {
+      if (syncLogId) {
+        await supabase.from('hs_sync_log').update({
+          status: 'error',
+          error_message: 'Could not identify location',
+          completed_at: new Date().toISOString(),
+        }).eq('id', syncLogId);
+      }
       return res.status(400).json({
         error: 'Could not identify location. No hs_client_id mapping, location_number, or type:5 employee found.',
         debug: { hsClientId, hsLocationNumber, locationId, orgId },
       });
+    }
+
+    // Update sync log with resolved location
+    if (syncLogId) {
+      await supabase.from('hs_sync_log').update({
+        location_id: finalLocationId,
+        org_id: finalOrgId,
+        location_number: locationNumber,
+      }).eq('id', syncLogId);
     }
 
     // Persist hs_client_id for faster future lookups
@@ -659,6 +706,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // Don't fail the request if flag update fails
     }
 
+    // Update sync log with success — include all request_meta fields (initial + result stats)
+    if (syncLogId) {
+      await supabase.from('hs_sync_log').update({
+        status: 'success',
+        completed_at: new Date().toISOString(),
+        request_meta: {
+          user_agent: req.headers['user-agent'] || null,
+          origin: req.headers.origin || null,
+          employee_count: employees.length,
+          has_shifts: shifts.length > 0,
+          has_bootstrap: !!req.body.bootstrap,
+          new_count: newEmployees.length,
+          modified_count: modifiedEmployees.length,
+          terminated_count: terminatedEmployees.length,
+          shifts_received: shifts.length,
+          notification_id: notification?.id || null,
+        },
+      }).eq('id', syncLogId);
+    }
+
     return res.status(200).json({
       success: true,
       location_number: locationNumber,
@@ -682,6 +749,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   } catch (error) {
     console.error('Error in sync-hotschedules:', error);
+
+    // Update sync log with error (don't let logging failure mask the real error)
+    if (syncLogId) {
+      try {
+        const supabase = createServerSupabaseClient();
+        await supabase.from('hs_sync_log').update({
+          status: 'error',
+          error_message: error instanceof Error ? error.message : 'Unknown error',
+          completed_at: new Date().toISOString(),
+        }).eq('id', syncLogId);
+      } catch { /* ignore logging failure */ }
+    }
+
     return res.status(500).json({
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -938,5 +1018,5 @@ async function updateActualPayRates(
   console.log(`[Sync] Updated actual pay rates for ${updated} employees`);
 }
 
-export default withAuth(handler);
+export default handler;
 

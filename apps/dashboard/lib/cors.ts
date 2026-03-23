@@ -4,6 +4,8 @@ const ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
+  'https://app.hotschedules.com',
+  'https://app.4pointsolutions.com',
 ];
 
 const ALLOWED_ORIGIN_SUFFIX = '.levelset.io';

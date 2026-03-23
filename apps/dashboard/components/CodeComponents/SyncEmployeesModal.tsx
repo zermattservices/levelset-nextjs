@@ -660,11 +660,14 @@ export function SyncEmployeesModal({
     if (!baseUrl) return '';
 
     // Bookmarklet phases:
+    // 0. Version check — bail with update message if bookmarklet is too old
     // 1. Parse HS cookie to extract location number + HS client ID
     // 2. Bootstrap — fetch schedule config to get weekStartDate, jobs, roles
     // 3. Parallel fetch — employees + shifts + jobs + roles + forecasts + time-off + availability
     // 4. POST all data to sync-hotschedules endpoint (no embedded Levelset IDs)
+    // 5. On any error, report to sync-error endpoint for logging
     const code = `javascript:(function(){
+var BV=1;
 var baseUrl='${baseUrl}';
 var loadingDiv=document.createElement('div');
 loadingDiv.style.cssText='position:fixed;top:20px;right:20px;background:#31664a;color:white;padding:15px 20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;min-width:260px;';
@@ -672,6 +675,10 @@ loadingDiv.textContent='Connecting to HotSchedules...';
 document.body.appendChild(loadingDiv);
 var hsClientId=null;var hsLocationNumber=null;var hsLocationDisplay=null;
 try{var cookieMatch=document.cookie.match(/clarifi_previous_node_store_selection=([^;]+)/);if(cookieMatch){var decoded=decodeURIComponent(cookieMatch[1]);var parsed=JSON.parse(decoded);var keys=Object.keys(parsed);if(keys.length>0){var entry=parsed[keys[0]];hsLocationDisplay=entry.display||'';var numMatch=hsLocationDisplay.match(/\\((\\d{5})\\)/);if(numMatch)hsLocationNumber=numMatch[1];var idMatch=entry.name?entry.name.match(/:clarifi:(\\d+):/):null;if(idMatch)hsClientId=parseInt(idMatch[1],10);}}}catch(e){console.warn('Could not parse HS cookie:',e);}
+function reportError(msg,phase){try{fetch(baseUrl+'/api/employees/sync-error',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({error:msg,hs_client_id:hsClientId,hs_location_number:hsLocationNumber,bookmarklet_version:BV,phase:phase})});}catch(e){}}
+function showError(msg){loadingDiv.remove();var d=document.createElement('div');d.style.cssText='position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';d.innerHTML='<strong>Error</strong><br><br>'+msg;document.body.appendChild(d);setTimeout(function(){d.remove();},8000);}
+fetch(baseUrl+'/api/employees/sync-version?v='+BV).then(function(r){return r.json();}).then(function(ver){
+if(ver.deprecated){loadingDiv.remove();alert('Your Levelset sync bookmarklet is outdated. Please update it from the Levelset dashboard (Employees > Sync > Step 1).');return;}
 var hsOrigin=window.location.origin;
 var ts=Date.now();
 var fetchOpts={method:'GET',credentials:'include',headers:{'Accept':'application/json'}};
@@ -718,12 +725,13 @@ if(Array.isArray(lpForecast)&&lpForecast.length>0&&lpForecast[0].forecastId){for
 loadingDiv.textContent='Fetching forecast intervals...';
 return (forecastId?safeFetch('/hs/spring/forecast/lp-store-volume-data/?forecastId='+forecastId):Promise.resolve([])).then(function(intervals){
 var forecastIntervals=Array.isArray(intervals)?intervals:[];
-var payload={employees:visibleEmployees,shifts:shifts,jobs:jobs,roles:roles,bootstrap:{id:bootstrap.id,currentWeekStartDate:bootstrap.currentWeekStartDate,utcOffset:bootstrap.utcOffset,tz:bootstrap.tz,scheduleMinuteInterval:bootstrap.scheduleMinuteInterval,clientWorkWeekStart:bootstrap.clientWorkWeekStart,userJobs:bootstrap.userJobs||[],jobs:bootstrap.jobs||[],schedules:bootstrap.schedules||[]},forecasts:{daily:forecastSummary&&forecastSummary.projectedVolume?forecastSummary.projectedVolume:[],intervals:forecastIntervals,benchmarks:[]},slsProjected:Array.isArray(slsProjected)?slsProjected:[],timeOff:timeOff,timeOffStatuses:timeOffStatuses,availability:availability,weekStartDate:weekStart,hs_client_id:hsClientId||bootstrap.id,hs_location_number:hsLocationNumber,hs_location_display:hsLocationDisplay};
+var payload={employees:visibleEmployees,shifts:shifts,jobs:jobs,roles:roles,bootstrap:{id:bootstrap.id,currentWeekStartDate:bootstrap.currentWeekStartDate,utcOffset:bootstrap.utcOffset,tz:bootstrap.tz,scheduleMinuteInterval:bootstrap.scheduleMinuteInterval,clientWorkWeekStart:bootstrap.clientWorkWeekStart,userJobs:bootstrap.userJobs||[],jobs:bootstrap.jobs||[],schedules:bootstrap.schedules||[]},forecasts:{daily:forecastSummary&&forecastSummary.projectedVolume?forecastSummary.projectedVolume:[],intervals:forecastIntervals,benchmarks:[]},slsProjected:Array.isArray(slsProjected)?slsProjected:[],timeOff:timeOff,timeOffStatuses:timeOffStatuses,availability:availability,weekStartDate:weekStart,hs_client_id:hsClientId||bootstrap.id,hs_location_number:hsLocationNumber,hs_location_display:hsLocationDisplay,source:'bookmarklet',bookmarklet_version:BV};
 loadingDiv.textContent='Syncing to Levelset...';
 return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
 });
 });
-}).then(function(r){if(!r.ok){return r.json().then(function(data){throw new Error(data.error||'Sync failed');});}return r.json();}).then(function(data){loadingDiv.remove();var resultDiv=document.createElement('div');resultDiv.style.cssText='position:fixed;top:20px;right:20px;background:'+(data.success?'#10b981':'#ef4444')+';color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';if(data.success){var msg='<strong>Sync Successful!</strong><br><br>Employees: '+data.stats.new+' new, '+data.stats.modified+' updated, '+data.stats.terminated+' terminated';if(data.stats.shifts_received){msg+='<br>Shifts: '+data.stats.shifts_received+' captured';}if(data.stats.jobs_received){msg+='<br>Jobs: '+data.stats.jobs_received;}resultDiv.innerHTML=msg;}else{resultDiv.innerHTML='<strong>Sync Failed</strong><br><br>'+data.error+(data.details?'<br><br>Details: '+data.details:'');}document.body.appendChild(resultDiv);setTimeout(function(){resultDiv.remove();},8000);}).catch(function(err){loadingDiv.remove();var errorDiv=document.createElement('div');errorDiv.style.cssText='position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';errorDiv.innerHTML='<strong>Error</strong><br><br>'+err.message;document.body.appendChild(errorDiv);setTimeout(function(){errorDiv.remove();},8000);});
+}).then(function(r){if(!r.ok){return r.json().then(function(data){throw new Error(data.error||'Sync failed');});}return r.json();}).then(function(data){loadingDiv.remove();var resultDiv=document.createElement('div');resultDiv.style.cssText='position:fixed;top:20px;right:20px;background:'+(data.success?'#10b981':'#ef4444')+';color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';if(data.success){var msg='<strong>Sync Successful!</strong><br><br>Employees: '+data.stats.new+' new, '+data.stats.modified+' updated, '+data.stats.terminated+' terminated';if(data.stats.shifts_received){msg+='<br>Shifts: '+data.stats.shifts_received+' captured';}if(data.stats.jobs_received){msg+='<br>Jobs: '+data.stats.jobs_received;}resultDiv.innerHTML=msg;}else{resultDiv.innerHTML='<strong>Sync Failed</strong><br><br>'+data.error+(data.details?'<br><br>Details: '+data.details:'');}document.body.appendChild(resultDiv);setTimeout(function(){resultDiv.remove();},8000);}).catch(function(err){reportError(err.message,'sync');showError(err.message);});
+}).catch(function(err){reportError(err.message,'version_check');showError('Could not connect to Levelset: '+err.message);});
 })();`;
 
     return code;
