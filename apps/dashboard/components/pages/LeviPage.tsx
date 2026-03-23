@@ -1,6 +1,6 @@
 /**
  * LeviPage — main Levi AI chat page.
- * Restricted to Levelset Admin users only.
+ * Access controlled via AI_USE permission.
  */
 
 import * as React from 'react';
@@ -13,6 +13,7 @@ import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { EmployeeModal } from '@/components/CodeComponents/EmployeeModal';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useLeviChat } from '@/lib/hooks/useLeviChat';
 import { ChatContainer } from '@/components/levi/ChatContainer';
@@ -22,6 +23,7 @@ import type { Employee } from '@/lib/supabase.types';
 export function LeviPage() {
   const router = useRouter();
   const auth = useAuth();
+  const { has } = usePermissions();
   const { selectedLocationId } = useLocationContext();
 
   // Employee modal state
@@ -68,7 +70,7 @@ export function LeviPage() {
     return <AuthLoadingScreen />;
   }
 
-  const isLevelsetAdmin = auth.role === 'Levelset Admin';
+  const canUseLevi = has(P.AI_USE);
 
   return (
     <>
@@ -78,7 +80,7 @@ export function LeviPage() {
       <div className={styles.page}>
         <MenuNavigation fullWidth />
 
-        {isLevelsetAdmin ? (
+        {canUseLevi ? (
           <div className={styles.chatArea}>
             <ChatContainer
               historyMessages={chat.historyMessages}
@@ -95,9 +97,9 @@ export function LeviPage() {
           </div>
         ) : (
           <div className={styles.accessDenied}>
-            <h2 className={styles.accessDeniedTitle}>Coming Soon</h2>
+            <h2 className={styles.accessDeniedTitle}>Access Restricted</h2>
             <p className={styles.accessDeniedText}>
-              Levi AI is currently available to Levelset administrators only.
+              You don&apos;t have permission to use Levi AI. Contact your administrator to request access.
             </p>
           </div>
         )}

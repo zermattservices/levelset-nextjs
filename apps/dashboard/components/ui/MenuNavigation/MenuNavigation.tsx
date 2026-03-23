@@ -351,8 +351,8 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
               </div>
             )}
 
-            {/* Levi AI - direct link, feature flag gated */}
-            {hasFeature(F.LEVI_AI) && (
+            {/* Levi AI - direct link, feature flag + permission gated */}
+            {hasFeature(F.LEVI_AI) && has(P.AI_USE) && (
               <div className={sty.navButtonContainer}>
                 <Link href="/levi" className={classNames(sty.navButton, sty.navButtonDirect)}>
                   <span className={sty.navButtonText}>Levi</span>
