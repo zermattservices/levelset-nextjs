@@ -24,6 +24,7 @@ import { getPillarScores } from '../tools/data/pillars.js';
 import { getOrgChart } from '../tools/data/org-chart.js';
 import { getScheduleOverview, getEmployeeSchedule, getLaborSummary } from '../tools/data/schedule.js';
 import { getEvaluationStatus } from '../tools/data/evaluations.js';
+import { getRatingActivity } from '../tools/data/rating-activity.js';
 
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -123,6 +124,11 @@ export const TOOL_META: Record<string, ToolMeta> = {
     summary: 'Evaluation overview (location-wide) or individual eval history — requires enable_evaluations',
     requiresConfirmation: false,
   },
+  get_rating_activity: {
+    category: 'data',
+    summary: 'Flexible ratings query: who submitted/received ratings, rating counts by rater/employee/position/day, individual ratings with criteria scores. Supports date range, rater, employee, and position filters.',
+    requiresConfirmation: false,
+  },
 
   // Display tools
   show_employee_list: {
@@ -212,6 +218,9 @@ export async function executeTool(
     case 'get_evaluation_status':
       return getEvaluationStatus(args, orgId, locationId);
 
+    case 'get_rating_activity':
+      return getRatingActivity(args, orgId, locationId);
+
     default:
       return JSON.stringify({ error: `Unknown tool: ${name}` });
   }
@@ -257,6 +266,12 @@ export function getToolCallLabel(name: string, input: Record<string, unknown>): 
       return 'Analyzing labor costs';
     case 'get_evaluation_status':
       return input.employee_id ? 'Checking evaluation history' : 'Loading evaluation overview';
+    case 'get_rating_activity': {
+      if (input.group_by === 'rater') return 'Checking rating submissions';
+      if (input.group_by === 'day') return 'Checking daily rating activity';
+      if (input.group_by === 'position') return 'Checking ratings by position';
+      return 'Loading rating activity';
+    }
     case 'show_employee_list':
     case 'show_employee_card':
       return ''; // Display tools — no label needed
@@ -442,6 +457,60 @@ export function buildAllTools(ctx: ToolRegistryContext): ToolSet {
       }),
       execute: async (input: Record<string, unknown>) => {
         return await getPillarScores(input, orgId, locationId);
+      },
+    }),
+
+    get_rating_activity: tool({
+      description:
+        'Flexible ratings query tool. Use this to answer questions about rating activity, submission patterns, and detailed rating data. Supports multiple modes:\n' +
+        '- group_by "rater": Who submitted the most/fewest ratings? → returns rater name, count, avg score given\n' +
+        '- group_by "employee": Who received the most/fewest ratings? → returns employee name, count, avg score\n' +
+        '- group_by "position": Which positions got rated the most? → returns position, count, avg score\n' +
+        '- group_by "day": How many ratings per day? → returns date, count, avg score\n' +
+        '- No group_by: Individual ratings with rater name, employee name, position, per-criteria scores, and notes\n\n' +
+        'The rater is the leader/trainer who submitted the rating. The employee is the team member who was rated.\n' +
+        'rating_1 through rating_5 map to position-specific criteria (e.g., for Fries: rating_1=Drop with Timing, rating_2=Fry & Finish Right, etc.). Set include_criteria=true to get criteria names in results.\n' +
+        'Default date range is last 7 days. Use start_date/end_date for custom ranges.',
+      inputSchema: z.object({
+        group_by: z
+          .enum(['rater', 'employee', 'position', 'day'])
+          .optional()
+          .describe('Group results by dimension. Omit for individual ratings.'),
+        rater_id: z
+          .string()
+          .optional()
+          .describe('Filter to ratings submitted by this employee_id (the rater). Use lookup_employee first to find the ID.'),
+        employee_id: z
+          .string()
+          .optional()
+          .describe('Filter to ratings received by this employee_id. Use lookup_employee first to find the ID.'),
+        position: z
+          .string()
+          .optional()
+          .describe('Filter to a specific position name (case-insensitive, e.g., "Fries", "iPOS")'),
+        start_date: z
+          .string()
+          .optional()
+          .describe('Start date YYYY-MM-DD (default: 7 days ago)'),
+        end_date: z
+          .string()
+          .optional()
+          .describe('End date YYYY-MM-DD (default: today)'),
+        limit: z
+          .number()
+          .optional()
+          .describe('Max results (default: 20, max: 50)'),
+        sort: z
+          .enum(['asc', 'desc'])
+          .optional()
+          .describe('Sort direction for count/date (default: desc = highest/newest first)'),
+        include_criteria: z
+          .boolean()
+          .optional()
+          .describe('Include position-specific criteria names for rating_1..5 in individual ratings (default: false)'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await getRatingActivity(input, orgId, locationId);
       },
     }),
 
