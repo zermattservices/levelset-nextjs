@@ -678,20 +678,8 @@ chatRoute.post('/', async (c) => {
             outputTokens: totalOutputTokens,
             latencyMs: Date.now() - startMs,
             escalated,
-            // Pipeline-specific fields
-            ...(orchestratorModel ? {
-              orchestratorModel,
-              orchestratorInputTokens,
-              orchestratorOutputTokens,
-            } : {}),
-            ...(workerModel ? {
-              workerModel,
-              workerInputTokens,
-              workerOutputTokens,
-            } : {}),
             toolCount: toolCallCount > 0 ? toolCallCount : undefined,
             toolDurationMs: toolDurationMs > 0 ? toolDurationMs : undefined,
-            fallback: fallback || undefined,
           }).catch(() => {});
         },
       });
@@ -768,7 +756,6 @@ chatRoute.post('/', async (c) => {
       outputTokens: totalOutputTokens,
       latencyMs: Date.now() - startMs,
       escalated,
-      fallback: true, // Non-streaming always uses legacy path
     }).catch((err) => {
       console.error('Usage logging failed:', err);
     });
