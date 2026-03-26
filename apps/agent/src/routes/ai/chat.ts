@@ -1,18 +1,15 @@
 /**
- * Chat endpoint — main orchestrator for Levi AI conversations.
+ * Chat endpoint — Levi AI conversations.
  *
- * Pipeline: Orchestrator (Opus) → Tool Executor → Worker (MiniMax)
- * Fallback: Legacy single-model path (MiniMax with all tools)
+ * Architecture: Single Sonnet 4.6 agent with native tool calling and
+ * adaptive thinking. Escalation fallback to Opus 4.6 via code-level try/catch.
  *
  * Built on the Vercel AI SDK:
- *   - generateObject() for structured plan generation (orchestrator)
- *   - streamText() for LLM response synthesis (worker + legacy fallback)
- *   - createUIMessageStream for structured SSE streaming
- *   - smoothStream for word-by-word streaming effect
- *   - tool() + Zod for type-safe tool definitions
- *
- * Streaming events follow the AI SDK UI Message Stream Protocol:
- *   start, text-start, text-delta, text-end, tool-call, tool-result, finish
+ *   - streamText() with tool definitions + stepCountIs for the tool loop
+ *   - generateText() for the non-streaming path
+ *   - createUIMessageStream for SSE streaming
+ *   - smoothStream for word-by-word effect
+ *   - onStepFinish for tool-status labels and display tool UI blocks
  *
  * Custom data parts:
  *   data-tool-status — human-readable labels for tool call progress
@@ -44,11 +41,6 @@ import {
 import { retrieveContext } from '../../lib/context-retriever.js';
 import { logUsage, checkRateLimit } from '../../lib/usage-tracker.js';
 
-// Pipeline imports
-import { generatePlan, summarizeConversation } from '../../lib/orchestrator.js';
-import { executePlan } from '../../lib/tool-executor.js';
-import type { ToolResult } from '../../lib/tool-executor.js';
-import { synthesizeResponse } from '../../lib/worker.js';
 import { buildTools, getToolCallLabel } from '../../lib/tool-registry.js';
 import type { ToolRegistryContext } from '../../lib/tool-registry.js';
 
@@ -267,8 +259,8 @@ chatRoute.delete('/clear', async (c) => {
 /**
  * POST / — Main chat endpoint with AI SDK streaming.
  *
- * Pipeline: Orchestrator (Opus) → Tool Executor → Worker (MiniMax)
- * Fallback: Legacy single-model path if orchestrator fails.
+ * Single Sonnet 4.6 agent with native tool calling and adaptive thinking.
+ * Escalation fallback to Opus 4.6 on primary model failure.
  */
 chatRoute.post('/', async (c) => {
   try {
@@ -366,320 +358,165 @@ chatRoute.post('/', async (c) => {
           let escalated = false;
           let toolCallCount = 0;
           let assistantContent = '';
-          let fallback = false;
           const allUIBlocks: Array<{ blockType: string; blockId: string; payload: Record<string, unknown> }> = [];
 
-          // Pipeline-specific tracking
-          let orchestratorModel = '';
-          let orchestratorInputTokens = 0;
-          let orchestratorOutputTokens = 0;
-          let workerModel = '';
-          let workerInputTokens = 0;
-          let workerOutputTokens = 0;
-          let toolDurationMs = 0;
+          const leviTools = buildTools(registryCtx);
 
-          try {
-            // ── Orchestrator Pipeline ─────────────────────────────
-
-            const conversationSummary = summarizeConversation(history);
-            const planResult = await generatePlan({
-              userMessage,
-              conversationSummary,
-              orgContext,
-              toolRegistryContext: registryCtx,
-            });
-
-            if (!planResult) {
-              throw new Error('Orchestrator failed to generate plan');
-            }
-
-            const { plan, usage: orchUsage } = planResult;
-            orchestratorModel = 'anthropic/claude-opus-4.6';
-            orchestratorInputTokens = orchUsage.inputTokens;
-            orchestratorOutputTokens = orchUsage.outputTokens;
-            totalInputTokens += orchUsage.inputTokens;
-            totalOutputTokens += orchUsage.outputTokens;
-
-            // Execute plan tools (deterministic — no LLM)
-            let toolResults: ToolResult[] = [];
-            if (plan.steps.length > 0) {
-              const toolStartMs = Date.now();
-              toolResults = await executePlan(plan, registryCtx, {
-                onToolStart: (toolName, label, stepIndex) => {
-                  if (label) {
-                    writer.write({
-                      type: 'data-tool-status' as any,
-                      data: {
-                        toolCallId: `plan-step-${stepIndex}`,
-                        toolName,
-                        status: 'running',
-                        label,
-                      },
-                    });
-                  }
+          const runAgent = (model: ReturnType<typeof models.languageModel>) => {
+            return streamText({
+              model,
+              system: systemPrompt,
+              messages: llmMessages,
+              tools: leviTools,
+              stopWhen: stepCountIs(MAX_TOOL_STEPS),
+              providerOptions: {
+                openrouter: {
+                  reasoning: { enabled: true },
+                  verbosity: 'medium',
                 },
-                onToolDone: (toolName, label, stepIndex) => {
-                  if (label) {
-                    writer.write({
-                      type: 'data-tool-status' as any,
-                      data: {
-                        toolCallId: `plan-step-${stepIndex}`,
-                        toolName,
-                        status: 'done',
-                        label,
-                      },
-                    });
-                  }
-                },
-              });
-              toolCallCount = plan.steps.length;
-              toolDurationMs = Date.now() - toolStartMs;
-            }
+              },
+              experimental_transform: smoothStream({ delayInMs: 15, chunking: 'word' }),
+              onStepFinish: async (step) => {
+                // Track usage
+                if (step.usage) {
+                  totalInputTokens += step.usage.inputTokens ?? 0;
+                  totalOutputTokens += step.usage.outputTokens ?? 0;
+                }
 
-            // Worker synthesis (MiniMax streams the response)
-            const workerResult = synthesizeResponse({
-              synthesisDirective: plan.synthesisDirective,
-              responseStyle: plan.responseStyle,
-              toolResults,
-              conversationHistory: llmMessages,
-              orgContext,
-              userName: user.name,
-              coreContext: contextResult?.coreContext || undefined,
-              retrievedContext: retrievedParts.length > 0 ? retrievedParts.join('\n\n') : undefined,
-              onStepFinish: async (step: any) => {
-                // Intercept display tool results and emit UI block events
-                if (step.toolResults) {
-                  for (const tr of step.toolResults as Array<{ toolCallId: string; output: unknown }>) {
-                    const output = tr.output;
-                    const isDisplay = typeof output === 'object' && output !== null && (output as any).__display;
-                    if (isDisplay) {
-                      const block = {
-                        blockType: (output as any).blockType as string,
-                        blockId: (output as any).blockId as string,
-                        payload: (output as any).payload as Record<string, unknown>,
-                      };
-                      allUIBlocks.push(block);
+                // Emit tool-status SSE labels for data tools
+                if (step.toolCalls && step.toolCalls.length > 0) {
+                  toolCallCount += step.toolCalls.length;
+                  for (const tc of step.toolCalls as Array<{ toolCallId: string; toolName: string; input: Record<string, unknown> }>) {
+                    if (!DISPLAY_TOOLS.has(tc.toolName)) {
                       writer.write({
-                        type: 'data-ui-block' as any,
-                        data: block,
+                        type: 'data-tool-status' as any,
+                        data: {
+                          toolCallId: tc.toolCallId,
+                          toolName: tc.toolName,
+                          status: 'done',
+                          label: getToolCallLabel(tc.toolName, tc.input),
+                        },
                       });
+                    }
+                  }
+                }
+
+                // Persist tool messages and emit UI blocks for display tools
+                if (step.toolCalls && step.toolCalls.length > 0) {
+                  const dataToolCalls = step.toolCalls
+                    .filter((tc: any) => !DISPLAY_TOOLS.has(tc.toolName))
+                    .map((tc: any) => ({
+                      id: tc.toolCallId,
+                      type: 'function' as const,
+                      function: { name: tc.toolName, arguments: JSON.stringify(tc.input) },
+                    }));
+
+                  if (dataToolCalls.length > 0) {
+                    await persistMessage(conversationId, {
+                      role: 'assistant',
+                      content: step.text || '',
+                      toolCalls: dataToolCalls,
+                    });
+                  }
+
+                  if (step.toolResults) {
+                    for (const tr of step.toolResults as Array<{ toolCallId: string; output: unknown }>) {
+                      const output = tr.output;
+                      const outputStr = typeof output === 'string' ? output : JSON.stringify(output);
+                      const isDisplay = typeof output === 'object' && output !== null && (output as any).__display;
+
+                      if (isDisplay) {
+                        const block = {
+                          blockType: (output as any).blockType as string,
+                          blockId: (output as any).blockId as string,
+                          payload: (output as any).payload as Record<string, unknown>,
+                        };
+                        allUIBlocks.push(block);
+                        writer.write({ type: 'data-ui-block' as any, data: block });
+                      } else {
+                        await persistMessage(conversationId, {
+                          role: 'tool',
+                          content: outputStr,
+                          toolCallId: tr.toolCallId,
+                        });
+                      }
                     }
                   }
                 }
               },
             });
+          };
 
-            // Merge the worker stream into our UI message stream
-            writer.merge(workerResult.toUIMessageStream({
+          try {
+            const result = runAgent(models.languageModel('primary'));
+            writer.merge(result.toUIMessageStream({
               sendStart: false,
               onError: (error) => {
                 const errMsg = error instanceof Error ? error.message : String(error);
-                console.error('[Chat] Worker stream error:', { error: errMsg });
+                console.error('[Chat] Primary stream error:', { error: errMsg });
                 return "I'm having trouble right now. Please try again.";
               },
             }));
-
-            // Wait for the stream to complete
-            assistantContent = await workerResult.text;
-            const workerResponse = await workerResult.response;
-            workerModel = workerResponse?.modelId || 'minimax/minimax-m2.5';
-            finalModel = workerModel; // Overall model reported is the worker
-
-            const wUsage = await workerResult.usage;
-            workerInputTokens = wUsage?.inputTokens ?? 0;
-            workerOutputTokens = wUsage?.outputTokens ?? 0;
-            totalInputTokens += workerInputTokens;
-            totalOutputTokens += workerOutputTokens;
-
-          } catch (pipelineError) {
-            // ── Legacy Fallback ──────────────────────────────────
-            console.warn('Pipeline failed, falling back to legacy path:', pipelineError);
-            fallback = true;
-
-            // Reset tracking from any partial pipeline run
+            assistantContent = await result.text;
+            const response = await result.response;
+            finalModel = response?.modelId || 'anthropic/claude-sonnet-4-6';
+            if (totalInputTokens === 0) {
+              const usage = await result.usage;
+              totalInputTokens = usage?.inputTokens ?? 0;
+              totalOutputTokens = usage?.outputTokens ?? 0;
+            }
+          } catch (primaryError) {
+            console.warn('Primary model failed, escalating to Opus:', primaryError);
+            escalated = true;
             totalInputTokens = 0;
             totalOutputTokens = 0;
             toolCallCount = 0;
 
-            const leviTools = buildTools(registryCtx);
-
             try {
-              const result = streamText({
-                model: models.languageModel('primary'),
-                system: systemPrompt,
-                messages: llmMessages,
-                tools: leviTools,
-                stopWhen: stepCountIs(MAX_TOOL_STEPS),
-                experimental_transform: smoothStream({ delayInMs: 15, chunking: 'word' }),
-                onStepFinish: async (step) => {
-                  // Track usage from each step
-                  if (step.usage) {
-                    totalInputTokens += step.usage.inputTokens ?? 0;
-                    totalOutputTokens += step.usage.outputTokens ?? 0;
-                  }
-
-                  // Emit custom tool status labels for data-fetching tools only
-                  if (step.toolCalls && step.toolCalls.length > 0) {
-                    toolCallCount += step.toolCalls.length;
-
-                    for (let i = 0; i < step.toolCalls.length; i++) {
-                      const tc = step.toolCalls[i] as { toolCallId: string; toolName: string; input: Record<string, unknown> };
-
-                      if (!DISPLAY_TOOLS.has(tc.toolName)) {
-                        writer.write({
-                          type: 'data-tool-status' as any,
-                          data: {
-                            toolCallId: tc.toolCallId,
-                            toolName: tc.toolName,
-                            status: 'done',
-                            label: getToolCallLabel(tc.toolName, tc.input),
-                          },
-                        });
-                      }
-                    }
-                  }
-
-                  // Persist tool messages and emit UI blocks from display tools
-                  if (step.toolCalls && step.toolCalls.length > 0) {
-                    const dataToolCalls = step.toolCalls
-                      .filter((tc: any) => !DISPLAY_TOOLS.has(tc.toolName))
-                      .map((tc: any) => ({
-                        id: tc.toolCallId,
-                        type: 'function' as const,
-                        function: {
-                          name: tc.toolName,
-                          arguments: JSON.stringify(tc.input),
-                        },
-                      }));
-
-                    if (dataToolCalls.length > 0) {
-                      await persistMessage(conversationId, {
-                        role: 'assistant',
-                        content: step.text || '',
-                        toolCalls: dataToolCalls,
-                      });
-                    }
-
-                    if (step.toolResults) {
-                      for (const tr of step.toolResults as Array<{ toolCallId: string; output: unknown }>) {
-                        const output = tr.output;
-                        const outputStr = typeof output === 'string'
-                          ? output
-                          : JSON.stringify(output);
-
-                        const isDisplay = typeof output === 'object' && output !== null && (output as any).__display;
-
-                        if (isDisplay) {
-                          const block = {
-                            blockType: (output as any).blockType as string,
-                            blockId: (output as any).blockId as string,
-                            payload: (output as any).payload as Record<string, unknown>,
-                          };
-                          allUIBlocks.push(block);
-                          writer.write({
-                            type: 'data-ui-block' as any,
-                            data: block,
-                          });
-                        } else {
-                          await persistMessage(conversationId, {
-                            role: 'tool',
-                            content: outputStr,
-                            toolCallId: tr.toolCallId,
-                          });
-                        }
-                      }
-                    }
-                  }
-                },
-              });
-
-              // Merge the AI SDK stream into our UI message stream
-              writer.merge(result.toUIMessageStream({
+              const fallbackResult = runAgent(models.languageModel('escalation'));
+              writer.merge(fallbackResult.toUIMessageStream({
                 sendStart: false,
                 onError: (error) => {
                   const errMsg = error instanceof Error ? error.message : String(error);
-                  console.error('[Chat] Primary stream error:', { error: errMsg, model: 'primary' });
+                  console.error('[Chat] Escalation stream error:', { error: errMsg });
                   return "I'm having trouble right now. Please try again.";
                 },
               }));
-
-              assistantContent = await result.text;
-              const response = await result.response;
-              finalModel = response?.modelId || 'minimax/minimax-m2.5';
-
-              if (totalInputTokens === 0) {
-                const usage = await result.usage;
-                totalInputTokens = usage?.inputTokens ?? 0;
-                totalOutputTokens = usage?.outputTokens ?? 0;
-              }
-            } catch (primaryError) {
-              console.warn('Primary model failed, escalating:', primaryError);
-              escalated = true;
-
-              try {
-                const escalationResult = streamText({
-                  model: models.languageModel('escalation'),
-                  system: systemPrompt,
-                  messages: llmMessages,
-                  tools: leviTools,
-                  stopWhen: stepCountIs(MAX_TOOL_STEPS),
-                  experimental_transform: smoothStream({ delayInMs: 15, chunking: 'word' }),
-                });
-
-                writer.merge(escalationResult.toUIMessageStream({
-                  sendStart: false,
-                  onError: (error) => {
-                    const errMsg = error instanceof Error ? error.message : String(error);
-                    console.error('[Chat] Escalation stream error:', { error: errMsg, model: 'escalation' });
-                    return "I'm having trouble right now. Please try again.";
-                  },
-                }));
-
-                assistantContent = await escalationResult.text;
-                const escalationResponse = await escalationResult.response;
-                finalModel = escalationResponse?.modelId || 'anthropic/claude-sonnet-4.5';
-
-                const escalationUsage = await escalationResult.usage;
-                totalInputTokens = escalationUsage?.inputTokens ?? 0;
-                totalOutputTokens = escalationUsage?.outputTokens ?? 0;
-              } catch (escalationError) {
-                console.error('Escalation model failed:', escalationError);
-                assistantContent = "I'm having trouble right now. Please try again.";
-              }
+              assistantContent = await fallbackResult.text;
+              const fallbackResponse = await fallbackResult.response;
+              finalModel = fallbackResponse?.modelId || 'anthropic/claude-opus-4-6';
+              const fallbackUsage = await fallbackResult.usage;
+              totalInputTokens = fallbackUsage?.inputTokens ?? 0;
+              totalOutputTokens = fallbackUsage?.outputTokens ?? 0;
+            } catch (escalationError) {
+              console.error('Escalation model also failed:', escalationError);
+              assistantContent = "I'm having trouble right now. Please try again.";
             }
           }
 
-          // Persist final assistant message (non-blocking)
+          // Persist final assistant message
           if (assistantContent) {
             persistMessage(conversationId, {
               role: 'assistant',
               content: assistantContent,
-              metadata: {
-                model: finalModel,
-                escalated,
-                fallback,
-                tool_call_count: toolCallCount,
-                input_tokens: totalInputTokens,
-                output_tokens: totalOutputTokens,
-              },
+              metadata: { model: finalModel, escalated, tool_call_count: toolCallCount, input_tokens: totalInputTokens, output_tokens: totalOutputTokens },
               uiBlocks: allUIBlocks.length > 0 ? allUIBlocks : undefined,
             }).catch(() => {});
           }
 
-          // Log usage (non-blocking)
+          // Log usage
           logUsage({
             orgId: billingOrgId,
             userId,
             conversationId,
             model: finalModel,
-            tier: fallback ? (escalated ? 'escalation' : 'primary') : 'pipeline',
+            tier: escalated ? 'escalation' : 'primary',
             taskType: 'user_chat',
             inputTokens: totalInputTokens,
             outputTokens: totalOutputTokens,
             latencyMs: Date.now() - startMs,
             escalated,
             toolCount: toolCallCount > 0 ? toolCallCount : undefined,
-            toolDurationMs: toolDurationMs > 0 ? toolDurationMs : undefined,
           }).catch(() => {});
         },
       });
@@ -687,7 +524,7 @@ chatRoute.post('/', async (c) => {
       return createUIMessageStreamResponse({ stream });
     }
 
-    // ── Non-streaming path (legacy only) ──────────────────────
+    // ── Non-streaming path ────────────────────────────────────
     const startMs = Date.now();
     let assistantContent = '';
     let totalInputTokens = 0;
@@ -704,26 +541,35 @@ chatRoute.post('/', async (c) => {
         messages: llmMessages,
         tools: leviTools,
         stopWhen: stepCountIs(MAX_TOOL_STEPS),
+        providerOptions: {
+          openrouter: {
+            reasoning: { enabled: true },
+            verbosity: 'medium',
+          },
+        },
       });
-
       assistantContent = result.text;
-      finalModel = result.response?.modelId || 'minimax/minimax-m2.5';
+      finalModel = result.response?.modelId || 'anthropic/claude-sonnet-4-6';
       totalInputTokens = result.usage?.inputTokens ?? 0;
       totalOutputTokens = result.usage?.outputTokens ?? 0;
     } catch (primaryError) {
       console.warn('Primary model failed, escalating:', primaryError);
       escalated = true;
-
       const result = await generateText({
         model: models.languageModel('escalation'),
         system: systemPrompt,
         messages: llmMessages,
         tools: leviTools,
         stopWhen: stepCountIs(MAX_TOOL_STEPS),
+        providerOptions: {
+          openrouter: {
+            reasoning: { enabled: true },
+            verbosity: 'medium',
+          },
+        },
       });
-
       assistantContent = result.text;
-      finalModel = result.response?.modelId || 'anthropic/claude-sonnet-4.5';
+      finalModel = result.response?.modelId || 'anthropic/claude-opus-4-6';
       totalInputTokens = result.usage?.inputTokens ?? 0;
       totalOutputTokens = result.usage?.outputTokens ?? 0;
     }
@@ -732,19 +578,12 @@ chatRoute.post('/', async (c) => {
       assistantContent = "I wasn't able to generate a response. Please try again.";
     }
 
-    // Persist final assistant message
     await persistMessage(conversationId, {
       role: 'assistant',
       content: assistantContent,
-      metadata: {
-        model: finalModel,
-        escalated,
-        input_tokens: totalInputTokens,
-        output_tokens: totalOutputTokens,
-      },
+      metadata: { model: finalModel, escalated, input_tokens: totalInputTokens, output_tokens: totalOutputTokens },
     });
 
-    // Log usage (non-blocking)
     logUsage({
       orgId: billingOrgId,
       userId,
@@ -756,9 +595,7 @@ chatRoute.post('/', async (c) => {
       outputTokens: totalOutputTokens,
       latencyMs: Date.now() - startMs,
       escalated,
-    }).catch((err) => {
-      console.error('Usage logging failed:', err);
-    });
+    }).catch((err) => console.error('Usage logging failed:', err));
 
     return c.json({ message: assistantContent });
   } catch (err) {
