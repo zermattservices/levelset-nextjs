@@ -1,8 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getRatingThresholds } from '@/lib/rating-thresholds';
-import { withAuth } from '@/lib/permissions/middleware';
 
-async function handler(
+/**
+ * Rating thresholds — public GET (used by public PEA scorecard page).
+ * Read-only, location-scoped by query param.
+ */
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -24,6 +27,4 @@ async function handler(
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
-
-export default withAuth(handler);
 
