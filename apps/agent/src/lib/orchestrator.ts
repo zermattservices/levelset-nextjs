@@ -11,7 +11,6 @@
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { models } from './ai-provider.js';
-import { getToolSummaries } from './tool-registry.js';
 import type { ToolRegistryContext } from './tool-registry.js';
 import type { ChatMessage } from './types.js';
 import type { OrgContext } from './org-context.js';
@@ -147,7 +146,8 @@ export async function generatePlan(params: {
   orgContext?: OrgContext;
   toolRegistryContext: ToolRegistryContext;
 }): Promise<{ plan: ExecutionPlan; usage: { inputTokens: number; outputTokens: number } } | null> {
-  const toolSummaries = getToolSummaries(params.toolRegistryContext);
+  // TODO: Remove in Task 7 — orchestrator is deprecated
+  const toolSummaries: Record<string, string> = {};
 
   const systemPrompt = buildOrchestratorPrompt({
     toolSummaries,

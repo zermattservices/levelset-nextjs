@@ -49,7 +49,7 @@ import { generatePlan, summarizeConversation } from '../../lib/orchestrator.js';
 import { executePlan } from '../../lib/tool-executor.js';
 import type { ToolResult } from '../../lib/tool-executor.js';
 import { synthesizeResponse } from '../../lib/worker.js';
-import { buildAllTools, getToolCallLabel } from '../../lib/tool-registry.js';
+import { buildTools, getToolCallLabel } from '../../lib/tool-registry.js';
 import type { ToolRegistryContext } from '../../lib/tool-registry.js';
 
 const MAX_TOOL_STEPS = 5;
@@ -501,7 +501,7 @@ chatRoute.post('/', async (c) => {
             totalOutputTokens = 0;
             toolCallCount = 0;
 
-            const leviTools = buildAllTools(registryCtx);
+            const leviTools = buildTools(registryCtx);
 
             try {
               const result = streamText({
@@ -707,7 +707,7 @@ chatRoute.post('/', async (c) => {
     let finalModel = '';
     let escalated = false;
 
-    const leviTools = buildAllTools(registryCtx);
+    const leviTools = buildTools(registryCtx);
 
     try {
       const result = await generateText({

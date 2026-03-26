@@ -1,14 +1,10 @@
 /**
  * Tool Registry — central registry for all Levi tools.
  *
- * Decouples tool schemas from the chat route so both the orchestrator
- * (for planning) and worker (for display tools) can reference them
- * independently.
- *
- * Tool categories:
- *   data    — Read-only queries (orchestrator plans these)
- *   display — UI cards (worker calls these)
- *   action  — Write operations (future — not yet implemented)
+ * Provides:
+ *   buildTools(ctx)       — Build all tools for the agent (data + display)
+ *   executeTool(name, args, ctx) — Execute a tool by name (used internally by tool callbacks)
+ *   getToolCallLabel(name, input) — Human-readable labels for SSE status events
  */
 
 import { tool } from 'ai';
@@ -44,130 +40,6 @@ export interface ToolRegistryContext {
   hierarchyLevel: number;
   permissions: Set<string>;
   accessibleLocationIds: string[];
-}
-
-export type ToolCategory = 'data' | 'display' | 'action';
-
-export interface ToolMeta {
-  category: ToolCategory;
-  summary: string;
-  requiresConfirmation: boolean;
-}
-
-// ─── Tool Metadata ────────────────────────────────────────────────────────────
-
-/**
- * Tool metadata registry — category, one-line summaries for the orchestrator
- * prompt, and confirmation requirements.
- *
- * Summaries are intentionally terse — the orchestrator sees these as a menu.
- */
-export const TOOL_META: Record<string, ToolMeta> = {
-  // Data tools
-  lookup_employee: {
-    category: 'data',
-    summary: 'Search for an employee by name → returns ID, role, basic details',
-    requiresConfirmation: false,
-  },
-  list_employees: {
-    category: 'data',
-    summary: 'List employees with filters (role, zone, leader, trainer) → count + list',
-    requiresConfirmation: false,
-  },
-  get_employee_profile: {
-    category: 'data',
-    summary: 'Full employee profile (details + ratings + discipline) in one call — requires employee_id',
-    requiresConfirmation: false,
-  },
-  get_team_overview: {
-    category: 'data',
-    summary: 'Location-wide team snapshot: role breakdown, position averages, top/bottom performers, discipline attention',
-    requiresConfirmation: false,
-  },
-  get_discipline_summary: {
-    category: 'data',
-    summary: 'Discipline deep dive — with employee_id: individual history; without: location-wide overview',
-    requiresConfirmation: false,
-  },
-  get_position_rankings: {
-    category: 'data',
-    summary: 'Rank employees for ONE specific position by rating average',
-    requiresConfirmation: false,
-  },
-  get_pillar_scores: {
-    category: 'data',
-    summary: 'OE pillar scores (0-100) with position breakdown — location-wide or per-employee',
-    requiresConfirmation: false,
-  },
-  get_org_chart: {
-    category: 'data',
-    summary: 'Org chart tree: departments, groups, supervisors, direct reports',
-    requiresConfirmation: false,
-  },
-  get_schedule_overview: {
-    category: 'data',
-    summary: 'Week schedule status: shift count, total hours, coverage by day',
-    requiresConfirmation: false,
-  },
-  get_employee_schedule: {
-    category: 'data',
-    summary: 'Individual employee shifts for upcoming weeks — requires employee_id',
-    requiresConfirmation: false,
-  },
-  get_labor_summary: {
-    category: 'data',
-    summary: 'Labor costs, hours, OT breakdown by zone (FOH/BOH)',
-    requiresConfirmation: false,
-  },
-  get_evaluation_status: {
-    category: 'data',
-    summary: 'Evaluation overview (location-wide) or individual eval history — requires enable_evaluations',
-    requiresConfirmation: false,
-  },
-  get_rating_activity: {
-    category: 'data',
-    summary: 'Flexible ratings query: who submitted/received ratings, rating counts by rater/employee/position/day, individual ratings with criteria scores. Supports date range, rater, employee, and position filters.',
-    requiresConfirmation: false,
-  },
-
-  // Display tools
-  show_employee_list: {
-    category: 'display',
-    summary: 'Show a visual ranked-list card in the chat',
-    requiresConfirmation: false,
-  },
-  show_employee_card: {
-    category: 'display',
-    summary: 'Show a visual card for a single employee',
-    requiresConfirmation: false,
-  },
-};
-
-// ─── Tool Summaries for Orchestrator ──────────────────────────────────────────
-
-/**
- * Get tool summaries for the orchestrator prompt.
- * Only includes tools available for the given context (feature-gated).
- */
-export function getToolSummaries(ctx: ToolRegistryContext): Record<string, string> {
-  const summaries: Record<string, string> = {};
-
-  for (const [name, meta] of Object.entries(TOOL_META)) {
-    // Skip display tools — orchestrator doesn't plan these
-    if (meta.category === 'display') continue;
-
-    // Feature gate: org chart
-    if (name === 'get_org_chart' && !ctx.features?.orgChart) continue;
-
-    // Feature gate: evaluations
-    if (name === 'get_evaluation_status' && !ctx.features?.evaluations) continue;
-
-    // Feature gate: schedule tools — always available (no feature flag needed)
-
-    summaries[name] = meta.summary;
-  }
-
-  return summaries;
 }
 
 // ─── Tool Execution ───────────────────────────────────────────────────────────
@@ -280,89 +152,18 @@ export function getToolCallLabel(name: string, input: Record<string, unknown>): 
   }
 }
 
-// ─── Display Tool Builders ────────────────────────────────────────────────────
+// ─── Tool Builder ─────────────────────────────────────────────────────────────
 
 /**
- * Build display tools for the worker. These are the only tools the worker can call.
+ * Build all tools for the agent — data tools and display tools.
  */
-export function buildDisplayTools(): ToolSet {
-  return {
-    show_employee_list: tool({
-      description:
-        'Display a visual ranked-list card in the chat. Use this when you want to highlight a group of employees — top performers, employees needing improvement, position rankings, etc. Only call AFTER you have fetched data and want to present a visual summary. Not every response needs a card — only use when the visual genuinely adds value.',
-      inputSchema: z.object({
-        title: z.string().describe('Card title (e.g. "Top Performers", "Needs Improvement", "Top iPOS")'),
-        employees: z.array(
-          z.object({
-            employee_id: z.string().optional().describe('Employee UUID if available from the data'),
-            name: z.string().describe('Employee full name'),
-            role: z.string().optional().describe('Employee role'),
-            metric_label: z.string().optional().describe('Label for the metric (e.g. "Avg Rating", "Points")'),
-            metric_value: z.number().optional().describe('Numeric value for the metric'),
-          })
-        ).describe('Employees to display (max 10)'),
-      }),
-      execute: async ({ title, employees }: { title: string; employees: Array<{ employee_id?: string; name: string; role?: string; metric_label?: string; metric_value?: number }> }) => {
-        return {
-          __display: true,
-          blockType: 'employee-list',
-          blockId: `list-${Date.now()}`,
-          payload: {
-            title,
-            employees: employees.slice(0, 10).map((e, i) => ({
-              employee_id: e.employee_id || '',
-              name: e.name,
-              role: e.role || '',
-              rank: i + 1,
-              metric_label: e.metric_label,
-              metric_value: e.metric_value,
-            })),
-          },
-        };
-      },
-    }),
-
-    show_employee_card: tool({
-      description:
-        'Display a visual card for a single employee. Use this when looking up or highlighting one specific employee. Only call AFTER you have fetched data about the employee.',
-      inputSchema: z.object({
-        employee_id: z.string().optional().describe('Employee UUID if available from the data'),
-        name: z.string().describe('Employee full name'),
-        role: z.string().optional().describe('Employee role'),
-        rating_avg: z.number().optional().describe('Overall rating average if available'),
-        current_points: z.number().optional().describe('Current discipline points if relevant'),
-      }),
-      execute: async (input: { employee_id?: string; name: string; role?: string; rating_avg?: number; current_points?: number }) => {
-        return {
-          __display: true,
-          blockType: 'employee-card',
-          blockId: `card-${input.employee_id || Date.now()}`,
-          payload: {
-            employee_id: input.employee_id || '',
-            name: input.name,
-            role: input.role || '',
-            rating_avg: input.rating_avg,
-            current_points: input.current_points,
-          },
-        };
-      },
-    }),
-  };
-}
-
-// ─── Full Tool Builder (Legacy Fallback) ──────────────────────────────────────
-
-/**
- * Build all tools for the legacy single-model fallback path.
- * This is the same as the old buildTools() in chat.ts.
- */
-export function buildAllTools(ctx: ToolRegistryContext): ToolSet {
+export function buildTools(ctx: ToolRegistryContext): ToolSet {
   const { orgId, locationId, features } = ctx;
 
   const tools: ToolSet = {
     lookup_employee: tool({
       description:
-        'Search for an employee by name and return their basic details (role, hire date, leader/trainer status). Use this to find an employee ID before calling other tools. For a full profile, call get_employee_profile after this.',
+        'Search for an employee by name and return their basic details (role, hire date, leader/trainer status). Use this to find an employee ID before calling other tools. For a full profile, call get_employee_profile after this. Call this first when you need an employee_id for other tools.',
       inputSchema: z.object({
         name: z.string().describe('Full or partial name of the employee to search for'),
         role: z.string().optional().describe('Filter by role name (e.g. "Team Leader")'),
@@ -389,7 +190,7 @@ export function buildAllTools(ctx: ToolRegistryContext): ToolSet {
     }),
     get_employee_profile: tool({
       description:
-        'Get a comprehensive profile for ONE employee: details, recent ratings with trend, infractions, and discipline actions — all in one call. Requires employee_id (use lookup_employee first).',
+        'Get a comprehensive profile for ONE employee: details, recent ratings with trend, infractions, and discipline actions — all in one call. Requires employee_id (use lookup_employee first). No need to call separate ratings or discipline tools after this.',
       inputSchema: z.object({
         employee_id: z.string().describe('The UUID of the employee'),
       }),
@@ -399,7 +200,7 @@ export function buildAllTools(ctx: ToolRegistryContext): ToolSet {
     }),
     get_team_overview: tool({
       description:
-        'Get the full team overview: rating averages by position, top/bottom performers by rating, team structure (roles, zones, leaders, trainers), discipline attention items, and recent hires. This is the go-to tool for broad questions about the team, ratings trends, team performance, or "how is the team doing?".',
+        'Get the full team overview: rating averages by position, top/bottom performers by rating, team structure (roles, zones, leaders, trainers), discipline attention items, and recent hires. This is the go-to tool for broad questions about the team, ratings trends, team performance, or "how is the team doing?". This is the primary tool for broad team, rating, and performance questions.',
       inputSchema: z.object({
         zone: z
           .enum(['FOH', 'BOH'])
@@ -427,7 +228,7 @@ export function buildAllTools(ctx: ToolRegistryContext): ToolSet {
     }),
     get_position_rankings: tool({
       description:
-        'Rank employees for a SINGLE position the user explicitly named (e.g. "who is the best host?"). NEVER call this tool more than once — if the user asks about ratings in general, trends, or overall performance, call get_team_overview instead.',
+        'Rank employees for a SINGLE position the user explicitly named (e.g. "who is the best host?"). NEVER call this tool more than once — if the user asks about ratings in general, trends, or overall performance, call get_team_overview instead. Only for specific single-position questions. For general ratings or trends, use get_team_overview.',
       inputSchema: z.object({
         position: z
           .string()
@@ -447,7 +248,7 @@ export function buildAllTools(ctx: ToolRegistryContext): ToolSet {
     }),
     get_pillar_scores: tool({
       description:
-        'Get Operational Excellence pillar scores (Great Food, Quick & Accurate, Creating Moments, Caring Interactions, Inviting Atmosphere). Without employee_id: location-level scores + top/bottom performers. With employee_id: per-pillar scores with position breakdown and criteria mapping. Each pillar includes has_data (boolean) — pillars with has_data=false have no ratings and are excluded from the overall weighted average. The overall score only reflects pillars the employee has been rated in.',
+        'Get Operational Excellence pillar scores (Great Food, Quick & Accurate, Creating Moments, Caring Interactions, Inviting Atmosphere). Without employee_id: location-level scores + top/bottom performers. With employee_id: per-pillar scores with position breakdown and criteria mapping. Each pillar includes has_data (boolean) — pillars with has_data=false have no ratings and are excluded from the overall weighted average. The overall score only reflects pillars the employee has been rated in. NOT for general ratings — use get_team_overview for that.',
       inputSchema: z.object({
         employee_id: z.string().optional().describe('UUID of a specific employee. Omit for location-wide scores.'),
         pillar: z.string().optional().describe('Filter to specific pillar name (e.g. "Great Food")'),
@@ -514,7 +315,7 @@ export function buildAllTools(ctx: ToolRegistryContext): ToolSet {
       },
     }),
 
-    // New tools — org chart, schedule, evaluations
+    // Feature-gated tools
     ...(features?.orgChart
       ? {
           get_org_chart: tool({
@@ -587,7 +388,66 @@ export function buildAllTools(ctx: ToolRegistryContext): ToolSet {
       : {}),
 
     // Display tools
-    ...buildDisplayTools(),
+    show_employee_list: tool({
+      description:
+        'Display a visual ranked-list card in the chat. Use this when you want to highlight a group of employees — top performers, employees needing improvement, position rankings, etc. Only call AFTER you have fetched data and want to present a visual summary. Not every response needs a card. For analytical answers, text is usually clearer. Only use when the visual genuinely adds value.',
+      inputSchema: z.object({
+        title: z.string().describe('Card title (e.g. "Top Performers", "Needs Improvement", "Top iPOS")'),
+        employees: z.array(
+          z.object({
+            employee_id: z.string().optional().describe('Employee UUID if available from the data'),
+            name: z.string().describe('Employee full name'),
+            role: z.string().optional().describe('Employee role'),
+            metric_label: z.string().optional().describe('Label for the metric (e.g. "Avg Rating", "Points")'),
+            metric_value: z.number().optional().describe('Numeric value for the metric'),
+          })
+        ).describe('Employees to display (max 10)'),
+      }),
+      execute: async ({ title, employees }: { title: string; employees: Array<{ employee_id?: string; name: string; role?: string; metric_label?: string; metric_value?: number }> }) => {
+        return {
+          __display: true,
+          blockType: 'employee-list',
+          blockId: `list-${Date.now()}`,
+          payload: {
+            title,
+            employees: employees.slice(0, 10).map((e, i) => ({
+              employee_id: e.employee_id || '',
+              name: e.name,
+              role: e.role || '',
+              rank: i + 1,
+              metric_label: e.metric_label,
+              metric_value: e.metric_value,
+            })),
+          },
+        };
+      },
+    }),
+
+    show_employee_card: tool({
+      description:
+        'Display a visual card for a single employee. Use this when looking up or highlighting one specific employee. Only call AFTER you have fetched data about the employee. Not every response needs a card. For analytical answers, text is usually clearer. Only use when the visual genuinely adds value.',
+      inputSchema: z.object({
+        employee_id: z.string().optional().describe('Employee UUID if available from the data'),
+        name: z.string().describe('Employee full name'),
+        role: z.string().optional().describe('Employee role'),
+        rating_avg: z.number().optional().describe('Overall rating average if available'),
+        current_points: z.number().optional().describe('Current discipline points if relevant'),
+      }),
+      execute: async (input: { employee_id?: string; name: string; role?: string; rating_avg?: number; current_points?: number }) => {
+        return {
+          __display: true,
+          blockType: 'employee-card',
+          blockId: `card-${input.employee_id || Date.now()}`,
+          payload: {
+            employee_id: input.employee_id || '',
+            name: input.name,
+            role: input.role || '',
+            rating_avg: input.rating_avg,
+            current_points: input.current_points,
+          },
+        };
+      },
+    }),
   };
 
   return tools;

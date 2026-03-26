@@ -12,7 +12,7 @@
 import { streamText, smoothStream, stepCountIs } from 'ai';
 import type { ModelMessage } from 'ai';
 import { models } from './ai-provider.js';
-import { buildDisplayTools } from './tool-registry.js';
+// NOTE: Worker is deprecated — will be removed in Task 7
 import type { ToolResult } from './tool-executor.js';
 import type { OrgContext } from './org-context.js';
 import { getStyleInstruction } from './ai-provider.js';
@@ -125,7 +125,9 @@ export function synthesizeResponse(input: WorkerInput): ReturnType<typeof stream
     },
   ];
 
-  const displayTools = buildDisplayTools();
+  // TODO: Remove in Task 7 — worker is deprecated
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const displayTools = {} as any;
 
   return streamText({
     model: models.languageModel('primary'),
