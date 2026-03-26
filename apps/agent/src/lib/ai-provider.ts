@@ -21,8 +21,8 @@ const openrouter = createOpenAICompatible({
 
 export const models = customProvider({
   languageModels: {
-    primary: openrouter('anthropic/claude-sonnet-4.6'),
-    escalation: openrouter('anthropic/claude-opus-4.6'),
+    primary: openrouter('anthropic/claude-sonnet-4-6'),
+    escalation: openrouter('anthropic/claude-opus-4-6'),
   },
 });
 
