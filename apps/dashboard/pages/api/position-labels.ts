@@ -3,6 +3,11 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { fetchBig5Labels, fetchPositionsList, FOH_POSITIONS, BOH_POSITIONS } from '@/lib/ratings-data';
 import { withAuth } from '@/lib/permissions/middleware';
 
+/**
+ * Position labels — GET is public (used by public PEA scorecard page).
+ * POST requires auth (writes data).
+ */
+
 async function getOrgIdForLocation(supabase: ReturnType<typeof createServerSupabaseClient>, locationId: string) {
   const { data, error } = await supabase
     .from('locations')
@@ -148,5 +153,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   return res.status(405).json({ error: 'Method not allowed' });
 }
 
-export default withAuth(handler);
+// GET is public (used by public PEA scorecard page). POST requires auth.
+export default function routeHandler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'GET') {
+    return handler(req, res);
+  }
+  return withAuth(handler)(req, res);
+}
 

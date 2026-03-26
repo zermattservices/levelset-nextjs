@@ -5,20 +5,19 @@ import {
   fetchPositionData,
   fetchLeadershipData,
 } from '@/lib/ratings-data';
-import { withAuth } from '@/lib/permissions/middleware';
-
 /**
- * Ratings API endpoint
- * 
+ * Ratings API endpoint — public GET (used by public PEA scorecard page).
+ * Read-only, location-scoped by query param.
+ *
  * Query params:
  * - tab: 'overview' | 'position' | 'leadership' (required)
  * - location_id: string (required)
  * - area: 'FOH' | 'BOH' (required)
  * - position: string (required if tab='position')
- * 
+ *
  * Returns aggregated rating data with employee/rater names via JOINs
  */
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -104,5 +103,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withAuth(handler);
 
