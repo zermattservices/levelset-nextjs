@@ -29,7 +29,6 @@ import {
   stepCountIs,
 } from 'ai';
 import type { ModelMessage } from 'ai';
-import { isLevelsetAdmin } from '@levelset/permissions';
 import type { UserContext, ChatMessage } from '../../lib/types.js';
 import { models } from '../../lib/ai-provider.js';
 import { buildSystemPrompt } from '../../lib/prompts.js';
@@ -55,6 +54,82 @@ import type { ToolRegistryContext } from '../../lib/tool-registry.js';
 
 const MAX_TOOL_STEPS = 5;
 const DISPLAY_TOOLS = new Set(['show_employee_list', 'show_employee_card']);
+
+/* ── Location → Org resolver + access validation ─────────── */
+
+import { getServiceClient } from '@levelset/supabase-client';
+
+interface ResolvedContext {
+  orgId: string;
+  locationId?: string;
+}
+
+/**
+ * Resolve org_id from location_id (server-side lookup, not client-supplied org_id).
+ * Validates the user has access to the requested location via:
+ *   1. User's assigned location_id on app_users
+ *   2. Explicit entry in user_location_access table
+ *
+ * Levelset Admins bypass access checks entirely.
+ *
+ * If no location_id is provided, falls back to user.orgId.
+ */
+async function resolveOrgContext(
+  user: UserContext,
+  requestedLocationId?: string
+): Promise<ResolvedContext | { error: string; status: number }> {
+  // No location specified — use user's default org
+  if (!requestedLocationId) {
+    return { orgId: user.orgId };
+  }
+
+  const supabase = getServiceClient();
+
+  // Look up the location to get its org_id (single source of truth)
+  const { data: location, error: locError } = await supabase
+    .from('locations')
+    .select('id, org_id')
+    .eq('id', requestedLocationId)
+    .maybeSingle();
+
+  if (locError || !location) {
+    return { error: 'Location not found', status: 404 };
+  }
+
+  // Admins bypass location access checks
+  if (user.isAdmin) {
+    return { orgId: location.org_id, locationId: requestedLocationId };
+  }
+
+  // Check 1: Is this the user's assigned location?
+  // (app_users.location_id — checked via a quick query since user context
+  // doesn't include it and we need the app_user for this org specifically)
+  const { data: appUser } = await supabase
+    .from('app_users')
+    .select('id, location_id')
+    .eq('id', user.appUserId)
+    .maybeSingle();
+
+  if (appUser?.location_id === requestedLocationId) {
+    return { orgId: location.org_id, locationId: requestedLocationId };
+  }
+
+  // Check 2: Does the user have explicit access via user_location_access?
+  if (appUser) {
+    const { data: access } = await supabase
+      .from('user_location_access')
+      .select('id')
+      .eq('user_id', appUser.id)
+      .eq('location_id', requestedLocationId)
+      .maybeSingle();
+
+    if (access) {
+      return { orgId: location.org_id, locationId: requestedLocationId };
+    }
+  }
+
+  return { error: 'You do not have access to this location', status: 403 };
+}
 
 /* ── Convert DB ChatMessages to AI SDK ModelMessages ──────── */
 
@@ -149,12 +224,9 @@ export const chatRoute = new Hono();
 chatRoute.get('/history', async (c) => {
   try {
     const user = c.get('user') as UserContext;
-    const isAdmin = isLevelsetAdmin(user.role);
-    const orgId = isAdmin
-      ? (c.req.query('org_id') || user.orgId)
-      : (user.orgId || c.req.query('org_id'));
-    if (!orgId) return c.json({ messages: [], hasMore: false });
-    const locationId = c.req.query('location_id') ?? undefined;
+    const resolved = await resolveOrgContext(user, c.req.query('location_id') ?? undefined);
+    if ('error' in resolved) return c.json({ messages: [], hasMore: false });
+    const { orgId, locationId } = resolved;
 
     const conversationId = await findActiveConversation(user.appUserId, orgId, locationId);
     if (!conversationId) return c.json({ messages: [], hasMore: false });
@@ -178,12 +250,11 @@ chatRoute.get('/history', async (c) => {
 chatRoute.delete('/clear', async (c) => {
   try {
     const user = c.get('user') as UserContext;
-    const isAdmin = isLevelsetAdmin(user.role);
-    const orgId = isAdmin
-      ? (c.req.query('org_id') || user.orgId)
-      : (user.orgId || c.req.query('org_id'));
-    if (!orgId) return c.json({ success: false, error: 'Missing org_id' }, 400);
-    const locationId = c.req.query('location_id') ?? undefined;
+    const resolved = await resolveOrgContext(user, c.req.query('location_id') ?? undefined);
+    if ('error' in resolved) {
+      return c.json({ success: false, error: resolved.error }, resolved.status as any);
+    }
+    const { orgId, locationId } = resolved;
 
     const archived = await archiveConversation(user.appUserId, orgId, locationId);
     return c.json({ success: true, archived });
@@ -204,7 +275,6 @@ chatRoute.post('/', async (c) => {
     // 1. Parse request body
     const body = await c.req.json<{
       message?: string;
-      org_id?: string;
       location_id?: string;
       stream?: boolean;
     }>();
@@ -215,20 +285,16 @@ chatRoute.post('/', async (c) => {
       return c.json({ error: 'Missing "message" field' }, 400);
     }
 
-    // 2. Get user context from auth middleware
+    // 2. Get user context from auth middleware + resolve org from location
     const user = c.get('user') as UserContext;
-    const isAdmin = isLevelsetAdmin(user.role);
-    const orgId = isAdmin
-      ? (body.org_id || user.orgId)
-      : (user.orgId || body.org_id);
-    const locationId = body.location_id;
+    const resolved = await resolveOrgContext(user, body.location_id);
+    if ('error' in resolved) {
+      return c.json({ error: resolved.error }, resolved.status as any);
+    }
+    const { orgId, locationId } = resolved;
     const userId = user.appUserId;
 
-    if (!orgId) {
-      return c.json({ error: 'No organization context available' }, 400);
-    }
-
-    const billingOrgId = isAdmin && user.orgId ? user.orgId : orgId;
+    const billingOrgId = user.isAdmin && user.orgId ? user.orgId : orgId;
 
     // 3. Rate limit check
     const allowed = await checkRateLimit(billingOrgId);
