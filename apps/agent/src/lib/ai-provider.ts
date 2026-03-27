@@ -1,14 +1,9 @@
 /**
  * AI Provider — OpenRouter via Vercel AI SDK.
  *
- * Replaces the hand-rolled fetch client in llm-clients/openrouter.ts
- * with the AI SDK's @ai-sdk/openai-compatible provider.
- *
  * Model aliases:
- *   primary      → MiniMax M2.5 (worker — synthesis & streaming)
- *   escalation   → Claude Sonnet 4.5 (fallback on primary failure)
- *   batch        → Gemini 2.5 Flash (large context, future use)
- *   orchestrator → Claude Opus 4.6 (plan generation via generateObject)
+ *   primary    → Sonnet 4.6 (single agent — tool calling + synthesis)
+ *   escalation → Opus 4.6 (fallback on primary failure)
  */
 
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
@@ -24,19 +19,10 @@ const openrouter = createOpenAICompatible({
   },
 });
 
-/**
- * Named model aliases for Levi.
- *
- * Usage:
- *   import { models } from './ai-provider.js';
- *   const model = models.languageModel('primary');
- */
 export const models = customProvider({
   languageModels: {
-    primary: openrouter('minimax/minimax-m2.5'),
-    escalation: openrouter('anthropic/claude-sonnet-4.5'),
-    batch: openrouter('google/gemini-2.5-flash'),
-    orchestrator: openrouter('anthropic/claude-opus-4.6'),
+    primary: openrouter('anthropic/claude-sonnet-4-6'),
+    escalation: openrouter('anthropic/claude-opus-4-6'),
   },
 });
 
