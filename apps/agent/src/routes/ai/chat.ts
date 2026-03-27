@@ -334,7 +334,7 @@ chatRoute.post('/', async (c) => {
       retrievedContext: retrievedParts.length > 0 ? retrievedParts.join('\n\n') : undefined,
     });
 
-    // 8. Build tool registry context (used by pipeline and legacy)
+    // 8. Build tool registry context
     const registryCtx: ToolRegistryContext = {
       orgId,
       locationId,

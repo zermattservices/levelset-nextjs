@@ -3,7 +3,6 @@
  *
  * Provides:
  *   buildTools(ctx)       — Build all tools for the agent (data + display)
- *   executeTool(name, args, ctx) — Execute a tool by name (used internally by tool callbacks)
  *   getToolCallLabel(name, input) — Human-readable labels for SSE status events
  */
 
@@ -40,62 +39,6 @@ export interface ToolRegistryContext {
   hierarchyLevel: number;
   permissions: Set<string>;
   accessibleLocationIds: string[];
-}
-
-// ─── Tool Execution ───────────────────────────────────────────────────────────
-
-/**
- * Execute a tool by name. Used by the deterministic tool executor.
- * All tools receive (args, orgId, locationId?) and return Promise<string>.
- */
-export async function executeTool(
-  name: string,
-  args: Record<string, unknown>,
-  ctx: ToolRegistryContext
-): Promise<string> {
-  const { orgId, locationId, features } = ctx;
-
-  switch (name) {
-    case 'lookup_employee':
-      return lookupEmployee(args, orgId, locationId);
-
-    case 'list_employees':
-      return listEmployees(args, orgId, locationId);
-
-    case 'get_employee_profile':
-      return getEmployeeProfile(args, orgId, locationId);
-
-    case 'get_team_overview':
-      return getTeamOverview(args, orgId, locationId, {
-        certificationsEnabled: features?.certifications ?? false,
-      });
-
-    case 'get_discipline_summary':
-      return getDisciplineSummary(args, orgId, locationId);
-
-    case 'get_position_rankings':
-      return getPositionRankings(args, orgId, locationId);
-
-    case 'get_pillar_scores':
-      return getPillarScores(args, orgId, locationId);
-
-    case 'get_org_chart':
-      return getOrgChart(args, orgId, locationId);
-    case 'get_schedule_overview':
-      return getScheduleOverview(args, orgId, locationId);
-    case 'get_employee_schedule':
-      return getEmployeeSchedule(args, orgId, locationId);
-    case 'get_labor_summary':
-      return getLaborSummary(args, orgId, locationId);
-    case 'get_evaluation_status':
-      return getEvaluationStatus(args, orgId, locationId);
-
-    case 'get_rating_activity':
-      return getRatingActivity(args, orgId, locationId);
-
-    default:
-      return JSON.stringify({ error: `Unknown tool: ${name}` });
-  }
 }
 
 // ─── Tool Labels ──────────────────────────────────────────────────────────────
