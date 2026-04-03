@@ -51,23 +51,6 @@ export function getPositionsByArea(area: 'FOH' | 'BOH'): string[] {
 }
 
 /**
- * Get the start and end dates for the current calendar quarter.
- * Q1: Jan 1 – Mar 31, Q2: Apr 1 – Jun 30, Q3: Jul 1 – Sep 30, Q4: Oct 1 – Dec 31
- */
-export function getCurrentQuarterRange(): { start: string; end: string } {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth(); // 0-indexed
-  const quarterStartMonth = Math.floor(month / 3) * 3;
-  const start = new Date(year, quarterStartMonth, 1);
-  const end = new Date(year, quarterStartMonth + 3, 0, 23, 59, 59, 999); // last day of quarter
-  return {
-    start: start.toISOString(),
-    end: end.toISOString()
-  };
-}
-
-/**
  * Get org_id and all location_ids for an organization from a single location_id
  */
 async function getOrgLocations(
@@ -359,9 +342,7 @@ export async function fetchOverviewData(
   }
 
   // Get all ratings from ALL org locations for this area (with pagination)
-  // Filtered to current calendar quarter only
   // Supabase has a max of 1000 rows per request, so we need to paginate
-  const quarterRange = getCurrentQuarterRange();
   let ratings: any[] = [];
   let offset = 0;
   const limit = 1000; // Supabase max rows per request
@@ -377,8 +358,6 @@ export async function fetchOverviewData(
       `)
       .in('location_id', locationIds)
       .in('position', positions)
-      .gte('created_at', quarterRange.start)
-      .lte('created_at', quarterRange.end)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -534,12 +513,16 @@ export async function fetchOverviewData(
         : null;
     }
 
-    // Quarter count — all ratings are already filtered to current quarter
-    const total_count_90d = empRatings.length;
+    // 90-day count (from all locations)
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    const total_count_90d = empRatings.filter(r => 
+      new Date(r.created_at) >= ninetyDaysAgo
+    ).length;
 
     // Last rating date (most recent from any location)
-    const last_rating_date = empRatings.length > 0
-      ? empRatings[0].created_at
+    const last_rating_date = empRatings.length > 0 
+      ? empRatings[0].created_at 
       : null;
 
     // Recent ratings for expandable rows (last 4 across all positions from any location)
@@ -680,8 +663,7 @@ export async function fetchPositionData(
     });
   });
 
-  // Get all ratings for this position from ALL org locations (current quarter only)
-  const quarterRange = getCurrentQuarterRange();
+  // Get all ratings for this position from ALL org locations
   const { data: ratings, error } = await supabase
     .from('ratings')
     .select(`
@@ -691,8 +673,6 @@ export async function fetchPositionData(
     `)
     .in('location_id', locationIds)
     .eq('position', position)
-    .gte('created_at', quarterRange.start)
-    .lte('created_at', quarterRange.end)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -761,12 +741,16 @@ export async function fetchPositionData(
       ? avgs.reduce((sum, avg) => sum + avg, 0) / avgs.length
       : null;
 
-    // Quarter count — all ratings are already filtered to current quarter
-    const total_count_90d = empRatings.length;
+    // 90-day count (from all locations)
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    const total_count_90d = empRatings.filter(r => 
+      new Date(r.created_at) >= ninetyDaysAgo
+    ).length;
 
     // Last rating date (most recent from any location)
-    const last_rating_date = empRatings.length > 0
-      ? empRatings[0].created_at
+    const last_rating_date = empRatings.length > 0 
+      ? empRatings[0].created_at 
       : null;
 
     aggregates.push({
@@ -852,8 +836,7 @@ export async function fetchLeadershipData(
     });
   });
 
-  // Get all ratings for this area from ALL org locations (current quarter only)
-  const quarterRange = getCurrentQuarterRange();
+  // Get all ratings for this area from ALL org locations with leader names and roles
   const { data: ratings, error } = await supabase
     .from('ratings')
     .select(`
@@ -863,8 +846,6 @@ export async function fetchLeadershipData(
     `)
     .in('location_id', locationIds)
     .in('position', positions)
-    .gte('created_at', quarterRange.start)
-    .lte('created_at', quarterRange.end)
     .order('created_at', { ascending: false });
 
   if (error || !ratings) {
@@ -977,12 +958,16 @@ export async function fetchLeadershipData(
       ? avgs.reduce((sum, avg) => sum + avg, 0) / avgs.length
       : null;
 
-    // Quarter count — all ratings are already filtered to current quarter
-    const total_count_90d = leaderRatings.length;
+    // 90-day count (from all locations)
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    const total_count_90d = leaderRatings.filter(r => 
+      new Date(r.created_at) >= ninetyDaysAgo
+    ).length;
 
     // Last rating date (most recent from any location)
-    const last_rating_date = leaderRatings.length > 0
-      ? leaderRatings[0].created_at
+    const last_rating_date = leaderRatings.length > 0 
+      ? leaderRatings[0].created_at 
       : null;
 
     // Recent ratings for expandable rows (last 10 from any location)
