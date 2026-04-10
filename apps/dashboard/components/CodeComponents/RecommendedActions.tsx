@@ -381,24 +381,53 @@ export function DisciplineNotifications({
           .select('*')
           .in('id', employeeIds);
 
+        // Fetch current infractions to verify points are still valid
+        let currentPointsMap = new Map<string, number>();
+        if (cutoffDate) {
+          const { data: infractions } = await supabase
+            .from('infractions')
+            .select('employee_id, points')
+            .in('employee_id', employeeIds)
+            .gte('infraction_date', cutoffDate);
+
+          if (infractions) {
+            infractions.forEach((inf: any) => {
+              const current = currentPointsMap.get(inf.employee_id) || 0;
+              currentPointsMap.set(inf.employee_id, current + (inf.points || 0));
+            });
+          }
+        }
+
         if (!empError) {
-          const enrichedRecs: RecommendedAction[] = dbRecs.map(rec => {
+          const enrichedRecs: RecommendedAction[] = [];
+
+          for (const rec of dbRecs) {
             const employee = employees?.find(e => e.id === rec.employee_id);
             const threshold = actionsData?.find(a => a.id === rec.recommended_action_id);
-            
-            return {
+            const thresholdPoints = threshold?.points_threshold || 0;
+
+            // Use live points if available, otherwise fall back to stored value
+            const livePoints = cutoffDate
+              ? (currentPointsMap.get(rec.employee_id) ?? 0)
+              : rec.points_when_recommended;
+
+            // Only show if current points still exceed the threshold
+            if (livePoints < thresholdPoints) continue;
+
+            enrichedRecs.push({
               employee_id: rec.employee_id,
               employee_name: employee?.full_name || 'Unknown',
               employee_role: employee?.role || 'Team Member',
-              current_points: rec.points_when_recommended,
+              current_points: livePoints,
               recommended_action: rec.recommended_action,
               action_id: rec.recommended_action_id,
-              points_threshold: threshold?.points_threshold || 0,
-              threshold_exceeded_by: rec.points_when_recommended - (threshold?.points_threshold || 0),
+              points_threshold: thresholdPoints,
+              threshold_exceeded_by: livePoints - thresholdPoints,
               has_existing_action: false,
               employee: employee as Employee,
-            };
-          });
+            });
+          }
+
           setRecommendations(enrichedRecs);
         }
       } else {
