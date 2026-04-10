@@ -347,7 +347,7 @@ export function DisciplineNotifications({
         setDisciplineActions(actionsData);
       }
       
-      // Look up discipline reset mode for this org
+      // Look up discipline reset mode for this org to get the cutoff date
       let cutoffDate: string | null = null;
       if (locData?.org_id) {
         const { data: discConfig } = await supabase
@@ -357,21 +357,17 @@ export function DisciplineNotifications({
           .maybeSingle();
         const resetMode: PointsResetMode = (discConfig?.points_reset_mode as PointsResetMode) || 'rolling_90';
         cutoffDate = calculateCutoffDate(resetMode);
+      } else {
+        // Fallback: default rolling 90 days
+        cutoffDate = calculateCutoffDate('rolling_90');
       }
 
       // Fetch pending recommendations from database
-      // Filter out stale recommendations created before the cutoff date
-      let recsQuery = supabase
+      const { data: dbRecs, error: recsError } = await supabase
         .from('recommended_disc_actions')
         .select('*')
         .eq('location_id', locationId)
-        .is('action_taken', null);
-
-      if (cutoffDate) {
-        recsQuery = recsQuery.gte('created_at', cutoffDate);
-      }
-
-      const { data: dbRecs, error: recsError } = await recsQuery
+        .is('action_taken', null)
         .order('points_when_recommended', { ascending: false });
 
       if (!recsError && dbRecs && dbRecs.length > 0) {
@@ -381,21 +377,19 @@ export function DisciplineNotifications({
           .select('*')
           .in('id', employeeIds);
 
-        // Fetch current infractions to verify points are still valid
-        let currentPointsMap = new Map<string, number>();
-        if (cutoffDate) {
-          const { data: infractions } = await supabase
-            .from('infractions')
-            .select('employee_id, points')
-            .in('employee_id', employeeIds)
-            .gte('infraction_date', cutoffDate);
+        // Fetch current infractions within the reset period to get live point totals
+        const currentPointsMap = new Map<string, number>();
+        const { data: infractions } = await supabase
+          .from('infractions')
+          .select('employee_id, points')
+          .in('employee_id', employeeIds)
+          .gte('infraction_date', cutoffDate);
 
-          if (infractions) {
-            infractions.forEach((inf: any) => {
-              const current = currentPointsMap.get(inf.employee_id) || 0;
-              currentPointsMap.set(inf.employee_id, current + (inf.points || 0));
-            });
-          }
+        if (infractions) {
+          infractions.forEach((inf: any) => {
+            const current = currentPointsMap.get(inf.employee_id) || 0;
+            currentPointsMap.set(inf.employee_id, current + (inf.points || 0));
+          });
         }
 
         if (!empError) {
@@ -406,10 +400,8 @@ export function DisciplineNotifications({
             const threshold = actionsData?.find(a => a.id === rec.recommended_action_id);
             const thresholdPoints = threshold?.points_threshold || 0;
 
-            // Use live points if available, otherwise fall back to stored value
-            const livePoints = cutoffDate
-              ? (currentPointsMap.get(rec.employee_id) ?? 0)
-              : rec.points_when_recommended;
+            // Always use live points — if infractions aged out or quarter reset, points drop
+            const livePoints = currentPointsMap.get(rec.employee_id) ?? 0;
 
             // Only show if current points still exceed the threshold
             if (livePoints < thresholdPoints) continue;
