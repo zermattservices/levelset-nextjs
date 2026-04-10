@@ -3,11 +3,15 @@ import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CircularProgress from '@mui/material/CircularProgress';
 import sty from './DisciplineActionsTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
+import type { PointsResetMode } from '@/lib/discipline-utils';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -42,7 +46,9 @@ export function DisciplineActionsTab({ orgId, disabled = false }: DisciplineActi
   const [saving, setSaving] = React.useState(false);
   const [hasChanges, setHasChanges] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  
+  const [resetMode, setResetMode] = React.useState<PointsResetMode>('rolling_90');
+  const [savingResetMode, setSavingResetMode] = React.useState(false);
+
   // Refs for autosave on unmount
   const actionsRef = React.useRef<DisciplineAction[]>([]);
   const hasChangesRef = React.useRef(false);
@@ -63,15 +69,26 @@ export function DisciplineActionsTab({ orgId, disabled = false }: DisciplineActi
     orgIdRef.current = orgId;
   }, [orgId]);
 
-  // Fetch actions - first try org-level, then fallback to location-level
+  // Fetch actions and reset mode config
   React.useEffect(() => {
-    async function fetchActions() {
+    async function fetchData() {
       if (!orgId) {
         setLoading(false);
         return;
       }
 
       try {
+        // Fetch reset mode config
+        const { data: configData } = await supabase
+          .from('org_discipline_config')
+          .select('points_reset_mode')
+          .eq('org_id', orgId)
+          .maybeSingle();
+
+        if (configData?.points_reset_mode) {
+          setResetMode(configData.points_reset_mode as PointsResetMode);
+        }
+
         // First try to get org-level actions (location_id IS NULL)
         let { data, error: fetchError } = await supabase
           .from('disc_actions_rubric')
@@ -104,7 +121,7 @@ export function DisciplineActionsTab({ orgId, disabled = false }: DisciplineActi
       }
     }
 
-    fetchActions();
+    fetchData();
   }, [orgId, supabase]);
 
   // Sort actions by points_threshold when blur occurs
@@ -159,6 +176,33 @@ export function DisciplineActionsTab({ orgId, disabled = false }: DisciplineActi
 
     setActions(actions.filter(act => act.id !== id));
     setHasChanges(true);
+  };
+
+  const handleResetModeChange = async (newMode: PointsResetMode) => {
+    if (!orgId || disabled) return;
+
+    const previousMode = resetMode;
+    setResetMode(newMode);
+    setSavingResetMode(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/org-settings/discipline-config?org_id=${orgId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ points_reset_mode: newMode }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to save');
+      }
+    } catch (err) {
+      console.error('Error saving reset mode:', err);
+      setError('Failed to save points reset period');
+      setResetMode(previousMode);
+    } finally {
+      setSavingResetMode(false);
+    }
   };
 
   const handleSave = async () => {
@@ -277,9 +321,38 @@ export function DisciplineActionsTab({ orgId, disabled = false }: DisciplineActi
   return (
     <div className={sty.container}>
       <div className={sty.intro}>
+        <h3 className={sty.introTitle}>Points Reset Period</h3>
+        <p className={sty.introDescription}>
+          Choose how infraction points are counted. Rolling 90 days counts infractions from the
+          last 90 days. Quarterly resets points at the start of each quarter (Jan, Apr, Jul, Oct).
+        </p>
+        <RadioGroup
+          row
+          value={resetMode}
+          onChange={(e) => handleResetModeChange(e.target.value as PointsResetMode)}
+        >
+          <FormControlLabel
+            value="rolling_90"
+            control={<Radio sx={{ '&.Mui-checked': { color: 'var(--ls-color-brand)' } }} />}
+            label={<span style={{ fontFamily, fontSize: 14 }}>Rolling 90 Days</span>}
+            disabled={disabled || savingResetMode}
+          />
+          <FormControlLabel
+            value="quarterly"
+            control={<Radio sx={{ '&.Mui-checked': { color: 'var(--ls-color-brand)' } }} />}
+            label={<span style={{ fontFamily, fontSize: 14 }}>Quarterly</span>}
+            disabled={disabled || savingResetMode}
+          />
+        </RadioGroup>
+        {savingResetMode && (
+          <CircularProgress size={16} sx={{ color: 'var(--ls-color-brand)', marginTop: 1 }} />
+        )}
+      </div>
+
+      <div className={sty.intro} style={{ marginTop: 24 }}>
         <h3 className={sty.introTitle}>Disciplinary Actions</h3>
         <p className={sty.introDescription}>
-          Define the disciplinary actions and their point thresholds. Actions are automatically 
+          Define the disciplinary actions and their point thresholds. Actions are automatically
           ordered from lowest to highest threshold.
         </p>
       </div>

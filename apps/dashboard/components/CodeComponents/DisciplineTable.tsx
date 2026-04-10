@@ -12,6 +12,7 @@ import {
 import type { Employee } from "@/lib/supabase.types";
 import { EmployeeModal } from "./EmployeeModal";
 import { RolePill } from "./shared/RolePill";
+import { calculateCutoffDate, type PointsResetMode } from "@/lib/discipline-utils";
 
 export interface DisciplineEntry {
   id: string;
@@ -229,9 +230,16 @@ export function DisciplineTable({
                 employees.map((emp: any) => emp.consolidated_employee_id || emp.id)
               );
               
-        // Get infractions for all employees (via consolidated_employee_id) from last 90 days
+        // Get infractions for all employees (via consolidated_employee_id) within reset period
         // Include infractions from any location where the employee exists in current location
-        const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        // Look up org's discipline reset mode
+        const { data: discConfig } = await supabase
+          .from('org_discipline_config')
+          .select('points_reset_mode')
+          .eq('org_id', locData.org_id)
+          .maybeSingle();
+        const resetMode: PointsResetMode = (discConfig?.points_reset_mode as PointsResetMode) || 'rolling_90';
+        const cutoffDate = calculateCutoffDate(resetMode);
               
               // Fetch all infractions in date range with pagination to bypass PostgREST limit
               let allInfractions: any[] = [];
@@ -253,7 +261,7 @@ export function DisciplineTable({
                       consolidated_employee_id
                     )
                   `)
-                  .gte('infraction_date', ninetyDaysAgo)
+                  .gte('infraction_date', cutoffDate)
                   .order('infraction_date', { ascending: false })
                   .range(offset, offset + limit - 1);
 

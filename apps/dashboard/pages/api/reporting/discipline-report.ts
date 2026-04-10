@@ -1,6 +1,7 @@
 import { withAuth } from '@/lib/permissions/middleware';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getDisciplineCutoffDate } from '@/lib/discipline-utils';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -135,10 +136,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       actionThresholds = locThresholds || [];
     }
 
-    // Calculate current points (90-day rolling)
-    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    // Calculate current points using org's configured reset period
+    const cutoffDate = await getDisciplineCutoffDate(supabase, orgId);
     const currentPoints = employeeInfractions
-      .filter((inf: any) => inf.infraction_date >= ninetyDaysAgo)
+      .filter((inf: any) => inf.infraction_date >= cutoffDate)
       .reduce((sum: number, inf: any) => sum + (inf.points || 0), 0);
 
     return res.status(200).json({

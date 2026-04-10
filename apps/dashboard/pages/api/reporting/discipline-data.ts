@@ -1,6 +1,7 @@
 import { withAuth } from '@/lib/permissions/middleware';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { calculateCutoffDate, getDisciplineResetMode } from '@/lib/discipline-utils';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -77,8 +78,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(500).json({ error: 'Failed to fetch inactive employees' });
     }
 
-    // Get infractions for last 90 days to calculate current points
-    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    // Get infractions within the configured reset period
+    const pointsResetMode = await getDisciplineResetMode(supabase, location.org_id);
+    const cutoffDate = calculateCutoffDate(pointsResetMode);
     
     // Get consolidated employee IDs for current location employees
     const currentLocationConsolidatedIds = new Set(
@@ -97,7 +99,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           consolidated_employee_id
         )
       `)
-      .gte('infraction_date', ninetyDaysAgo)
+      .gte('infraction_date', cutoffDate)
       .order('infraction_date', { ascending: false });
 
     if (infractionsError) {
@@ -147,6 +149,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       inactiveEmployees,
       disciplineActions: actionsData,
       locationImageUrl: location.image_url,
+      points_reset_mode: pointsResetMode,
     });
   } catch (error) {
     console.error('Error in discipline-data API:', error);

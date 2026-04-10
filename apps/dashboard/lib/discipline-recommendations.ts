@@ -1,5 +1,6 @@
 import { createSupabaseClient } from "@/util/supabase/component";
 import type { Employee } from "./supabase.types";
+import { getDisciplineCutoffDate } from "./discipline-utils";
 
 export interface RecommendedAction {
   employee_id: string;
@@ -48,9 +49,9 @@ export async function calculateRecommendations(
     if (rubricError) throw rubricError;
     if (!rubric || rubric.length === 0) return [];
 
-    // Fetch infractions from last 90 days
+    // Fetch infractions within the configured reset period
     const employeeIds = employees.map(emp => emp.id);
-    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const cutoffDate = await getDisciplineCutoffDate(supabase, orgId);
 
     const { data: infractions, error: infError } = await supabase
       .from('infractions')
@@ -58,7 +59,7 @@ export async function calculateRecommendations(
       .in('employee_id', employeeIds)
       .eq('org_id', orgId)
       .eq('location_id', locationId)
-      .gte('infraction_date', ninetyDaysAgo);
+      .gte('infraction_date', cutoffDate);
 
     if (infError) {
       console.warn('Error fetching infractions:', infError);

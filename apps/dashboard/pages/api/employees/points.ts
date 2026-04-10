@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { withAuth } from '@/lib/permissions/middleware';
+import { getDisciplineCutoffDate } from '@/lib/discipline-utils';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -16,10 +17,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const supabase = createServerSupabaseClient();
 
-    // Get employee info including consolidated_employee_id
+    // Get employee info including consolidated_employee_id and org_id
     const { data: employee, error: employeeError } = await supabase
       .from('employees')
-      .select('id, consolidated_employee_id')
+      .select('id, consolidated_employee_id, org_id')
       .eq('id', employee_id)
       .single();
 
@@ -29,8 +30,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const consolidatedId = employee.consolidated_employee_id || employee.id;
 
-    // Calculate 90-day rolling points
-    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    // Calculate points using org's configured reset period
+    const cutoffDate = await getDisciplineCutoffDate(supabase, employee.org_id);
 
     // Get all infractions for this employee (including consolidated employees)
     const { data: infractions, error: infractionsError } = await supabase
@@ -42,7 +43,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           consolidated_employee_id
         )
       `)
-      .gte('infraction_date', ninetyDaysAgo);
+      .gte('infraction_date', cutoffDate);
 
     if (infractionsError) {
       console.error('Error fetching infractions:', infractionsError);
