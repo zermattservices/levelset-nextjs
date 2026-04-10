@@ -20,9 +20,12 @@ next-env.d.ts
 *.bin
 *.pdf
 deputy.html
-.claude/worktrees/
+.claude/
+.mcp.json
+.superset/
 .worktrees/
 .cursor/
+levelset-vault/
 
 # Secrets
 apps/agent/.env
