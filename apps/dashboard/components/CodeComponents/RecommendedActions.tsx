@@ -18,6 +18,7 @@ import { parseISO, format } from "date-fns";
 import type { RecommendedAction } from "@/lib/discipline-recommendations";
 import type { Employee, Infraction } from "@/lib/supabase.types";
 import { createSupabaseClient } from "@/util/supabase/component";
+import { calculateCutoffDate, type PointsResetMode } from "@/lib/discipline-utils";
 import { RecordActionModal } from "./RecordActionModal";
 import { EmployeeModal } from "./EmployeeModal";
 import { DismissConfirmationModal } from "./DismissConfirmationModal";
@@ -346,12 +347,31 @@ export function DisciplineNotifications({
         setDisciplineActions(actionsData);
       }
       
+      // Look up discipline reset mode for this org
+      let cutoffDate: string | null = null;
+      if (locData?.org_id) {
+        const { data: discConfig } = await supabase
+          .from('org_discipline_config')
+          .select('points_reset_mode')
+          .eq('org_id', locData.org_id)
+          .maybeSingle();
+        const resetMode: PointsResetMode = (discConfig?.points_reset_mode as PointsResetMode) || 'rolling_90';
+        cutoffDate = calculateCutoffDate(resetMode);
+      }
+
       // Fetch pending recommendations from database
-      const { data: dbRecs, error: recsError } = await supabase
+      // Filter out stale recommendations created before the cutoff date
+      let recsQuery = supabase
         .from('recommended_disc_actions')
         .select('*')
         .eq('location_id', locationId)
-        .is('action_taken', null)
+        .is('action_taken', null);
+
+      if (cutoffDate) {
+        recsQuery = recsQuery.gte('created_at', cutoffDate);
+      }
+
+      const { data: dbRecs, error: recsError } = await recsQuery
         .order('points_when_recommended', { ascending: false });
 
       if (!recsError && dbRecs && dbRecs.length > 0) {
