@@ -406,7 +406,7 @@ export function FullPEAScoreboard({
       const shouldExcludeLastCol = isLastColumn && !isBaseView;
       
       if (!shouldExcludeLastCol && isPureNumber(display)){
-        const num = parseFloat(display);
+        const num = Math.round(parseFloat(display) * 100) / 100;
         d.classList.add('num');
         if (num >= 2.75) d.classList.add('v-green');
         else if (num >= 1.75) d.classList.add('v-yellow');
@@ -424,7 +424,7 @@ export function FullPEAScoreboard({
       }
       const isLeaderLastCol = isLeaderTab && (colIndex === cols - 1);
       if (!isLeaderLastCol && isPureNumber(display)){
-        const num = parseFloat(display);
+        const num = Math.round(parseFloat(display) * 100) / 100;
         th.classList.add('num');
         if (num >= 2.75) th.classList.add('v-green');
         else if (num >= 1.75) th.classList.add('v-yellow');

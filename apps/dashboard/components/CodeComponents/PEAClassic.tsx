@@ -183,15 +183,18 @@ const RatingCell = styled(TableCell)<{ $rating?: number | null; $greenThreshold?
   let textColor = 'var(--ls-color-neutral-soft-foreground)';
   let fontWeight = 400;
 
-  if ($rating !== null && $rating !== undefined) {
+  // Round to 2 decimal places so color matches the displayed value
+  const rounded = $rating !== null && $rating !== undefined ? Math.round($rating * 100) / 100 : null;
+
+  if (rounded !== null) {
     fontWeight = 600;
-    if ($rating >= $greenThreshold) {
+    if (rounded >= $greenThreshold) {
       bgColor = 'var(--ls-color-success-vivid)';
       textColor = 'var(--ls-color-bg-container)';
-    } else if ($rating >= $yellowThreshold) {
+    } else if (rounded >= $yellowThreshold) {
       bgColor = '#ffb549';
       textColor = 'var(--ls-color-bg-container)';
-    } else if ($rating >= 1.0) {
+    } else if (rounded >= 1.0) {
       bgColor = 'var(--ls-color-destructive-medium)';
       textColor = 'var(--ls-color-bg-container)';
     }
