@@ -585,8 +585,9 @@ export async function fetchPositionData(
   const { orgId, locationIds } = orgInfo;
 
   // Determine filtering rules based on position
+  // Only Trainer and Team Lead positions restrict the roster to flagged employees
   const isTrainerPosition = position.toLowerCase().includes('trainer');
-  const isLeaderPosition = position.toLowerCase().includes('leadership') || position.toLowerCase().includes('team lead') || position.toLowerCase().includes('3h week') || position.toLowerCase().includes('hope');
+  const isLeaderPosition = position.toLowerCase().includes('leadership') || position.toLowerCase().includes('team lead');
   
   // Determine FOH/BOH - first try org_positions, then fallback to hardcoded lists
   let isFOH = FOH_POSITIONS.includes(position);
